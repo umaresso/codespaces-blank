@@ -1,0 +1,20 @@
+import React from "react";
+import { Center } from "@chakra-ui/react";
+function Card(props) {
+  
+  return (
+    <Center
+    {...props}
+      padding={[0,10,10]}
+      justifyContent={"center"}
+      width={"100%"}
+      height={"fit-content"}
+      paddingBottom={"5vh"}
+      background={"#010208"}
+    >
+      {props.children}
+    </Center>
+  );
+}
+
+export default Card;
