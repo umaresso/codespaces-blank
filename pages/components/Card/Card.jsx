@@ -1,11 +1,10 @@
 import React from "react";
 import { Center } from "@chakra-ui/react";
 function Card(props) {
-  
   return (
     <Center
-    {...props}
-      padding={[0,10,10]}
+      {...props}
+      padding={[0, 10, 20]}
       justifyContent={"center"}
       width={"100%"}
       height={"fit-content"}
