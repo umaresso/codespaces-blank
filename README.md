@@ -1,4 +1,4 @@
-### Web3Rent
+# Web3Rent
 ## Inspiration
 Web3 is booming. Future is promising with the opportunities Metaverse will bring .But Nfts became the cake of rich since they were launched. Due to tremendous use cases of NFTs like 
 -   Use in Games **(** sandbox and axie infinity  **)**
@@ -31,8 +31,44 @@ Same website can perform whitelisting for Bored Ape collection for 1 day and the
 #### Users
 Users are People that can borrow NFTs and use them till specific time .
 ## How we built it
+##### Development Flow
 
+###### Dapp renting                                                        
+
+    Task                                                                    Status
+    
+    Built Navbar                                                            100%
+    Built Introduction                                                      100%
+    Developed Smart Contracts for Whitelist factory and Tracker             100%
+    Developed Smart Contracts for Sale factory and Tracker                  100%
+    Created a UI Page for Whitelist Creation                                100%
+    Integrated Whitelist Contract                                           100%
+    Created a UI Page for Sale Creation                                     100%
+    Integrated Sale contract                                                100%
+    Made a Compatible dynamic website for whitelist                         100%
+    Made a Compatible dynamic website for Sale                              100%
+    Tested Compatible websites                                              100%
+    Made Website Integration Frontend                                       100%
+    Made a WebsiteRent Smart contract                                       100%
+    Integrated websiteRent contract with UI                                 100%
+    Tested Entire whitelist sale creation and renting the dapp              100%
+    Displaying NFT collection on rented Dapp                                 0%
+###### NFT Renting
+
+    Task                                                                    Status 
+    
+    Built a demo ERC721 contract                                            100%
+    Built a rentable version of ERC721 ( using IERC4907 standard )          100%
+    Built an NFT renting Tracker smart contract                             100%
+    Tested smart contracts in Remix ID                                      100%
+    Built a dummy UI for uploading NFTs                                     100%
+    Uploading NFTs UI integration with smart contracts                      100%
+    UI to show available and rented NFTs                                     10%
+    NFT renting                                                              0%
+    
+    
 ## Challenges we ran into
+
 
 ## Accomplishments that we're proud of
 
