@@ -54,10 +54,15 @@ function Introduction() {
             width={"90%"}
             border={"10px solid black"}
             borderRadius={"40px"}
+            transition={"200ms all ease-in-out"}
             // borderLeft={"150px solid black"}
             // borderRight={"150px solid black"}
 
             src="https://cdn.dribbble.com/users/1859790/screenshots/10750520/media/78cf0dccfeebd50268d23057e7568dac.png?compress=1&resize=1200x900&vertical=top"
+            _hover={{
+              transform: "scale(1.025)",
+              cursor: "pointer",
+            }}
           />
         </VStack>
       </Stack>
