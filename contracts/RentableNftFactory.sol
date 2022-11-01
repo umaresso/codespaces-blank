@@ -4,8 +4,8 @@ pragma solidity ^0.8.7;
 
 // Contract help taken from Sidharth : https://medium.com/coinmonks/rentable-nfts-erc-4907-part-ii-954cc27d22e9
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "https://github.com/athiwatp/openzeppelin-solidity/blob/master/contracts/token/ERC721/IERC721Full.sol";
+import "https://github.com/athiwatp/openzeppelin-solidity/blob/master/contracts/token/ERC721/IERC721Full.sol";
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./IERC4907.sol";
@@ -16,7 +16,7 @@ contract RentableNftFactory is IERC4907 {
 
     mapping(uint  => address) public users;
     mapping(uint  => uint) public expiresAt;
-    IERC721 nftContract;
+    IERC721Full nftContract;
     constructor(address contractAddress){
          nftContract=IERC721(contractAddress);
 
@@ -61,7 +61,7 @@ contract RentableNftFactory is IERC4907 {
         return nftContract.balanceOf(_owner);
     }
 
-    function ownerOf(uint256 _tokenId) public override view returns (address){
+    function ownerOf(uint256 _tokenId) public view returns (address){
         return nftContract.ownerOf(_tokenId);
     }
 
@@ -83,6 +83,9 @@ contract RentableNftFactory is IERC4907 {
     }
     function isApprovedOrOwner(address _user,uint tokenId)public override view returns(bool){
         return ownerOf(tokenId)==_user || getApproved(tokenId)==_user;
+    }
+    function ownerOf(address tokenId)public override returns(address){
+          return ownerOf(tokenId);
     }
    
     function setApprovalForAll(address _operator, bool _approved) external{
