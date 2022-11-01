@@ -1,4 +1,6 @@
-# Web3Rent
+
+![image](https://user-images.githubusercontent.com/99790333/199196822-63360d91-b85e-42f8-b611-23700cd98bc0.png)
+
 ## Inspiration
 Web3 is booming. Future is promising with the opportunities Metaverse will bring .But Nfts became the cake of rich since they were launched. Due to tremendous use cases of NFTs like 
 -   Use in Games **(** sandbox and axie infinity  **)**
