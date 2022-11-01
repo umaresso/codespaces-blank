@@ -307,6 +307,7 @@ function CreateSale() {
               </Text>
             </VStack>
           </VStack>
+          
         </Box>
       )}
       {deployedAddress !== null && (

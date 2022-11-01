@@ -63,7 +63,7 @@ function NftUpload() {
 
   async function init() {
     getProviderOrSigner(NetworkChain, web3ModelRef, true).then((_signer) => {
-      _signer.getAddress().then((_user) => {
+      _signer?.getAddress().then((_user) => {
         setOwner(_user);
       });
     });
