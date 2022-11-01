@@ -1,31 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Box,
-  Grid,
-  GridItem,
   Heading,
   HStack,
-  Img,
   Text,
   VStack,
-  Wrap,
   Center,
-  WrapItem,
-  Button,
+  
 } from '@chakra-ui/react'
 import FilterMenuItem from './components/FilterMenuItem'
-import DappInformationPopup from './components/DappInformationPopup'
-import { WebsiteRentContract } from './data/WebsiteRent'
-import { fetchWhitelists } from './data/Whitelist'
-import { fetchSales } from './data/Sale'
-import {
-  fetchDappsContent,
-  getAllDappsUris,
-  getImageLinkFromIPFS,
-} from './data/ipfsStuff'
-import { getProviderOrSigner } from './data/accountsConnection'
 import { useRef } from 'react'
-import Web3Modal from 'web3modal'
 
 let NetworkChain = 'goerli'
 export async function getStaticProps(context) {
@@ -35,9 +18,10 @@ export async function getStaticProps(context) {
   }
 }
 
-function ExploreDapps(props) {
+function Explorecontracts(props) {
   const [currentMenu, setCurrentMenu] = useState('all')
   const [owner, setOwner] = useState()
+  const [contractAddresses,setContractAddresses]=useState(null);
   let web3ModalRef = useRef()
 
   /**
@@ -49,9 +33,44 @@ function ExploreDapps(props) {
   function getAccessToken() {
     return props.token
   }
+  async function storeWithProgress(files) {
+    // show the root cid as soon as it's ready
+    const onRootCidReady = (cid) => {
+      console.log("uploading files with cid:", cid);
+    };
 
+    // when each chunk is stored, update the percentage complete and display
+    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
+    let uploaded = 0;
+
+    const onStoredChunk = (size) => {
+      uploaded += size;
+      const pct = 100 * (uploaded / totalSize);
+    };
+
+    const client = makeStorageClient();
+    return client.put(files, { onRootCidReady, onStoredChunk });
+  }
+  async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
+    const _blob = new Blob(
+      [
+        JSON.stringify({
+          contracts: [...contractAddresses],
+        }),
+      ],
+      { type: "application/json" }
+    );
+    const updatedDappInfo = [new File([_blob], `contracts.json`)];
+    let newCID = await storeWithProgress(updatedDappInfo);
+    return newCID;
+  }
+
+  
   /**      */
-  async function init() {}
+
+  async function init() {
+    
+  }
 
   useEffect(() => {
     init()
@@ -102,4 +121,4 @@ function ExploreDapps(props) {
   )
 }
 
-export default ExploreDapps
+export default Explorecontracts

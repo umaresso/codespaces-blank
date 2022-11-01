@@ -53,3 +53,21 @@ export function getImageLinkFromIPFS(cid) {
   let link = `https://${cid}.ipfs.w3s.link/img.PNG`;
   return link;
 }
+
+
+export const getAllContractAddressess = async (contract, setter) => {
+  let currentIPFSLink = await contract.contractAddressesIpfsLink();
+
+  if (currentIPFSLink == "") {
+    if (setter) {
+      setter([]);
+    }
+    return [];
+  }
+  let link = `https://${currentIPFSLink}.ipfs.w3s.link/dappInfo.json`;
+  const response = await axios.get(link);
+  if (setter) {
+    setter(response.data.contracts);
+  }
+  return response.data.contracts;
+};
