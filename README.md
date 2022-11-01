@@ -1,6 +1,5 @@
 
 ![image](https://user-images.githubusercontent.com/99790333/199196822-63360d91-b85e-42f8-b611-23700cd98bc0.png)
-
 ## Inspiration
 Web3 is booming. Future is promising with the opportunities Metaverse will bring .But Nfts became the cake of rich since they were launched. Due to tremendous use cases of NFTs like 
 -   Use in Games **(** sandbox and axie infinity  **)**
@@ -70,10 +69,31 @@ Users are People that can borrow NFTs and use them till specific time .
     
     
 ## Challenges we ran into
-
-
+We faced many but here are few
+#### Clarity of Project Idea
+Not everyone is clear about the projet idea so as we. Initially we wanted to develop a platform where you can rent websites that are re-usable for different collections. But after some time, we had a look at renting NFTs and we have reframed our idea to include it too. 
+#### Building a Factory version of Contracts
+It was difficult for us to form factory versions for whitelisting sale creation and Rentable NFT smart contracts. But with the help of stackoverflow and github, we made it. Credits are given to the people whose code has helped us in smart contracts generation.
+#### Ensuring Uniqueness of the Project
+Uptil Dapp rent , our idea was really unique. But the inclusion of NFT renting made us somehow related to existing projects like reNFT. We need to be unique. We tried to ensure uniqueness by using ERC4907 standard. We wrote easy to understand well commented smart contracts that are fully transparent. Existing projects lack these features.  Also , our availability on Tron and Ethereum gave us an edge over others.
+#### Un-availability of Laptop and Connectivity
+One of the team members did not have the laptop and good internet connection also being a university student. He used to borrow laptop from his friends for the work. At times he had to sleep at 7 pm and wake up at 12 AM to do work on their laptops when it was free.But we both made it.
+#### User experience and Decentralization
+When we wanted to show available NFTs and Dapps for rent we wanted the storage to be decentralized but smart contract performs a bunch of stuff with the records. We could load available NFTs from smart contracts that is a slow process but the user exprience might suffer. So we took the concern of user experience and decentralization and achieving both with IPFS and filecoin's web3 storage.
 ## Accomplishments that we're proud of
 
 ## What we learned
 
 ## What's next for RentWeb3
+Originality & Creativity
+How novel and innovative is the idea? Does it set out to do something unique or at least improve existing models?
+Technicality & Design
+What is tech like? Is it user-friendly and does it have comprehensive and efficient features? Is it designed to scale?
+Business Model & Feasibility
+What is the value proposition and how does it set out to differentiate itself? How will it capture the market and/or generate revenue?
+Usability
+What is the user experience like? Is it clean and intuitive such that users not familiar with blockchain can easily interact with the program?
+Practicality & Use Case
+Is this something the community would actually use and want? Will the idea have an impact on the crypto community?
+Contribution to the Crypto Ecosystem
+How does your idea increase crypto adoption, value for its users, and innovation in the field of blockchain? Does it welcome new users and help existing users?
