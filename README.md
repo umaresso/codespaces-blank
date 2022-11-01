@@ -70,15 +70,15 @@ Users are People that can borrow NFTs and use them till specific time .
     
 ## Challenges we ran into
 We faced many but here are few
-#### Clarity of Project Idea
+### Clarity of Project Idea
 Not everyone is clear about the projet idea so as we. Initially we wanted to develop a platform where you can rent websites that are re-usable for different collections. But after some time, we had a look at renting NFTs and we have reframed our idea to include it too. 
-#### Building a Factory version of Contracts
+### Building a Factory version of Contracts
 It was difficult for us to form factory versions for whitelisting sale creation and Rentable NFT smart contracts. But with the help of stackoverflow and github, we made it. Credits are given to the people whose code has helped us in smart contracts generation.
-#### Ensuring Uniqueness of the Project
+### Ensuring Uniqueness of the Project
 Uptil Dapp rent , our idea was really unique. But the inclusion of NFT renting made us somehow related to existing projects like reNFT. We need to be unique. We tried to ensure uniqueness by using ERC4907 standard. We wrote easy to understand well commented smart contracts that are fully transparent. Existing projects lack these features.  Also , our availability on Tron and Ethereum gave us an edge over others.
-#### Un-availability of Laptop and Connectivity
+### Un-availability of Laptop and Connectivity
 One of the team members did not have the laptop and good internet connection also being a university student. He used to borrow laptop from his friends for the work. At times he had to sleep at 7 pm and wake up at 12 AM to do work on their laptops when it was free.But we both made it.
-#### User experience and Decentralization
+### User experience and Decentralization
 When we wanted to show available NFTs and Dapps for rent we wanted the storage to be decentralized but smart contract performs a bunch of stuff with the records. We could load available NFTs from smart contracts that is a slow process but the user exprience might suffer. So we took the concern of user experience and decentralization and achieving both with IPFS and filecoin's web3 storage.
 ## Accomplishments that we're proud of
 
