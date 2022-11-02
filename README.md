@@ -81,19 +81,14 @@ One of the team members did not have the laptop and good internet connection als
 ### User experience and Decentralization
 When we wanted to show available NFTs and Dapps for rent we wanted the storage to be decentralized but smart contract performs a bunch of stuff with the records. We could load available NFTs from smart contracts that is a slow process but the user exprience might suffer. So we took the concern of user experience and decentralization and achieving both with IPFS and filecoin's web3 storage.
 ## Accomplishments that we're proud of
-
+To be added
 ## What we learned
-
+To be added
 ## What's next for RentWeb3
-Originality & Creativity
-How novel and innovative is the idea? Does it set out to do something unique or at least improve existing models?
-Technicality & Design
-What is tech like? Is it user-friendly and does it have comprehensive and efficient features? Is it designed to scale?
-Business Model & Feasibility
-What is the value proposition and how does it set out to differentiate itself? How will it capture the market and/or generate revenue?
-Usability
-What is the user experience like? Is it clean and intuitive such that users not familiar with blockchain can easily interact with the program?
-Practicality & Use Case
-Is this something the community would actually use and want? Will the idea have an impact on the crypto community?
-Contribution to the Crypto Ecosystem
-How does your idea increase crypto adoption, value for its users, and innovation in the field of blockchain? Does it welcome new users and help existing users?
+We are aimimg to be the number one marketplace for Renting Web3 assets Globally.
+Currently we are dealing with NFT and Dapp renting that are NFT centered. 
+We are implementing their basic features, but in distant future we are aiming to 
+implement renting of other Web3 assets that will come along in our vision.
+
+### End of document but start of a New Journey....
+
