@@ -25,11 +25,15 @@ contract NftRentingTracker{
     mapping(address =>mapping(uint=>bool)) tokensAvailable; // tokens available on platform
     mapping(address=>NFT[]) public userNfts;
     mapping(address=>uint) public userNftsCount;
-
+    mapping(address=>address)public erc721ToRentableContract;
+    mapping(address=>address)public rentableToErc721Contract;
+    
     // token rent to pay to owner
 
     // store new contract addresses on ipfs
-    string contractAddressesIpfsLink;
+    string public contractAddressesIpfsLink;
+    string public contractTokensIpfsLink;
+
     uint public rentFee = 1;  // 1% fee on every renting..
 
     // each owner has many tokens inside many contract addresses
@@ -48,11 +52,15 @@ modifier ifOwnerOrApproved(address contractAddress,uint tokenId){
     _;
 
 }
-function uploadNftForRent(address contractAddress,uint tokenId,uint price)public ifOwnerOrApproved(contractAddress,tokenId){
+function uploadNftForRent(address erc721Address,address contractAddress,uint tokenId,uint price,string memory newContractAddressesIPFSLink,string memory newContractTokensIPFSLink)public ifOwnerOrApproved(contractAddress,tokenId){
     require(!tokensAvailable[contractAddress][tokenId],"Token is Already present on Platform");
     tokensAvailable[contractAddress][tokenId]=true;
     rentPrices[contractAddress][tokenId]=price;
-
+    erc721ToRentableContract[erc721Address]=contractAddress;
+    rentableToErc721Contract[contractAddress]=erc721Address;
+    contractAddressesIpfsLink=newContractAddressesIPFSLink;
+    contractTokensIpfsLink=newContractTokensIPFSLink;
+    
 }
 function rentNFT(address contractAddress,uint tokenId,uint daysToRentFor)public payable {
     // 1000000000000000000
