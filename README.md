@@ -128,6 +128,6 @@ We are implementing their basic features, but in distant future we are aiming to
 
 -   Variety of Dapps to rent
 -   APIs to build scalable apps on top of our platform ( composability )
--   To be continued
+-   More to be added
 ### End of document but start of a New Journey....
 
