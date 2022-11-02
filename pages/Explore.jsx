@@ -60,7 +60,7 @@ function Explore() {
           </WrapItem>
           <WrapItem>
             <LinkButton
-              title={'Rent Dapp'}
+              title={'Explore Dapps'}
               href={'/ExploreDapps'}
               color={'green'}
               variant={'solid'}

@@ -28,7 +28,6 @@ import LinkButton from "./components/LinkButton/LinkButton";
 import DropDownMenu from "./components/DropDownMenu";
 import SuccessfulDeployment from "./components/SuccessfulDeployment";
 import { getProviderOrSigner } from "./data/accountsConnection";
-import { minimizeContractInterface } from "@wagmi/core";
 
 let NetworkChain = "goerli";
 let Blockchain = "ethereum";
@@ -128,28 +127,38 @@ function CreateSale() {
 
         setStatus(`Deployment successful 🎉 `);
         setStatus(`Contract Address:`);
-        setStatus(minimizeContractInterface(contract.address));
+        setStatus(getMinimalAddress(contract.address));
 
-        setStatus("Storing it!");
+        setStatus("Keeping its track for Future!");
         await trackSaleDeployment(contract.address);
       } catch (e) {
         alert("deployment unsuccessful :(");
         alert("See Console for Details !");
         console.log("Deployment Unsuccessful Error", e);
       }
+
     })();
   }
 
   async function trackSaleDeployment(contractAddress) {
     let contract = saleTrackerContract;
     setStatus("Transaction initiated !");
-    let tx = await contract.addUserSale(owner, contractAddress);
-    setStatus("Waiting for Transaction Completion ");
+    try{
+      let tx = await contract.addUserSale(owner, contractAddress);
+      setStatus("Waiting for Transaction Completion ");
+  
+      await tx.wait();
+      setStatus("Storage Successful 🎉");
+  
+      setDeployedAddress(contractAddress);
+  
+    }
+    catch(e){
+      setStatus("Error: Deployment Unsuccessful");
+      console.log("error ",e);
 
-    await tx.wait();
-    setStatus("Storage Successful 🎉");
+    }
 
-    setDeployedAddress(contractAddress);
   }
 
   async function getUserWhitelists() {
@@ -300,11 +309,7 @@ function CreateSale() {
             display={deployedAddress ? "none" : "flex"}
           >
             <Heading>Sale Creation Status</Heading>
-            <VStack spacing={10} width="60vw" id="creationStatus">
-              <Text fontSize={"20px"}>
-                {" "}
-                {loader && "Sale Creation Started.."}
-              </Text>
+            <VStack spacing={5} width="60vw" id="creationStatus">
             </VStack>
           </VStack>
           
