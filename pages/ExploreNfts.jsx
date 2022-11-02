@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from 'react'
-import { Heading, HStack, Text, VStack, Center } from '@chakra-ui/react'
-import FilterMenuItem from './components/FilterMenuItem'
-import { useRef } from 'react'
-import { getProvider } from '@wagmi/core'
-import { getProviderOrSigner } from './data/accountsConnection'
-import { getCustomNetworkNFTTrackerContract } from './data/NftRenting'
+import React, { useEffect, useState } from "react";
+import { Heading, HStack, Text, VStack, Center } from "@chakra-ui/react";
+import FilterMenuItem from "./components/FilterMenuItem";
+import { useRef } from "react";
+import { getProvider } from "@wagmi/core";
+import { getProviderOrSigner } from "./data/accountsConnection";
+import { getCustomNetworkNFTTrackerContract } from "./data/NftRenting";
 import {
   getAllContractAddressess,
   getAllContractTokens,
-} from './data/ipfsStuff'
+} from "./data/ipfsStuff";
+import { getCustomNetworkERC721Contract, getTokenUri } from "./data/ERC721";
 
-let NetworkChain = 'goerli'
+let NetworkChain = "goerli";
 export async function getStaticProps(context) {
-  require('dotenv').config()
+  require("dotenv").config();
   return {
     props: { token: process.env.WEB3STORAGE_TOKEN }, // will be passed to the page component as props
-  }
+  };
 }
 
 function Explorecontracts(props) {
-  const [currentMenu, setCurrentMenu] = useState('all')
-  const [owner, setOwner] = useState()
+  const [currentMenu, setCurrentMenu] = useState("all");
+  const [owner, setOwner] = useState();
   //  const [contractAddresses,setContractAddresses]=useState(null);
-  const [contractTokens, setContractTokens] = useState(null)
-  const [NftRentingTracker, setNftRentingTracker] = useState(null)
-  let web3ModalRef = useRef()
-console.log("contract tokens are",contractTokens);
+  const [contractTokens, setContractTokens] = useState(null);
+  const [NftRentingTracker, setNftRentingTracker] = useState(null);
+  let web3ModalRef = useRef();
+  console.log("contract tokens are", contractTokens);
 
   /**
    *
@@ -34,25 +35,25 @@ console.log("contract tokens are",contractTokens);
    */
 
   function getAccessToken() {
-    return props.token
+    return props.token;
   }
   async function storeWithProgress(files) {
     // show the root cid as soon as it's ready
     const onRootCidReady = (cid) => {
-      console.log('uploading files with cid:', cid)
-    }
+      console.log("uploading files with cid:", cid);
+    };
 
     // when each chunk is stored, update the percentage complete and display
-    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0)
-    let uploaded = 0
+    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
+    let uploaded = 0;
 
     const onStoredChunk = (size) => {
-      uploaded += size
-      const pct = 100 * (uploaded / totalSize)
-    }
+      uploaded += size;
+      const pct = 100 * (uploaded / totalSize);
+    };
 
-    const client = makeStorageClient()
-    return client.put(files, { onRootCidReady, onStoredChunk })
+    const client = makeStorageClient();
+    return client.put(files, { onRootCidReady, onStoredChunk });
   }
   async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
     const _blob = new Blob(
@@ -61,11 +62,11 @@ console.log("contract tokens are",contractTokens);
           contracts: [...contractAddresses],
         }),
       ],
-      { type: 'application/json' },
-    )
-    const updatedDappInfo = [new File([_blob], `contracts.json`)]
-    let newCID = await storeWithProgress(updatedDappInfo)
-    return newCID
+      { type: "application/json" }
+    );
+    const updatedDappInfo = [new File([_blob], `contracts.json`)];
+    let newCID = await storeWithProgress(updatedDappInfo);
+    return newCID;
   }
 
   /**      */
@@ -73,41 +74,71 @@ console.log("contract tokens are",contractTokens);
   async function init() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((_signer) => {
       _signer?.getAddress().then((_user) => {
-        setOwner(_user)
-      })
-    })
+        setOwner(_user);
+      });
+    });
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (contract) => {
-        await getAllContractTokens(contract, setContractTokens)
+        getAllContractTokens(contract, setContractTokens).then(
+          (contractTokensArray) => {
+            let addresses = null;
+            console.log(
+              "smart contract addresses got ",
+              contractTokensArray[0],
+              contractTokensArray[1]
+            );
+            addresses?.map(async (adr) => {
+              getCustomNetworkERC721Contract(
+                NetworkChain,
+                web3ModalRef,
+                adr
+              ).then((erc721Contract) => {
+                let tokens = contractTokensArray[adr];
+                console.log("Smart contract at ", adr, " got tokens: ", tokens);
+                let tokenBaseUris = [];
+                tokens?.map((tokenId) => {
+                  getTokenUri(erc721Contract, tokenId).then((uri) => {
+                    tokenBaseUris.push(uri);
+                  });
+                });
+                console.log("Token Base URIs got ", tokenBaseUris);
+              });
+            });
+          }
+        );
 
-        setNftRentingTracker(contract)
-      },
-    )
+        setNftRentingTracker(contract);
+      }
+    );
   }
   function getAccessToken() {
-    return props.token
+    return props.token;
   }
   function makeStorageClient() {
-    return new Web3Storage({ token: getAccessToken() })
+    return new Web3Storage({ token: getAccessToken() });
   }
 
   useEffect(() => {
-    init()
-  }, [])
+    init();
+  }, []);
 
   return (
     <>
-      <VStack height={'100vh'} bg="black" textColor={'white'}>
+      <VStack height={"100vh"} bg="black" textColor={"white"}>
         <Center>
           <VStack>
-            <Heading paddingTop={'10vh'} fontSize={'5.5em'} width={['80vw','70vw','60vw']}>
+            <Heading
+              paddingTop={"10vh"}
+              fontSize={"5.5em"}
+              width={["80vw", "70vw", "60vw"]}
+            >
               Rent yourself a Cool NFT
             </Heading>
             <Text
-              fontFamily={'sans-serif'}
-              textColor={'grey'}
-              fontSize={'18px'}
-              width={['80vw','70vw','60vw']}
+              fontFamily={"sans-serif"}
+              textColor={"grey"}
+              fontSize={"18px"}
+              width={["80vw", "70vw", "60vw"]}
             >
               RentWeb3 is your favorite place to rent awesome NFTs to use in
               your Next game , for attending an event or hosting your Phenomenal
@@ -120,24 +151,24 @@ console.log("contract tokens are",contractTokens);
 
         <HStack spacing={10}>
           <FilterMenuItem
-            title={'all'}
+            title={"all"}
             setter={setCurrentMenu}
-            isClicked={currentMenu === 'all'}
+            isClicked={currentMenu === "all"}
           />
           <FilterMenuItem
-            title={'available'}
+            title={"available"}
             setter={setCurrentMenu}
-            isClicked={currentMenu === 'whitelist'}
+            isClicked={currentMenu === "whitelist"}
           />
           <FilterMenuItem
-            title={'rented'}
+            title={"rented"}
             setter={setCurrentMenu}
-            isClicked={currentMenu === 'sale'}
+            isClicked={currentMenu === "sale"}
           />
         </HStack>
       </VStack>
     </>
-  )
+  );
 }
 
-export default Explorecontracts
+export default Explorecontracts;

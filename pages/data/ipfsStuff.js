@@ -26,18 +26,14 @@ export const fetchDappsContent = async (Cids, setter, loader) => {
     let dapp = response.data;
     dapp.image = getImageLinkFromIPFS(dapp.image);
     if (dapp.url) {
-      let renttime = await websiteRentContract.rentTime(dapp.url)
-      if (parseInt(renttime) * 1000 > (new Date()).getTime()) {
+      let renttime = await websiteRentContract.rentTime(dapp.url);
+      if (parseInt(renttime) * 1000 > new Date().getTime()) {
         console.log("rented already !");
         dapp.rented = true;
-
-      }
-      else {
-        console.log("Not rented !")
+      } else {
+        console.log("Not rented !");
         dapp.rented = false;
-
       }
-
     }
     dappArray.push(dapp);
 
@@ -54,10 +50,9 @@ export function getImageLinkFromIPFS(cid) {
   return link;
 }
 
-
 export const getAllContractAddressess = async (contract, setter) => {
   let currentIPFSLink = await contract.contractAddressesIpfsLink();
-  console.log("ipfs link for contracts is ",currentIPFSLink);
+  console.log("ipfs link for contracts is ", currentIPFSLink);
   if (currentIPFSLink == "") {
     if (setter) {
       setter([]);
@@ -66,16 +61,16 @@ export const getAllContractAddressess = async (contract, setter) => {
   }
   let link = `https://${currentIPFSLink}.ipfs.w3s.link/contracts.json`;
   const response = await axios.get(link);
-  console.log("the contracts are ",response.data.contracts)
+  console.log("the contracts are ", response.data.contracts);
   if (setter) {
     setter(response.data.contracts);
   }
   return response.data.contracts;
 };
 
-export const getAllContractTokens= async (contract, setter) => {
+export const getAllContractTokens = async (contract, setter) => {
   let currentIPFSLink = await contract.contractTokensIpfsLink();
-  console.log("ipfs link for contractsTokens is ",currentIPFSLink);
+  console.log("ipfs link for contractsTokens is ", currentIPFSLink);
   if (currentIPFSLink == "") {
     if (setter) {
       setter([]);
@@ -84,8 +79,8 @@ export const getAllContractTokens= async (contract, setter) => {
   }
   let link = `https://${currentIPFSLink}.ipfs.w3s.link/contractTokens.json`;
   const response = await axios.get(link);
-  console.log("response is ",response);
-  console.log("the contract tokens are ",response.data.contractTokens)
+  console.log("response is ", response);
+  console.log("the contract tokens are ", response.data.contractTokens);
   if (setter) {
     setter(response.data.contractTokens);
   }
