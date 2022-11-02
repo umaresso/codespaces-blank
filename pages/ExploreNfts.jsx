@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Heading,
-  HStack,
-  Text,
-  VStack,
-  Center,
-  
-} from '@chakra-ui/react'
+import { Heading, HStack, Text, VStack, Center } from '@chakra-ui/react'
 import FilterMenuItem from './components/FilterMenuItem'
 import { useRef } from 'react'
+import { getProvider } from '@wagmi/core'
+import { getProviderOrSigner } from './data/accountsConnection'
+import { getCustomNetworkNFTTrackerContract } from './data/NftRenting'
+import {
+  getAllContractAddressess,
+  getAllContractTokens,
+} from './data/ipfsStuff'
 
 let NetworkChain = 'goerli'
 export async function getStaticProps(context) {
@@ -21,8 +21,11 @@ export async function getStaticProps(context) {
 function Explorecontracts(props) {
   const [currentMenu, setCurrentMenu] = useState('all')
   const [owner, setOwner] = useState()
-  const [contractAddresses,setContractAddresses]=useState(null);
+  //  const [contractAddresses,setContractAddresses]=useState(null);
+  const [contractTokens, setContractTokens] = useState(null)
+  const [NftRentingTracker, setNftRentingTracker] = useState(null)
   let web3ModalRef = useRef()
+console.log("contract tokens are",contractTokens);
 
   /**
    *
@@ -36,20 +39,20 @@ function Explorecontracts(props) {
   async function storeWithProgress(files) {
     // show the root cid as soon as it's ready
     const onRootCidReady = (cid) => {
-      console.log("uploading files with cid:", cid);
-    };
+      console.log('uploading files with cid:', cid)
+    }
 
     // when each chunk is stored, update the percentage complete and display
-    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
-    let uploaded = 0;
+    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0)
+    let uploaded = 0
 
     const onStoredChunk = (size) => {
-      uploaded += size;
-      const pct = 100 * (uploaded / totalSize);
-    };
+      uploaded += size
+      const pct = 100 * (uploaded / totalSize)
+    }
 
-    const client = makeStorageClient();
-    return client.put(files, { onRootCidReady, onStoredChunk });
+    const client = makeStorageClient()
+    return client.put(files, { onRootCidReady, onStoredChunk })
   }
   async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
     const _blob = new Blob(
@@ -58,18 +61,34 @@ function Explorecontracts(props) {
           contracts: [...contractAddresses],
         }),
       ],
-      { type: "application/json" }
-    );
-    const updatedDappInfo = [new File([_blob], `contracts.json`)];
-    let newCID = await storeWithProgress(updatedDappInfo);
-    return newCID;
+      { type: 'application/json' },
+    )
+    const updatedDappInfo = [new File([_blob], `contracts.json`)]
+    let newCID = await storeWithProgress(updatedDappInfo)
+    return newCID
   }
 
-  
   /**      */
 
   async function init() {
-    
+    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((_signer) => {
+      _signer?.getAddress().then((_user) => {
+        setOwner(_user)
+      })
+    })
+    getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
+      async (contract) => {
+        await getAllContractTokens(contract, setContractTokens)
+
+        setNftRentingTracker(contract)
+      },
+    )
+  }
+  function getAccessToken() {
+    return props.token
+  }
+  function makeStorageClient() {
+    return new Web3Storage({ token: getAccessToken() })
   }
 
   useEffect(() => {
@@ -81,14 +100,14 @@ function Explorecontracts(props) {
       <VStack height={'100vh'} bg="black" textColor={'white'}>
         <Center>
           <VStack>
-            <Heading paddingTop={'10vh'} fontSize={'5.5em'} width={'40vw'}>
+            <Heading paddingTop={'10vh'} fontSize={'5.5em'} width={['80vw','70vw','60vw']}>
               Rent yourself a Cool NFT
             </Heading>
             <Text
               fontFamily={'sans-serif'}
               textColor={'grey'}
               fontSize={'18px'}
-              width={'40vw'}
+              width={['80vw','70vw','60vw']}
             >
               RentWeb3 is your favorite place to rent awesome NFTs to use in
               your Next game , for attending an event or hosting your Phenomenal
