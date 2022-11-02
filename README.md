@@ -124,11 +124,10 @@ To be added
 ## What's next for RentWeb3
 We are aiming to be the number one marketplace for Renting Web3 assets Globally.<br/>
 Currently we are dealing with NFT and Dapp renting that are NFT centered. <br/>
-We are implementing their basic features, but in distant future we are aiming to <br/>
+We are implementing their basic features, but in distant future we are aiming to implement <br/>
 
--   Customization in Renting the Dapp ( diversification )
--   Direct NFT integration with metaverse and other use-cases ( Scalability )
+-   Variety of Dapps to rent
 -   APIs to build scalable apps on top of our platform ( composability )
-
+-   To be continued
 ### End of document but start of a New Journey....
 
