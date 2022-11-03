@@ -8,6 +8,7 @@ import {
 
 import Sale from ".//components/Sale";
 import SuccessfulDeployment from ".//components/SuccessfulDeployment";
+import { getMinimalAddress } from "../Utilities";
 
 const ethers = require("ethers");
 
@@ -106,9 +107,6 @@ function CreateWhitelist(props) {
     }
     console.log("calling deploy");
     deploy(Sale);
-  }
-  function getMinimalAddress(adr) {
-    return adr.slice(0, 6) + ".." + adr.slice(40);
   }
 
   async function trackWhitelistDeployment(contractAddress, owner) {

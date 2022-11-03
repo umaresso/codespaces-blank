@@ -18,6 +18,29 @@ export const getAllDappsUris = async (contract, setter) => {
   return response.data.dapps;
 };
 
+export const getTokenIpfsData = async (tokenUri) => {
+  const response = await axios.get(tokenUri);
+  let metadata = response.data;
+  // console.log("metadata inside ipfs fetch is ", metadata);
+  return metadata;
+};
+
+export const getTokensMetaData = async (tokenURIs,setter) => {
+  let metadataArray = [];
+
+  return tokenURIs?.map(async (item, index) => {
+    return getTokenIpfsData(item).then(async (metadata) => {
+      metadataArray.push(metadata);
+      if (index + 1 == tokenURIs.length) {
+        if(setter){
+          setter(metadataArray);
+        }
+        return metadataArray;
+
+      }
+    });
+  });
+};
 export const fetchDappsContent = async (Cids, setter, loader) => {
   let dappArray = [];
   await Cids.map(async (cid, index) => {
@@ -79,8 +102,8 @@ export const getAllContractTokens = async (contract, setter) => {
   }
   let link = `https://${currentIPFSLink}.ipfs.w3s.link/contractTokens.json`;
   const response = await axios.get(link);
-  console.log("response is ", response);
-  console.log("the contract tokens are ", response.data.contractTokens);
+  // console.log("response is ", response);
+  //  console.log("the contract tokens are ", response.data.contractTokens);
   if (setter) {
     setter(response.data.contractTokens);
   }

@@ -385,7 +385,19 @@ export const getCustomNetworkERC721Contract = async (
   return erc721Contract;
 };
 const ethers = require("ethers");
+function embedGateway(hash) {
+  return "https://ipfs.io" + hash;
+}
 export const getTokenUri = async (contract, tokenId) => {
   let tokenUri = await contract.tokenURI(tokenId);
+  if (tokenUri == "") {
+    return "";
+  } else if (tokenUri.toString().startsWith("/ipfs")) {
+    let newTokenUri = tokenUri.slice(6, -1);
+    return newTokenUri;
+  } else if (tokenUri.toString().startsWith("ipfs://")) {
+    let newTokenUri = tokenUri.slice(7, -1);
+    return newTokenUri;
+  }
   return tokenUri;
 };

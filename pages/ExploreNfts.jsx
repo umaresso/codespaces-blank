@@ -10,6 +10,7 @@ import {
   getAllContractTokens,
 } from "./data/ipfsStuff";
 import { getCustomNetworkERC721Contract, getTokenUri } from "./data/ERC721";
+import ContractNFTs from "./components/ContractNFTs";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -24,9 +25,11 @@ function Explorecontracts(props) {
   const [owner, setOwner] = useState();
   //  const [contractAddresses,setContractAddresses]=useState(null);
   const [contractTokens, setContractTokens] = useState(null);
+  const [contractTokenURIs, setContractTokenURIs] = useState([]);
+
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   let web3ModalRef = useRef();
-  console.log("contract tokens are", contractTokens);
+  // console.log("contract tokens are", contractTokens);
 
   /**
    *
@@ -81,27 +84,32 @@ function Explorecontracts(props) {
       async (contract) => {
         getAllContractTokens(contract, setContractTokens).then(
           (contractTokensArray) => {
-            let addresses = null;
-            console.log(
-              "smart contract addresses got ",
-              contractTokensArray[0],
-              contractTokensArray[1]
-            );
+            let addresses = Object.keys(contractTokensArray);
             addresses?.map(async (adr) => {
+              // console.log("address is ", adr);
               getCustomNetworkERC721Contract(
                 NetworkChain,
                 web3ModalRef,
                 adr
               ).then((erc721Contract) => {
                 let tokens = contractTokensArray[adr];
-                console.log("Smart contract at ", adr, " got tokens: ", tokens);
-                let tokenBaseUris = [];
-                tokens?.map((tokenId) => {
+                //     console.log("Smart contract at ", adr, " got tokens: ", tokens);
+                let tokenUris = [];
+                tokens?.map((tokenId, index) => {
                   getTokenUri(erc721Contract, tokenId).then((uri) => {
-                    tokenBaseUris.push(uri);
+                    tokenUris.push(uri);
+                    if (index + 1 == tokens.length) {
+                      // console.log("Token Base URIs got ", tokenUris);
+                      let arr = [...contractTokenURIs];
+                      let contractInstance = {
+                        contractAddress: adr,
+                        tokenURIs: tokenUris,
+                      };
+                      arr.push(contractInstance);
+                      setContractTokenURIs(arr);
+                    }
                   });
                 });
-                console.log("Token Base URIs got ", tokenBaseUris);
               });
             });
           }
@@ -124,7 +132,7 @@ function Explorecontracts(props) {
 
   return (
     <>
-      <VStack height={"100vh"} bg="black" textColor={"white"}>
+      <VStack height={"fit-content"} bg="black" textColor={"white"}>
         <Center>
           <VStack>
             <Heading
@@ -166,6 +174,17 @@ function Explorecontracts(props) {
             isClicked={currentMenu === "sale"}
           />
         </HStack>
+        <VStack height={"fit-content"}>
+          {contractTokenURIs &&
+            contractTokenURIs.map((ContractInstance) => {
+              console.log("ExploreNFT:token insrance", ContractInstance);
+              return (
+                <div key={ContractInstance.toString()}>
+                  <ContractNFTs contract={ContractInstance} />;
+                </div>
+              );
+            })}
+        </VStack>
       </VStack>
     </>
   );

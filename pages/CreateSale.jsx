@@ -28,6 +28,7 @@ import LinkButton from "./components/LinkButton/LinkButton";
 import DropDownMenu from "./components/DropDownMenu";
 import SuccessfulDeployment from "./components/SuccessfulDeployment";
 import { getProviderOrSigner } from "./data/accountsConnection";
+import { getMinimalAddress } from "../Utilities";
 
 let NetworkChain = "goerli";
 let Blockchain = "ethereum";
@@ -64,10 +65,6 @@ function CreateSale() {
     p_tag.key = `message${message}`;
     p_tag.textContent = "-> " + message;
     ele.append(p_tag);
-  }
-  function getMinimalAddress(adr) {
-    if (!adr) return "Fetching..";
-    return adr.slice(0, 6) + ".." + adr.slice(38);
   }
 
   async function fetchDetails() {
@@ -127,7 +124,7 @@ function CreateSale() {
 
         setStatus(`Deployment successful 🎉 `);
         setStatus(`Contract Address:`);
-        setStatus(getMinimalAddress(contract.address));
+        setStatus(getMinimalAddress(contract.address,true));
 
         setStatus("Keeping its track for Future!");
         await trackSaleDeployment(contract.address);

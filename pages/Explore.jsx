@@ -36,25 +36,9 @@ function Explore() {
           <Wrap width={"60vw"} paddingBottom={"10vh"} spacing={20}>
           <WrapItem>
             <LinkButton
-              title={'Upload NFT'}
-              href={'/NftUpload'}
-              color={'blue'}
-              variant={'solid'}
-            />
-          </WrapItem>
-          <WrapItem>
-            <LinkButton
               title={'Explore NFTs'}
               href={'/ExploreNfts'}
               color={'blue'}
-              variant={'solid'}
-            />
-          </WrapItem>
-          <WrapItem>
-            <LinkButton
-              title={'Upload Dapp'}
-              href={'/CreateDapp'}
-              color={'green'}
               variant={'solid'}
             />
           </WrapItem>
