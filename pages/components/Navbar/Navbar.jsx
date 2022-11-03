@@ -1,4 +1,4 @@
-import { Box, HStack, Button, Heading } from "@chakra-ui/react";
+import { Box, HStack, Button, Heading, Img } from "@chakra-ui/react";
 import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -54,8 +54,9 @@ function Navbar() {
     <HStack
       position={"fixed"}
       top={"0"}
-      paddingLeft={5}
-      paddingRight={5}
+      padding={"10px"}
+      paddingTop={"30px"}
+      paddingBottom={"30px"}
       justifyContent={"space-between"}
       width={"100%"}
       height={"50px"}
@@ -65,19 +66,19 @@ function Navbar() {
     >
       <Box width={"10vw"}>
         <Link href="/">
-          <Heading
-            _hover={{ cursor: "pointer" }}
-            as="h5"
-            fontSize={"18px"}
-            width={"max-content"}
-          >
-            RentWeb3
-          </Heading>
+          <Img
+            _hover={{
+              cursor: "pointer",
+            }}
+            borderRadius={"50%"}
+            width={"50px"}
+            src={"./rw3.png"}
+          />
         </Link>
       </Box>
       <HStack
         display={["none", "none", "none", "flex"]}
-        spacing={[5, 10, 12]}
+        spacing={[5, 8, 8]}
         width="40vw"
         justifyContent={"space-between"}
         fontSize={["12px", "12px", "14px"]}

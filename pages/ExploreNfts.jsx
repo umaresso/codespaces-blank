@@ -11,6 +11,7 @@ import {
 } from "./data/ipfsStuff";
 import { getCustomNetworkERC721Contract, getTokenUri } from "./data/ERC721";
 import ContractNFTs from "./components/ContractNFTs";
+import NftInformationPopup from "./components/NftInformationPopup";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -26,7 +27,7 @@ function Explorecontracts(props) {
   //  const [contractAddresses,setContractAddresses]=useState(null);
   const [contractTokens, setContractTokens] = useState(null);
   const [contractTokenURIs, setContractTokenURIs] = useState([]);
-
+  const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   let web3ModalRef = useRef();
   // console.log("contract tokens are", contractTokens);
@@ -104,6 +105,7 @@ function Explorecontracts(props) {
                       let contractInstance = {
                         contractAddress: adr,
                         tokenURIs: tokenUris,
+                        tokenIds: tokens,
                       };
                       arr.push(contractInstance);
                       setContractTokenURIs(arr);
@@ -132,7 +134,12 @@ function Explorecontracts(props) {
 
   return (
     <>
-      <VStack height={"fit-content"} bg="black" textColor={"white"}>
+      <VStack
+        height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}
+        bg="black"
+        textColor={"white"}
+        width={"100vw"}
+      >
         <Center>
           <VStack>
             <Heading
@@ -174,18 +181,28 @@ function Explorecontracts(props) {
             isClicked={currentMenu === "sale"}
           />
         </HStack>
-        <VStack height={"fit-content"}>
+        <VStack
+          align={"left"}
+          padding={20}
+          width={"100vw"}
+          height={"fit-content"}
+        >
           {contractTokenURIs &&
             contractTokenURIs.map((ContractInstance) => {
-              console.log("ExploreNFT:token insrance", ContractInstance);
               return (
                 <div key={ContractInstance.toString()}>
-                  <ContractNFTs contract={ContractInstance} />;
+                  <ContractNFTs
+                    selector={setSelectedNft}
+                    contract={ContractInstance}
+                  />
                 </div>
               );
             })}
         </VStack>
       </VStack>
+      {selectedNft != null && (
+        <NftInformationPopup NFT={selectedNft} displayToggle={selectedNft} />
+      )}
     </>
   );
 }

@@ -401,3 +401,14 @@ export const getTokenUri = async (contract, tokenId) => {
   }
   return tokenUri;
 };
+
+export function getContractName(NetworkChain, web3ModalRef, contractAddress) {
+  return getCustomNetworkERC721Contract(
+    NetworkChain,
+    web3ModalRef,
+    contractAddress
+  ).then(async (contract) => {
+    let name = await contract.name();
+    return name;
+  });
+}
