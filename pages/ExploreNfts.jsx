@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Heading, HStack, Text, VStack, Center } from "@chakra-ui/react";
+import { Heading, HStack, Box, Text, VStack, Center } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
 import { getProvider } from "@wagmi/core";
 import { getProviderOrSigner } from "./data/accountsConnection";
-import { getCustomNetworkNFTTrackerContract } from "./data/NftRenting";
+import {
+  getCustomNetworkNFTTrackerContract,
+  getRentableContract,
+} from "./data/NftRenting";
 import {
   getAllContractAddressess,
   getAllContractTokens,
 } from "./data/ipfsStuff";
-import { getCustomNetworkERC721Contract, getTokenUri } from "./data/ERC721";
+import {
+  getCustomNetworkERC721Contract,
+  getTokenOwner,
+  getTokenRentStatus,
+  getTokenUri,
+} from "./data/ERC721";
 import ContractNFTs from "./components/ContractNFTs";
 import NftInformationPopup from "./components/NftInformationPopup";
 
@@ -29,6 +37,8 @@ function Explorecontracts(props) {
   const [contractTokenURIs, setContractTokenURIs] = useState([]);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   let web3ModalRef = useRef();
   // console.log("contract tokens are", contractTokens);
 
@@ -82,10 +92,12 @@ function Explorecontracts(props) {
       });
     });
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
-      async (contract) => {
-        getAllContractTokens(contract, setContractTokens).then(
+      async (TrackerContract) => {
+        getAllContractTokens(TrackerContract, setContractTokens).then(
           (contractTokensArray) => {
+            setLoading(false);
             let addresses = Object.keys(contractTokensArray);
+
             addresses?.map(async (adr) => {
               // console.log("address is ", adr);
               getCustomNetworkERC721Contract(
@@ -93,31 +105,50 @@ function Explorecontracts(props) {
                 web3ModalRef,
                 adr
               ).then((erc721Contract) => {
-                let tokens = contractTokensArray[adr];
-                //     console.log("Smart contract at ", adr, " got tokens: ", tokens);
-                let tokenUris = [];
-                tokens?.map((tokenId, index) => {
-                  getTokenUri(erc721Contract, tokenId).then((uri) => {
-                    tokenUris.push(uri);
-                    if (index + 1 == tokens.length) {
-                      // console.log("Token Base URIs got ", tokenUris);
-                      let arr = [...contractTokenURIs];
-                      let contractInstance = {
-                        contractAddress: adr,
-                        tokenURIs: tokenUris,
-                        tokenIds: tokens,
-                      };
-                      arr.push(contractInstance);
-                      setContractTokenURIs(arr);
-                    }
-                  });
-                });
+                getRentableContract(TrackerContract, adr).then(
+                  (rentableContract) => {
+                    let tokens = contractTokensArray[adr];
+                    //     console.log("Smart contract at ", adr, " got tokens: ", tokens);
+                    let tokenUris = [];
+                    let tokenRentStatusObject={};
+                    tokens?.map((tokenId, index) => {
+                      getTokenUri(erc721Contract, tokenId).then((uri) => {
+                        getTokenOwner(erc721Contract, tokenId).then(
+                          (_owner) => {
+                            getTokenRentStatus(
+                              TrackerContract,
+                              rentableContract,
+                              tokenId
+                            ).then((tokenRentStatus) => {
+                              tokenUris.push(uri);
+                              tokenRentStatusObject[tokenId]=tokenRentStatus;
+                              if (index + 1 == tokens.length) {
+                                // console.log("Token Base URIs got ", tokenUris);
+                                let arr = [...contractTokenURIs];
+                                let contractInstance = {
+                                  ercContractAddress: adr,
+                                  tokenURIs: tokenUris,
+                                  tokenIds: tokens,
+                                  owner: _owner,
+                                  rentableContract,
+                                  rentalStatus:tokenRentStatusObject,
+                                };
+                                arr.push(contractInstance);
+                                setContractTokenURIs(arr);
+                              }
+                            });
+                          }
+                        );
+                      });
+                    });
+                  }
+                );
               });
             });
           }
         );
 
-        setNftRentingTracker(contract);
+        setNftRentingTracker(TrackerContract);
       }
     );
   }
@@ -138,22 +169,22 @@ function Explorecontracts(props) {
         height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}
         bg="black"
         textColor={"white"}
-        width={"100vw"}
+        width={"100%"}
       >
         <Center>
           <VStack>
             <Heading
-              paddingTop={"10vh"}
-              fontSize={"5.5em"}
-              width={["80vw", "70vw", "60vw"]}
+              paddingTop={"15vh"}
+              fontSize={"5em"}
+              width={["80vw", "70vw", "50vw"]}
             >
-              Rent yourself a Cool NFT
+              Rent cool NFTs
             </Heading>
             <Text
               fontFamily={"sans-serif"}
               textColor={"grey"}
               fontSize={"18px"}
-              width={["80vw", "70vw", "60vw"]}
+              width={["80vw", "70vw", "50vw"]}
             >
               RentWeb3 is your favorite place to rent awesome NFTs to use in
               your Next game , for attending an event or hosting your Phenomenal
@@ -181,10 +212,13 @@ function Explorecontracts(props) {
             isClicked={currentMenu === "sale"}
           />
         </HStack>
+        {loading && <Heading>Loading NFT Collections..</Heading>}
+
         <VStack
           align={"left"}
           padding={20}
-          width={"100vw"}
+          paddingTop={0}
+          width={"100%"}
           height={"fit-content"}
         >
           {contractTokenURIs &&
@@ -201,7 +235,12 @@ function Explorecontracts(props) {
         </VStack>
       </VStack>
       {selectedNft != null && (
-        <NftInformationPopup NFT={selectedNft} displayToggle={selectedNft} />
+        <Box width={"100vh"} height="fit-content">
+          <NftInformationPopup
+            NFT={selectedNft}
+            displayToggle={setSelectedNft}
+          />
+        </Box>
       )}
     </>
   );

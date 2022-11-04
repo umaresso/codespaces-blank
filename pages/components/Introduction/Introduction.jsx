@@ -12,7 +12,7 @@ function Introduction() {
   //  _____
 
   return (
-    <Box width={"100vw"} color={textColor} height={"100vh"} bg={"black"}>
+    <Box width={"100vw"} color={textColor} height={"fit-content"} bg={"black"} paddingBottom={10} >
       <Stack direction={["column", "column", "column", "row"]}>
         <VStack
           align={"left"}
@@ -23,7 +23,7 @@ function Introduction() {
           paddingTop={["40vh", "40vh", "20vh"]}
         >
           <Heading
-            fontSize={["2em", "4em", "6em"]}
+            fontSize={["2em", "4em", "5em"]}
             width={["80vw", "80vw", "80vw", "40vw"]}
           >
             Time to Rent Web3 Assets

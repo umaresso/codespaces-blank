@@ -412,3 +412,15 @@ export function getContractName(NetworkChain, web3ModalRef, contractAddress) {
     return name;
   });
 }
+
+export async function getTokenOwner(TrackerContract,tokenId) {
+    let _owner = await TrackerContract.ownerOf(tokenId);
+    return _owner;
+  
+}
+export async function getTokenRentStatus(TrackerContract,contractAddress,tokenId) {
+  let rented= await TrackerContract.isRented(contractAddress,tokenId);
+  return rented;
+
+}
+

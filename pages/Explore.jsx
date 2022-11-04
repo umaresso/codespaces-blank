@@ -33,7 +33,8 @@ function Explore() {
           </Text>
           <hr/>
           <Heading padding={"5vh 0 5vh 0"}>Take Action</Heading>
-          <Wrap width={"60vw"} paddingBottom={"10vh"} spacing={20}>
+<Center>
+<Wrap  paddingBottom={"10vh"} spacing={20}>
           <WrapItem>
             <LinkButton
               title={'Explore NFTs'}
@@ -52,6 +53,8 @@ function Explore() {
           </WrapItem>
         </Wrap>
 
+
+</Center>
         </VStack>
       </Center>
     </VStack>
