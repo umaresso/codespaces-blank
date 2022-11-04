@@ -1088,13 +1088,33 @@ export const getNftPrice = async (
   price = parseInt(price) / 10 ** 18;
   return price;
 };
+export const getNftUserAddress = async (
+  NetworkChain,
+  web3modalRef,
+  rentableContractAddress,
+  tokenId
+) => {
+  let user;
+
+  user = await getCustomNetworkNFTFactoryContract(
+    NetworkChain,
+    web3modalRef,
+    rentableContractAddress
+  ).then(async (rentableContract) => {
+    user = await rentableContract.userOf(tokenId);
+    return user;
+  });
+  return user;
+};
+
 export const rentNFT = async (
   Trackercontract,
   contractAddress,
   tokenId,
   days,
   price,
-  statusUpdater
+  statusUpdater,
+  successFunction,successParams
 ) => {
   try {
     let tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
@@ -1103,6 +1123,9 @@ export const rentNFT = async (
     statusUpdater("Wating for Transaction Completion");
     await tx.wait();
     statusUpdater("Successfully Rented NFT 🥳");
+    setTimeout(() => {
+      successFunction(successParams)
+    }, 2000);
   } catch (e) {
     if (e.toString().includes("user rejected transaction")) {
       statusUpdater("You Rejected Transaction ");

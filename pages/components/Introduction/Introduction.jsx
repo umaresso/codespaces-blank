@@ -24,7 +24,7 @@ function Introduction() {
 
   return (
     <Box
-      width={"100vw"}
+      width={"100%"}
       color={textColor}
       height={"fit-content"}
       bg={"black"}

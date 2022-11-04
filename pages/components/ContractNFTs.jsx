@@ -88,6 +88,8 @@ function ContractNFTs({ contract, selector, Key, currentMenu }) {
             let img = getIpfsImageLink(token.image);
             return (
               <WrapItem
+              key={token.name + index + Key+"wrap"}
+ 
                 onClick={() => {
                   let token = {
                     id: Ids[index],
@@ -100,9 +102,8 @@ function ContractNFTs({ contract, selector, Key, currentMenu }) {
                   NftSelector(token);
                   //                  console.log("Token ", token, " is clicked");
                 }}
-                key={token.name + index + Key}
               >
-                <VStack>
+                <VStack key={token.name + index + Key+Ids[index]+'token'}>
                   <Img
                     height={"40vh"}
                     transition={"200ms all ease-in-out"}

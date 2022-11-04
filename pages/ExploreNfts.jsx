@@ -14,6 +14,7 @@ import { getProvider } from "@wagmi/core";
 import { connectWallet, getProviderOrSigner } from "./data/accountsConnection";
 import {
   getCustomNetworkNFTTrackerContract,
+  getNftUserAddress,
   getRentableContract,
 } from "./data/NftRenting";
 import {
@@ -47,7 +48,7 @@ function ExploreNfts(props) {
   const [contractTokenURIs, setContractTokenURIs] = useState([]);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   let web3ModalRef = useRef();
   // console.log("contract tokens are", contractTokens);
@@ -109,14 +110,13 @@ function ExploreNfts(props) {
     await connectWallet();
     console.log("owner ", owner);
     if (!owner) return;
-    getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
+    await getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
         getAllContractTokens(TrackerContract, setContractTokens).then(
           (contractTokensArray) => {
-            setLoading(false);
             let addresses = Object.keys(contractTokensArray);
 
-            addresses?.map(async (adr) => {
+            addresses?.map(async (adr,adrIndex) => {
               // console.log("address is ", adr);
               getCustomNetworkERC721Contract(
                 NetworkChain,
@@ -134,31 +134,43 @@ function ExploreNfts(props) {
                     );
                     let tokenUris = [];
                     let tokenRentStatusObject = {};
+                    let Users = [];
                     tokens?.map((tokenId, index) => {
                       getTokenUri(erc721Contract, tokenId).then((uri) => {
                         getTokenOwner(erc721Contract, tokenId).then(
                           (_owner) => {
-                            getTokenRentStatus(
-                              TrackerContract,
+                            getNftUserAddress(
+                              NetworkChain,
+                              web3ModalRef,
                               rentableContract,
                               tokenId
-                            ).then((tokenRentStatus) => {
-                              tokenUris.push(uri);
-                              tokenRentStatusObject[tokenId] = tokenRentStatus;
-                              if (index + 1 == tokens.length) {
-                                // console.log("Token Base URIs got ", tokenUris);
-                                let arr = [...contractTokenURIs];
-                                let contractInstance = {
-                                  ercContractAddress: adr,
-                                  tokenURIs: tokenUris,
-                                  tokenIds: tokens,
-                                  owner: _owner,
-                                  rentableContract,
-                                  rentalStatus: tokenRentStatusObject,
-                                };
-                                arr.push(contractInstance);
-                                setContractTokenURIs(arr);
-                              }
+                            ).then(async (nft_user) => {
+                              getTokenRentStatus(
+                                TrackerContract,
+                                rentableContract,
+                                tokenId
+                              ).then((tokenRentStatus) => {
+                                tokenUris.push(uri);
+                                tokenRentStatusObject[tokenId] =
+                                  tokenRentStatus;
+                                Users.push(nft_user);
+                                if (index + 1 == tokens.length) {
+                                  // console.log("Token Base URIs got ", tokenUris);
+                                  let arr = [...contractTokenURIs];
+                                  let contractInstance = {
+                                    ercContractAddress: adr,
+                                    tokenURIs: tokenUris,
+                                    tokenIds: tokens,
+                                    owner: _owner,
+                                    rentableContract,
+                                    rentalStatus: tokenRentStatusObject,
+                                    users: Users,
+                                  };
+                                  arr.push(contractInstance);
+
+                                  setContractTokenURIs(arr);
+                                }
+                              });
                             });
                           }
                         );
@@ -167,7 +179,11 @@ function ExploreNfts(props) {
                   }
                 );
               });
+              if(adrIndex==addresses.length){
+                setLoading(false);
+              }
             });
+            
           }
         );
 
@@ -183,6 +199,7 @@ function ExploreNfts(props) {
   }
 
   useEffect(() => {
+    setLoading(true);
     init();
   }, [owner]);
 
@@ -239,28 +256,32 @@ function ExploreNfts(props) {
 
             <HStack spacing={10}>
               <FilterMenuItem
+                key={"filter-all"}
                 title={"all"}
                 setter={setCurrentMenu}
                 isClicked={currentMenu === "all"}
               />
               <FilterMenuItem
+                key={"filter-available"}
                 title={"available"}
                 setter={setCurrentMenu}
                 isClicked={currentMenu === "available"}
               />
               <FilterMenuItem
+                key={"filter-rented"}
                 title={"rented"}
                 setter={setCurrentMenu}
                 isClicked={currentMenu === "rented"}
               />
               <FilterMenuItem
+                key={"filter-mine"}
                 title={"mine"}
                 setter={setCurrentMenu}
                 isClicked={currentMenu === "mine"}
               />
             </HStack>
 
-            {loading && <Heading>Loading NFT Collections..</Heading>}
+            {loading && contractTokenURIs.length==0 && <Heading>Loading NFT Collections..</Heading>}
 
             <VStack
               align={"left"}
@@ -273,9 +294,13 @@ function ExploreNfts(props) {
                 contractTokenURIs.map((ContractInstance, index) => {
                   return (
                     <ContractNFTs
-                      Key={
-                        ContractInstance.ercContractAddress + index.toString()
+                      key={
+                        ContractInstance.toString() 
                       }
+                      Key={
+                        ContractInstance.toString() 
+                      }
+                      
                       currentMenu={currentMenu}
                       selector={setSelectedNft}
                       contract={ContractInstance}

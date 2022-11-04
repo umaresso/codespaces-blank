@@ -31,6 +31,7 @@ import { useRef } from "react";
 import { delay } from "framer-motion";
 import { getIpfsImageLink } from "../data/ipfsStuff";
 import { getProviderOrSigner } from "../data/accountsConnection";
+import { useRouter } from "next/router";
 
 const ethers = require("ethers");
 let NetworkChain = "goerli";
@@ -47,6 +48,7 @@ function getCurrency() {
   }
 }
 function NftInformationPopup({ NFT, displayToggle }) {
+  const router = useRouter();
   const [rentWill, setrentWill] = useState(false);
   const [rentPrice, setRentPrice] = useState("Fetching..");
   const [nftTrackerContract, setNftTrackerContract] = useState(null);
@@ -80,9 +82,10 @@ function NftInformationPopup({ NFT, displayToggle }) {
       Nft.id,
       rentDays,
       totalPrice,
-      setStatus
+      setStatus,
+      router.push,
+      "/Explore"
     );
-    setReload((prev) => !prev);
   }
   async function connectWallet() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
@@ -95,6 +98,11 @@ function NftInformationPopup({ NFT, displayToggle }) {
   }
 
   async function init() {
+    connectWallet();
+    if (walletAddress) {
+      init();
+    }
+    
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
         // console.log("Tracker contract is ", TrackerContract);
@@ -116,9 +124,8 @@ function NftInformationPopup({ NFT, displayToggle }) {
   }
 
   useEffect(() => {
-    connectWallet();
     init();
-  }, [reload]);
+  }, [walletAddress]);
   let image = getIpfsImageLink(Nft.metadata.image);
   return (
     <Center height={"100vh"} width={"100vw"} position={"fixed"} top={"0"}>
