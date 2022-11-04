@@ -45,6 +45,8 @@ export const getProviderOrSigner = async (network, web3ModalRef) => {
   });
   let provider;
   let web3Provider;
+  let signer;
+
   try {
     //     const QuickNodeProvider = ethers.providers.getDefaultProvider(
     // 'https://autumn-necessary-frost.ethereum-goerli.quiknode.pro/07319f15c47c89543c7bf75aa284cc5347ace6e1/'
@@ -60,7 +62,7 @@ export const getProviderOrSigner = async (network, web3ModalRef) => {
       return null;
     }
 
-    const signer = web3Provider?.getSigner();
+    signer = web3Provider.getSigner();
     return signer;
   } catch (err) {
     if (err.toString().includes("already pending")) {
@@ -69,5 +71,6 @@ export const getProviderOrSigner = async (network, web3ModalRef) => {
     console.log("Error connecting wallet", err.toString());
     return null;
   }
+  return signer;
   // If user is not connected to the Mumbai network, let them know and throw an error
 };

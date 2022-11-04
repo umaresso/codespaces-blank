@@ -18,7 +18,7 @@ import { Blob } from "web3.storage";
 import { getMinimalAddress } from "../../Utilities";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { getContractName } from "../data/ERC721";
-import { getTokensMetaData } from "../data/ipfsStuff";
+import { getIpfsImageLink, getTokensMetaData } from "../data/ipfsStuff";
 let NetwokChain = "goerli";
 function ContractNFTs({ contract, selector, Key }) {
   console.log("key is ", Key);
@@ -33,14 +33,7 @@ function ContractNFTs({ contract, selector, Key }) {
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
   let web3ModalRef = useRef();
-  function getIpfsImageLink(_link) {
-    if (_link.toString().startsWith("ipfs:")) {
-      let Cid = _link.toString().slice(5);
-      let link = "https://ipfs.io/ipfs/" + Cid;
-      return link;
-    }
-    return _link;
-  }
+
   useEffect(() => {
     getTokensMetaData(Uris, setTokenMetadataArray);
     getContractName(NetwokChain, web3ModalRef, address).then((_name) => {

@@ -29,9 +29,11 @@ import {
 } from "../data/NftRenting";
 import { useRef } from "react";
 import { delay } from "framer-motion";
+import { getIpfsImageLink } from "../data/ipfsStuff";
+import { getProviderOrSigner } from "../data/accountsConnection";
 
 const ethers = require("ethers");
-let NetwokChain = "goerli";
+let NetworkChain = "goerli";
 let bg = "black";
 let textColor = "white";
 let CurrentBlockchain = "Ethereum";
@@ -50,7 +52,8 @@ function NftInformationPopup({ NFT, displayToggle }) {
   const [nftTrackerContract, setNftTrackerContract] = useState(null);
   const [rentableContract, setRentableContract] = useState(null);
   const [rentDays, setRentDays] = useState(1);
-
+  const [walletAddress, setWalletAddress] = useState(null);
+  const [reload, setReload] = useState(false);
   // console.log("NFT received", NFT);
   let Nft = NFT;
   let ErcContractAddress = Nft.contractAddress;
@@ -68,7 +71,6 @@ function NftInformationPopup({ NFT, displayToggle }) {
 
   async function rentNft() {
     let totalPrice = rentPrice * rentDays;
-    document.getElementById("rent-btn").textContent = "Renting Now..";
     setStatus("Renting Started 🌟");
     setStatus("Approve Transaction");
 
@@ -80,10 +82,20 @@ function NftInformationPopup({ NFT, displayToggle }) {
       totalPrice,
       setStatus
     );
+    setReload((prev) => !prev);
+  }
+  async function connectWallet() {
+    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
+      if (signer) {
+        signer.getAddress().then((user) => {
+          setWalletAddress(user);
+        });
+      }
+    });
   }
 
   async function init() {
-    getCustomNetworkNFTTrackerContract(NetwokChain, web3ModalRef).then(
+    getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
         // console.log("Tracker contract is ", TrackerContract);
         let ErcContractAddress = NFT.tokenContract;
@@ -104,9 +116,10 @@ function NftInformationPopup({ NFT, displayToggle }) {
   }
 
   useEffect(() => {
+    connectWallet();
     init();
-  }, []);
-
+  }, [reload]);
+  let image = getIpfsImageLink(Nft.metadata.image);
   return (
     <Center height={"100vh"} width={"100vw"} position={"fixed"} top={"0"}>
       {!rentWill ? (
@@ -124,7 +137,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
               height={"35vh"}
               width={"30vw"}
               borderRadius={"20px"}
-              src={Nft.metadata.image}
+              src={image}
             />
             <VStack align={"left"}>
               <Heading paddingBottom={"2vh"}>NFT information</Heading>
@@ -216,8 +229,9 @@ function NftInformationPopup({ NFT, displayToggle }) {
                 title={"Rent Now"}
                 id={"rent-btn"}
                 color={"green"}
-                onClick={() => {
-                  rentNft();
+                href={"/Explore"}
+                onClick={async () => {
+                  await rentNft();
                 }}
               />
               <LinkButton
@@ -227,7 +241,6 @@ function NftInformationPopup({ NFT, displayToggle }) {
                 title={`Close`}
                 color={"white"}
                 variant={"outline"}
-                href={"/ExploreNfts"}
               />
             </HStack>
           </VStack>

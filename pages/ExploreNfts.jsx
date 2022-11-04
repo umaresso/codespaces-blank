@@ -29,6 +29,7 @@ import {
 import ContractNFTs from "./components/ContractNFTs";
 import NftInformationPopup from "./components/NftInformationPopup";
 import Head from "next/head";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -95,17 +96,19 @@ function Explorecontracts(props) {
   /**      */
 
   async function connectWallet() {
-    getProviderOrSigner(NetworkChain, web3ModalRef).then((_signer) => {
-      if (_signer == null) {
-        return null;
+    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
+      if (signer) {
+        signer.getAddress().then((user) => {
+          console.log("siger address ", user);
+          setOwner(user);
+        });
       }
-      _signer?.getAddress().then((_user) => {
-        setOwner(_user);
-      });
     });
   }
   async function init() {
-    if (!owner) return 0;
+    await connectWallet();
+    console.log("owner ", owner);
+    if (!owner) return;
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
         getAllContractTokens(TrackerContract, setContractTokens).then(
@@ -180,14 +183,12 @@ function Explorecontracts(props) {
   }
 
   useEffect(() => {
-    connectWallet();
-
     init();
   }, [owner]);
 
   return (
     <>
-      {!owner && (
+      {owner == null && (
         <VStack
           paddingTop={"20vh"}
           height={"100vh"}
@@ -195,12 +196,16 @@ function Explorecontracts(props) {
           textColor={"white"}
           width={"100%"}
         >
-          <Button colorScheme={"blue"} variant={"solid"}>
+          <Button
+            onClick={connectWallet}
+            colorScheme={"blue"}
+            variant={"solid"}
+          >
             Connect Wallet
           </Button>
         </VStack>
       )}
-      {owner && (
+      {owner != null && (
         <>
           <VStack
             height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}

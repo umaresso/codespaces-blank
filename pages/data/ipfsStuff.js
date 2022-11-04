@@ -25,18 +25,17 @@ export const getTokenIpfsData = async (tokenUri) => {
   return metadata;
 };
 
-export const getTokensMetaData = async (tokenURIs,setter) => {
+export const getTokensMetaData = async (tokenURIs, setter) => {
   let metadataArray = [];
 
   return tokenURIs?.map(async (item, index) => {
     return getTokenIpfsData(item).then(async (metadata) => {
       metadataArray.push(metadata);
       if (index + 1 == tokenURIs.length) {
-        if(setter){
+        if (setter) {
           setter(metadataArray);
         }
         return metadataArray;
-
       }
     });
   });
@@ -109,3 +108,11 @@ export const getAllContractTokens = async (contract, setter) => {
   }
   return response.data.contractTokens;
 };
+export function getIpfsImageLink(_link) {
+  if (_link.toString().startsWith("ipfs:")) {
+    let Cid = _link.toString().slice(5);
+    let link = "https://ipfs.io/ipfs/" + Cid;
+    return link;
+  }
+  return _link;
+}

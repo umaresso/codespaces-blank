@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Button } from "@chakra-ui/react";
+import e from "cors";
 function LinkButton({
   title,
   color,
@@ -13,14 +14,14 @@ function LinkButton({
   const [navigate, setNavigate] = useState(false);
   const router = useRouter();
 
-  function LetsNavigate() {
+  async function LetsNavigate(e) {
     router.push(href);
   }
   return (
     <Button
       id={id ? id : "button" + title}
       onClick={async () => {
-        onClick && (await onClick());
+        if (onClick) await onClick();
         if (href) LetsNavigate();
       }}
       colorScheme={color}
