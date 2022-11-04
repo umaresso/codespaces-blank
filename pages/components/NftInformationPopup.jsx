@@ -126,7 +126,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
               src={Nft.metadata.image}
             />
             <VStack align={"left"}>
-              <Heading paddingBottom={"2vh"}>Nft information</Heading>
+              <Heading paddingBottom={"2vh"}>NFT information</Heading>
               <HStack align={"center"} justify="space-between">
                 <b>Token ID : </b>
                 <Text>{Nft.id}</Text>
