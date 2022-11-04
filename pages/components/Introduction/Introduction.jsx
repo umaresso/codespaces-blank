@@ -1,18 +1,35 @@
 import { Button, Heading, Box, Center, HStack, Img } from "@chakra-ui/react";
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import LinkButton from "../LinkButton/LinkButton";
 import { Grid } from "@chakra-ui/react";
 import { VStack, Stack } from "@chakra-ui/react";
+import { getProviderOrSigner } from "../../data/accountsConnection";
+let NetworkChain = "goerli";
 
 function Introduction() {
   // theme
   let bg = "black";
   let textColor = "white";
   //  _____
+  let web3ModalRef = useRef();
+
+  async function Connect() {
+    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
+      if (!signer) {
+        Connect();
+      }
+    });
+  }
 
   return (
-    <Box width={"100vw"} color={textColor} height={"fit-content"} bg={"black"} paddingBottom={10} >
+    <Box
+      width={"100vw"}
+      color={textColor}
+      height={"fit-content"}
+      bg={"black"}
+      paddingBottom={10}
+    >
       <Stack direction={["column", "column", "column", "row"]}>
         <VStack
           align={"left"}
@@ -40,12 +57,26 @@ function Introduction() {
               So What are you waiting for ?
             </Box>
           </Box>
-          <LinkButton
-            href={"/Create"}
-            title={"Get Started"}
-            color={"green"}
-            variant={"solid"}
-          />
+          <HStack spacing={10}>
+            <LinkButton
+              href={"/Create"}
+              title={"Upload Assets"}
+              color={"green"}
+              variant={"solid"}
+              onClick={() => {
+                Connect();
+              }}
+            />
+            <LinkButton
+              href={"/Explore"}
+              title={"Explore Assets"}
+              color={"blue"}
+              variant={"solid"}
+              onClick={() => {
+                Connect();
+              }}
+            />
+          </HStack>
         </VStack>
 
         <VStack bg={"black"} justifyContent={"center"} height={"100vh"}>

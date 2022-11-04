@@ -10,6 +10,7 @@ function Card(props) {
       height={"fit-content"}
       paddingBottom={"5vh"}
       background={"#010208"}
+      {...props}
     >
       {props.children}
     </Center>

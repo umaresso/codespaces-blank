@@ -69,16 +69,17 @@ function NftInformationPopup({ NFT, displayToggle }) {
   async function rentNft() {
     let totalPrice = rentPrice * rentDays;
     document.getElementById("rent-btn").textContent = "Renting Now..";
-    setStatus("Renting Started 🌟")
-    setStatus("Approve Transaction")
-    
+    setStatus("Renting Started 🌟");
+    setStatus("Approve Transaction");
+
     await rentNFT(
       nftTrackerContract,
       rentableContract,
       Nft.id,
       rentDays,
-      totalPrice,setStatus);
-      
+      totalPrice,
+      setStatus
+    );
   }
 
   async function init() {

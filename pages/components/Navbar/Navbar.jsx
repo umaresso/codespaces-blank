@@ -36,16 +36,13 @@ function Navbar() {
     });
   }
   useEffect(() => {
-    let connectionCheckerId = setInterval(() => {
-      if (!walletAddress) {
-        Connect();
-      } else {
-        clearInterval(connectionCheckerId);
-      }
-    }, 3000);
+    if (!walletAddress) {
+      Connect();
+    }
   }, []);
 
   function getMinimalAddress(_adr) {
+    if (!_adr) return "";
     let adr = _adr.toString();
     return adr.slice(0, 6) + ".." + adr.slice(40);
   }

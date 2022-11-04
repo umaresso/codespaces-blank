@@ -20,7 +20,8 @@ import { getProviderOrSigner } from "../data/accountsConnection";
 import { getContractName } from "../data/ERC721";
 import { getTokensMetaData } from "../data/ipfsStuff";
 let NetwokChain = "goerli";
-function ContractNFTs({ contract, selector }) {
+function ContractNFTs({ contract, selector, Key }) {
+  console.log("key is ", Key);
   const [loading, setLoading] = useState(true);
   let address = contract.ercContractAddress;
   let Uris = contract.tokenURIs;
@@ -32,16 +33,30 @@ function ContractNFTs({ contract, selector }) {
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
   let web3ModalRef = useRef();
+  function getIpfsImageLink(_link) {
+    if (_link.toString().startsWith("ipfs:")) {
+      let Cid = _link.toString().slice(5);
+      let link = "https://ipfs.io/ipfs/" + Cid;
+      return link;
+    }
+    return _link;
+  }
   useEffect(() => {
     getTokensMetaData(Uris, setTokenMetadataArray);
     getContractName(NetwokChain, web3ModalRef, address).then((_name) => {
       setContractName(_name);
     });
   }, []);
-  console.log("tokenMetadataArray is ", tokenMetadataArray);
+  console.log("Showing", contract);
   return (
-    <VStack align={"left"} bg={"black"} height={"100vh"}>
-      <Heading width={"fit-content"}>
+    <VStack
+      paddingBottom={"5vh"}
+      key={Key}
+      align={"left"}
+      bg={"black"}
+      height={"fit-content"}
+    >
+      <Heading width={"fit-content"} fontSize="30px">
         {contractName ? contractName : <p>Fetching Collection..</p>}{" "}
         <hr
           style={{
@@ -51,11 +66,13 @@ function ContractNFTs({ contract, selector }) {
         />
       </Heading>
 
-      {!tokenMetadataArray && <Text>No Tokens for this Collection</Text>}
+      {!tokenMetadataArray && (
+        <Text>No Tokens for this Collection( or refresh the page)</Text>
+      )}
       <Wrap paddingTop={5} spacing={20}>
         {tokenMetadataArray &&
           tokenMetadataArray.map((token, index) => {
-            let img = token.image;
+            let img = getIpfsImageLink(token.image);
             return (
               <WrapItem
                 onClick={() => {
@@ -70,7 +87,7 @@ function ContractNFTs({ contract, selector }) {
                   NftSelector(token);
                   //                  console.log("Token ", token, " is clicked");
                 }}
-                key={token.name + "wrap"}
+                key={token.name + index + Key}
               >
                 <VStack>
                   <Img
@@ -81,7 +98,7 @@ function ContractNFTs({ contract, selector }) {
                       transform: "scale(1.05)",
                     }}
                     borderRadius={"20px"}
-                    key={token.name}
+                    key={token.name + index}
                     src={
                       img
                         ? img
@@ -89,15 +106,15 @@ function ContractNFTs({ contract, selector }) {
                     }
                   />
                   <HStack spacing={10}>
-                    <Heading>
+                    <Heading fontSize={"24px"}>
                       Token # <b>{Ids[index]}</b>
                     </Heading>
                     {!rentalStatus[Ids[index]] ? (
-                      <Button colorScheme={"green"} textColor={"white"} >
+                      <Button colorScheme={"green"} textColor={"white"}>
                         Available
                       </Button>
                     ) : (
-                      <Button colorScheme={"blue"} textColor={"white"} disabled  >
+                      <Button colorScheme={"blue"} textColor={"white"} disabled>
                         Rented
                       </Button>
                     )}

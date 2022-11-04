@@ -1036,7 +1036,7 @@ const NftRentingTrackerABI = [
     type: "function",
   },
 ];
-const NftRentingTrackerAddress = "0x596F7ef9b3118E518D1e8fea9Bb1533e92a1Ea73";
+const NftRentingTrackerAddress = "0x712cea4eD7DDeaCa27369e21E4211e85A1e012F4";
 
 export const getCustomNetworkNFTFactoryContract = async (
   network,
@@ -1074,7 +1074,7 @@ export const getCustomNetworkNFTTrackerContract = async (
 
 export const getRentableContract = async (contract, ercContract, setter) => {
   let rentable = await contract.erc721ToRentableContract(ercContract);
-  if(setter){
+  if (setter) {
     setter(rentable);
   }
   return rentable;
@@ -1084,8 +1084,8 @@ export const getNftPrice = async (
   contractAddress,
   tokenId
 ) => {
-  let price = await TrackerContract.getTokenRentPrice(contractAddress,tokenId);
-  price=parseInt(price)/(10**18);  
+  let price = await TrackerContract.getTokenRentPrice(contractAddress, tokenId);
+  price = parseInt(price) / 10 ** 18;
   return price;
 };
 export const rentNFT = async (
@@ -1093,27 +1093,23 @@ export const rentNFT = async (
   contractAddress,
   tokenId,
   days,
-  price,statusUpdater
+  price,
+  statusUpdater
 ) => {
-  try{
+  try {
     let tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
       value: parseEther(price.toString()),
     });
     statusUpdater("Wating for Transaction Completion");
     await tx.wait();
-    statusUpdater("Successfully Rented NFT 🥳")
-    
-  }
-  catch(e){
-    if(e.toString().includes('user rejected transaction')){
+    statusUpdater("Successfully Rented NFT 🥳");
+  } catch (e) {
+    if (e.toString().includes("user rejected transaction")) {
       statusUpdater("You Rejected Transaction ");
       console.log(e);
+    } else if (e.toString().includes("insufficient funds for gas")) {
+      statusUpdater("You have Insufficient funds for paying Transaction gas ");
+      statusUpdater("We Want you to come again after deposit !");
     }
-    else if(e.toString().includes('insufficient funds for gas')){
-     statusUpdater("You have Insufficient funds for paying Transaction gas ") 
-     statusUpdater("We Want you to come again after deposit !");
-    }
-    
   }
-  
 };

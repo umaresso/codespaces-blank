@@ -1,19 +1,26 @@
 /*
   connectWallet: Connects the MetaMask wallet
 */
-import { BigNumber, Contract, ethers, providers, utils } from 'ethers'
-import Web3Modal from 'web3modal'
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
+import Web3Modal from "web3modal";
 
 export const connectWallet = async (web3ModalRef) => {
   try {
     // Get the provider from web3Modal, which in our case is MetaMask
     // When used for the first time, it prompts the user to connect their wallet
-    await getProviderOrSigner(web3ModalRef, false)
+    await getProviderOrSigner(web3ModalRef, false);
     //          setWalletConnected(true);
   } catch (err) {
-    console.error(err)
+    if (
+      err
+        .toString()
+        .includes(`Request of type 'wallet_requestPermissions' already pending`)
+    ) {
+      alert("Please Connect your Wallet !");
+    }
+    console.log(err.toString());
   }
-}
+};
 
 /**
  * Returns a Provider or Signer object representing the Ethereum RPC with or without the
@@ -26,44 +33,41 @@ export const connectWallet = async (web3ModalRef) => {
  * request signatures from the user using Signer functions.
  *
 =       */
-export const getProviderOrSigner = async (
-  network,
-  web3ModalRef,
-  needSigner = true,
-) => {
+export const getProviderOrSigner = async (network, web3ModalRef) => {
   // Connect to Metamask
   // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
-  let Web3ModalRef = web3ModalRef
+  // alert("Please Accept the Metamask Connection");
+  let Web3ModalRef = web3ModalRef;
   web3ModalRef.current = new Web3Modal({
     network: network,
     providerOptions: {},
     disableInjectedProvider: false,
-  })
+  });
   let provider;
   let web3Provider;
   try {
-//     const QuickNodeProvider = ethers.providers.getDefaultProvider(
-// 'https://autumn-necessary-frost.ethereum-goerli.quiknode.pro/07319f15c47c89543c7bf75aa284cc5347ace6e1/'
-//       )
+    //     const QuickNodeProvider = ethers.providers.getDefaultProvider(
+    // 'https://autumn-necessary-frost.ethereum-goerli.quiknode.pro/07319f15c47c89543c7bf75aa284cc5347ace6e1/'
+    //       )
 
-//    provider = await Web3ModalRef.current.connect(QuickNodeProvider)
-    provider = await Web3ModalRef.current.connect()
+    //    provider = await Web3ModalRef.current.connect(QuickNodeProvider)
+    provider = await Web3ModalRef.current.connect();
 
-    web3Provider = new providers.Web3Provider(provider)
-    const { chainId } = await web3Provider?.getNetwork()
-    if (chainId !== 5) {
-      window.alert('Please Change the network to Goerli')
-      return null
+    web3Provider = new providers.Web3Provider(provider);
+    const { chainId } = await web3Provider?.getNetwork();
+    if (chainId && chainId !== 5) {
+      window.alert("Please Change the network to Goerli");
+      return null;
     }
 
-    if (needSigner) {
-      const signer = web3Provider.getSigner()
-      return signer
+    const signer = web3Provider?.getSigner();
+    return signer;
+  } catch (err) {
+    if (err.toString().includes("already pending")) {
+      alert("Please Connect your Wallet !");
     }
-  } catch (e) {
-    console.log('error connecting metamask', e)
+    console.log("Error connecting wallet", err.toString());
+    return null;
   }
   // If user is not connected to the Mumbai network, let them know and throw an error
-
-  return web3Provider
-}
+};

@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Heading, HStack, Box, Text, VStack, Center } from "@chakra-ui/react";
+import {
+  Heading,
+  HStack,
+  Box,
+  Text,
+  VStack,
+  Center,
+  Button,
+} from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
 import { getProvider } from "@wagmi/core";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { connectWallet, getProviderOrSigner } from "./data/accountsConnection";
 import {
   getCustomNetworkNFTTrackerContract,
   getRentableContract,
@@ -20,6 +28,7 @@ import {
 } from "./data/ERC721";
 import ContractNFTs from "./components/ContractNFTs";
 import NftInformationPopup from "./components/NftInformationPopup";
+import Head from "next/head";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -31,7 +40,7 @@ export async function getStaticProps(context) {
 
 function Explorecontracts(props) {
   const [currentMenu, setCurrentMenu] = useState("all");
-  const [owner, setOwner] = useState();
+  const [owner, setOwner] = useState(null);
   //  const [contractAddresses,setContractAddresses]=useState(null);
   const [contractTokens, setContractTokens] = useState(null);
   const [contractTokenURIs, setContractTokenURIs] = useState([]);
@@ -85,12 +94,18 @@ function Explorecontracts(props) {
 
   /**      */
 
-  async function init() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((_signer) => {
+  async function connectWallet() {
+    getProviderOrSigner(NetworkChain, web3ModalRef).then((_signer) => {
+      if (_signer == null) {
+        return null;
+      }
       _signer?.getAddress().then((_user) => {
         setOwner(_user);
       });
     });
+  }
+  async function init() {
+    if (!owner) return 0;
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
         getAllContractTokens(TrackerContract, setContractTokens).then(
@@ -108,9 +123,14 @@ function Explorecontracts(props) {
                 getRentableContract(TrackerContract, adr).then(
                   (rentableContract) => {
                     let tokens = contractTokensArray[adr];
-                    //     console.log("Smart contract at ", adr, " got tokens: ", tokens);
+                    console.log(
+                      "Smart contract at ",
+                      adr,
+                      " got tokens: ",
+                      tokens
+                    );
                     let tokenUris = [];
-                    let tokenRentStatusObject={};
+                    let tokenRentStatusObject = {};
                     tokens?.map((tokenId, index) => {
                       getTokenUri(erc721Contract, tokenId).then((uri) => {
                         getTokenOwner(erc721Contract, tokenId).then(
@@ -121,7 +141,7 @@ function Explorecontracts(props) {
                               tokenId
                             ).then((tokenRentStatus) => {
                               tokenUris.push(uri);
-                              tokenRentStatusObject[tokenId]=tokenRentStatus;
+                              tokenRentStatusObject[tokenId] = tokenRentStatus;
                               if (index + 1 == tokens.length) {
                                 // console.log("Token Base URIs got ", tokenUris);
                                 let arr = [...contractTokenURIs];
@@ -131,7 +151,7 @@ function Explorecontracts(props) {
                                   tokenIds: tokens,
                                   owner: _owner,
                                   rentableContract,
-                                  rentalStatus:tokenRentStatusObject,
+                                  rentalStatus: tokenRentStatusObject,
                                 };
                                 arr.push(contractInstance);
                                 setContractTokenURIs(arr);
@@ -160,87 +180,108 @@ function Explorecontracts(props) {
   }
 
   useEffect(() => {
+    connectWallet();
+
     init();
-  }, []);
+  }, [owner]);
 
   return (
     <>
-      <VStack
-        height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}
-        bg="black"
-        textColor={"white"}
-        width={"100%"}
-      >
-        <Center>
-          <VStack>
-            <Heading
-              paddingTop={"15vh"}
-              fontSize={"5em"}
-              width={["80vw", "70vw", "50vw"]}
-            >
-              Rent cool NFTs
-            </Heading>
-            <Text
-              fontFamily={"sans-serif"}
-              textColor={"grey"}
-              fontSize={"18px"}
-              width={["80vw", "70vw", "50vw"]}
-            >
-              RentWeb3 is your favorite place to rent awesome NFTs to use in
-              your Next game , for attending an event or hosting your Phenomenal
-              event in the Metaverse. We bring you the NFTs from World's best
-              creators at affordable prices. So , if you want to be the part of
-              the family ,Rent an NFT Now !
-            </Text>
-          </VStack>
-        </Center>
-
-        <HStack spacing={10}>
-          <FilterMenuItem
-            title={"all"}
-            setter={setCurrentMenu}
-            isClicked={currentMenu === "all"}
-          />
-          <FilterMenuItem
-            title={"available"}
-            setter={setCurrentMenu}
-            isClicked={currentMenu === "whitelist"}
-          />
-          <FilterMenuItem
-            title={"rented"}
-            setter={setCurrentMenu}
-            isClicked={currentMenu === "sale"}
-          />
-        </HStack>
-        {loading && <Heading>Loading NFT Collections..</Heading>}
-
+      {!owner && (
         <VStack
-          align={"left"}
-          padding={20}
-          paddingTop={0}
+          paddingTop={"20vh"}
+          height={"100vh"}
+          bg="black"
+          textColor={"white"}
           width={"100%"}
-          height={"fit-content"}
         >
-          {contractTokenURIs &&
-            contractTokenURIs.map((ContractInstance) => {
-              return (
-                <div key={ContractInstance.toString()}>
-                  <ContractNFTs
-                    selector={setSelectedNft}
-                    contract={ContractInstance}
-                  />
-                </div>
-              );
-            })}
+          <Button colorScheme={"blue"} variant={"solid"}>
+            Connect Wallet
+          </Button>
         </VStack>
-      </VStack>
-      {selectedNft != null && (
-        <Box width={"100vh"} height="fit-content">
-          <NftInformationPopup
-            NFT={selectedNft}
-            displayToggle={setSelectedNft}
-          />
-        </Box>
+      )}
+      {owner && (
+        <>
+          <VStack
+            height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}
+            bg="black"
+            textColor={"white"}
+            width={"100%"}
+          >
+            <Center>
+              <VStack>
+                <Heading
+                  paddingTop={"15vh"}
+                  fontSize={"5em"}
+                  width={["80vw", "70vw", "50vw"]}
+                >
+                  Rent cool NFTs
+                </Heading>
+                <Text
+                  fontFamily={"sans-serif"}
+                  textColor={"grey"}
+                  fontSize={"18px"}
+                  width={["80vw", "70vw", "50vw"]}
+                >
+                  RentWeb3 is your favorite place to rent awesome NFTs to use in
+                  your Next game , for attending an event or hosting your
+                  Phenomenal event in the Metaverse. We bring you the NFTs from
+                  World's best creators at affordable prices. So , if you want
+                  to be the part of the family ,Rent an NFT Now !
+                </Text>
+              </VStack>
+            </Center>
+
+            <HStack spacing={10}>
+              <FilterMenuItem
+                title={"all"}
+                setter={setCurrentMenu}
+                isClicked={currentMenu === "all"}
+              />
+              <FilterMenuItem
+                title={"available"}
+                setter={setCurrentMenu}
+                isClicked={currentMenu === "whitelist"}
+              />
+              <FilterMenuItem
+                title={"rented"}
+                setter={setCurrentMenu}
+                isClicked={currentMenu === "sale"}
+              />
+            </HStack>
+
+            {loading && <Heading>Loading NFT Collections..</Heading>}
+
+            <VStack
+              align={"left"}
+              paddingLeft={10}
+              width={"100%"}
+              height={"fit-content"}
+              spacing={10}
+            >
+              {contractTokenURIs &&
+                contractTokenURIs.map((ContractInstance, index) => {
+                  return (
+                    <ContractNFTs
+                      Key={
+                        ContractInstance.ercContractAddress + index.toString()
+                      }
+                      selector={setSelectedNft}
+                      contract={ContractInstance}
+                    />
+                  );
+                })}
+            </VStack>
+          </VStack>
+          {selectedNft != null && (
+            <Box width={"100vh"} height="fit-content">
+              <NftInformationPopup
+                NFT={selectedNft}
+                displayToggle={setSelectedNft}
+              />
+            </Box>
+          )}
+        </>
       )}
     </>
   );
