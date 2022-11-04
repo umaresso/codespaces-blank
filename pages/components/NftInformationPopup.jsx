@@ -28,6 +28,8 @@ import {
   rentNFT,
 } from "../data/NftRenting";
 import { useRef } from "react";
+import { delay } from "framer-motion";
+
 const ethers = require("ethers");
 let NetwokChain = "goerli";
 let bg = "black";
@@ -48,18 +50,35 @@ function NftInformationPopup({ NFT, displayToggle }) {
   const [nftTrackerContract, setNftTrackerContract] = useState(null);
   const [rentableContract, setRentableContract] = useState(null);
   const [rentDays, setRentDays] = useState(1);
-  console.log("NFT received",NFT)
+
+  // console.log("NFT received", NFT);
   let Nft = NFT;
   let ErcContractAddress = Nft.contractAddress;
   let owner = Nft.owner;
   let DisplayToggle = displayToggle;
 
   let web3ModalRef = useRef();
+  function setStatus(message) {
+    let ele = document.getElementById("creationStatus");
+    var p_tag = document.createElement("p");
+    p_tag.key = `message${message}`;
+    p_tag.textContent = "-> " + message;
+    ele.append(p_tag);
+  }
+
   async function rentNft() {
-    // alert("purchasing...");
-    await rentNFT(nftTrackerContract, rentableContract, Nft.id, rentDays, rentPrice);
-    //setrentWill(true);
-    DisplayToggle(null);
+    let totalPrice = rentPrice * rentDays;
+    document.getElementById("rent-btn").textContent = "Renting Now..";
+    setStatus("Renting Started 🌟")
+    setStatus("Approve Transaction")
+    
+    await rentNFT(
+      nftTrackerContract,
+      rentableContract,
+      Nft.id,
+      rentDays,
+      totalPrice,setStatus);
+      
   }
 
   async function init() {
@@ -166,42 +185,52 @@ function NftInformationPopup({ NFT, displayToggle }) {
           </Stack>
         </VStack>
       ) : (
-        <VStack width={"100vw"} height={"100vh"} paddingLeft={"10vw"}paddingRight={"10vw"} paddingTop={20}  bg={"black"} color="whiteAlpha.700">
+        <VStack
+          width={"100vw"}
+          height={"100vh"}
+          paddingLeft={"10vw"}
+          paddingRight={"10vw"}
+          paddingTop={20}
+          bg={"black"}
+          color="whiteAlpha.700"
+        >
           <VStack spacing={10} width={"50vw"}>
-          <Heading textColor={"white"}>Rent NFT</Heading>
-          <NamedInput title={"Token Id"}>
-            <Input readOnly value={Nft.id} />
-          </NamedInput>
-          <NamedInput title={"Rent Days"}>
-            <Input
-              placeholder="Number of days to rent for"
-              onChange={(e) => {
-                setRentDays(e.target.value);
-              }}
-            />
-          </NamedInput>
-          <NamedInput title={"Price to Pay"}>
-            <Input value={rentPrice * rentDays + " " + getCurrency()} />
-          </NamedInput>
-          <HStack width={"50vw"} justify={"space-between"}>
-            <LinkButton
-              title={"Rent Now"}
-              color={"green"}
-              onClick={() => {
-                rentNft();
-              }}
-            />
-            <LinkButton
-              onClick={() => {
-                DisplayToggle(null);
-              }}
-              title={`Close`}
-              color={"white"}
-              variant={"outline"}
-            />
-          </HStack>
-
+            <Heading textColor={"white"}>Rent NFT</Heading>
+            <NamedInput title={"Token Id"}>
+              <Input readOnly value={Nft.id} />
+            </NamedInput>
+            <NamedInput title={"Rent Days"}>
+              <Input
+                placeholder="Number of days to rent for"
+                onChange={(e) => {
+                  setRentDays(e.target.value);
+                }}
+              />
+            </NamedInput>
+            <NamedInput title={"Price to Pay"}>
+              <Input value={rentPrice * rentDays + " " + getCurrency()} />
+            </NamedInput>
+            <HStack width={"50vw"} justify={"space-between"}>
+              <LinkButton
+                title={"Rent Now"}
+                id={"rent-btn"}
+                color={"green"}
+                onClick={() => {
+                  rentNft();
+                }}
+              />
+              <LinkButton
+                onClick={() => {
+                  DisplayToggle(null);
+                }}
+                title={`Close`}
+                color={"white"}
+                variant={"outline"}
+                href={"/ExploreNfts"}
+              />
+            </HStack>
           </VStack>
+          <div id="creationStatus"></div>
         </VStack>
       )}
     </Center>

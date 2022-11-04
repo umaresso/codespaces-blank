@@ -1093,10 +1093,27 @@ export const rentNFT = async (
   contractAddress,
   tokenId,
   days,
-  price
+  price,statusUpdater
 ) => {
-  let tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
-    value: parseEther(price.toString()),
-  });
-  await tx.wait();
+  try{
+    let tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
+      value: parseEther(price.toString()),
+    });
+    statusUpdater("Wating for Transaction Completion");
+    await tx.wait();
+    statusUpdater("Successfully Rented NFT 🥳")
+    
+  }
+  catch(e){
+    if(e.toString().includes('user rejected transaction')){
+      statusUpdater("You Rejected Transaction ");
+      console.log(e);
+    }
+    else if(e.toString().includes('insufficient funds for gas')){
+     statusUpdater("You have Insufficient funds for paying Transaction gas ") 
+     statusUpdater("We Want you to come again after deposit !");
+    }
+    
+  }
+  
 };

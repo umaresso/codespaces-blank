@@ -1,4 +1,13 @@
-import { Heading, HStack, Img, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import {
+  Button,
+  Heading,
+  HStack,
+  Img,
+  Text,
+  VStack,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react";
 import axios from "axios";
 import { transform } from "lodash";
 import Head from "next/head";
@@ -12,23 +21,22 @@ import { getContractName } from "../data/ERC721";
 import { getTokensMetaData } from "../data/ipfsStuff";
 let NetwokChain = "goerli";
 function ContractNFTs({ contract, selector }) {
-  const [loading,setLoading]=useState(true);
+  const [loading, setLoading] = useState(true);
   let address = contract.ercContractAddress;
   let Uris = contract.tokenURIs;
   let Ids = [...contract.tokenIds];
   let NftSelector = selector;
-  let _owner=contract.owner;
-  let rentalStatus=contract.rentalStatus;
-  console.log("showing NFTs for ", contract);
+  let _owner = contract.owner;
+  let rentalStatus = contract.rentalStatus;
+  // console.log("showing NFTs for ", contract);
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
   let web3ModalRef = useRef();
   useEffect(() => {
-    getTokensMetaData(Uris, setTokenMetadataArray);;
+    getTokensMetaData(Uris, setTokenMetadataArray);
     getContractName(NetwokChain, web3ModalRef, address).then((_name) => {
       setContractName(_name);
     });
-    
   }, []);
   console.log("tokenMetadataArray is ", tokenMetadataArray);
   return (
@@ -55,10 +63,10 @@ function ContractNFTs({ contract, selector }) {
                     id: Ids[index],
                     metadata: tokenMetadataArray[index],
                     tokenContract: address,
-                    owner:_owner,
-                    rented:rentalStatus[Ids[index]]
+                    owner: _owner,
+                    rented: rentalStatus[Ids[index]],
                   };
-                  
+
                   NftSelector(token);
                   //                  console.log("Token ", token, " is clicked");
                 }}
@@ -66,7 +74,7 @@ function ContractNFTs({ contract, selector }) {
               >
                 <VStack>
                   <Img
-                  height={"40vh"}
+                    height={"40vh"}
                     transition={"200ms all ease-in-out"}
                     _hover={{
                       cursor: "pointer",
@@ -81,12 +89,19 @@ function ContractNFTs({ contract, selector }) {
                     }
                   />
                   <HStack spacing={10}>
-                  <Heading>
-                    Token # <b>{Ids[index]}</b>
-                  </Heading>
-                  <Text>{rentalStatus[index]}</Text>
+                    <Heading>
+                      Token # <b>{Ids[index]}</b>
+                    </Heading>
+                    {!rentalStatus[Ids[index]] ? (
+                      <Button colorScheme={"green"} textColor={"white"} >
+                        Available
+                      </Button>
+                    ) : (
+                      <Button colorScheme={"blue"} textColor={"white"} disabled  >
+                        Rented
+                      </Button>
+                    )}
                   </HStack>
-
                 </VStack>
               </WrapItem>
             );
