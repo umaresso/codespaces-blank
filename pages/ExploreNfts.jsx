@@ -39,7 +39,7 @@ export async function getStaticProps(context) {
   };
 }
 
-function Explorecontracts(props) {
+function ExploreNfts(props) {
   const [currentMenu, setCurrentMenu] = useState("all");
   const [owner, setOwner] = useState(null);
   //  const [contractAddresses,setContractAddresses]=useState(null);
@@ -246,12 +246,17 @@ function Explorecontracts(props) {
               <FilterMenuItem
                 title={"available"}
                 setter={setCurrentMenu}
-                isClicked={currentMenu === "whitelist"}
+                isClicked={currentMenu === "available"}
               />
               <FilterMenuItem
                 title={"rented"}
                 setter={setCurrentMenu}
-                isClicked={currentMenu === "sale"}
+                isClicked={currentMenu === "rented"}
+              />
+              <FilterMenuItem
+                title={"mine"}
+                setter={setCurrentMenu}
+                isClicked={currentMenu === "mine"}
               />
             </HStack>
 
@@ -271,6 +276,7 @@ function Explorecontracts(props) {
                       Key={
                         ContractInstance.ercContractAddress + index.toString()
                       }
+                      currentMenu={currentMenu}
                       selector={setSelectedNft}
                       contract={ContractInstance}
                     />
@@ -292,4 +298,4 @@ function Explorecontracts(props) {
   );
 }
 
-export default Explorecontracts;
+export default ExploreNfts;

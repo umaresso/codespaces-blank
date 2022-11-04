@@ -20,8 +20,7 @@ import { getProviderOrSigner } from "../data/accountsConnection";
 import { getContractName } from "../data/ERC721";
 import { getIpfsImageLink, getTokensMetaData } from "../data/ipfsStuff";
 let NetwokChain = "goerli";
-function ContractNFTs({ contract, selector, Key }) {
-  console.log("key is ", Key);
+function ContractNFTs({ contract, selector, Key, currentMenu }) {
   const [loading, setLoading] = useState(true);
   let address = contract.ercContractAddress;
   let Uris = contract.tokenURIs;
@@ -32,9 +31,17 @@ function ContractNFTs({ contract, selector, Key }) {
   // console.log("showing NFTs for ", contract);
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
+  const [Owner, setOwner] = useState(null);
   let web3ModalRef = useRef();
 
   useEffect(() => {
+    getProviderOrSigner(NetwokChain, web3ModalRef).then((_signer) => {
+      if (_signer) {
+        _signer.getAddress((_Owner) => {
+          setOwner(Owner);
+        });
+      }
+    });
     getTokensMetaData(Uris, setTokenMetadataArray);
     getContractName(NetwokChain, web3ModalRef, address).then((_name) => {
       setContractName(_name);
@@ -65,6 +72,19 @@ function ContractNFTs({ contract, selector, Key }) {
       <Wrap paddingTop={5} spacing={20}>
         {tokenMetadataArray &&
           tokenMetadataArray.map((token, index) => {
+            let rented = rentalStatus[Ids[index]];
+            if (currentMenu !== "all") {
+              if (rented && currentMenu !== "rented") {
+                return <></>;
+              } else if (!rented) {
+                if (currentMenu == "mine" && token.owner !== Owner) {
+                  return <></>;
+                }
+              }
+            }
+
+            // rented available
+
             let img = getIpfsImageLink(token.image);
             return (
               <WrapItem
@@ -74,7 +94,7 @@ function ContractNFTs({ contract, selector, Key }) {
                     metadata: tokenMetadataArray[index],
                     tokenContract: address,
                     owner: _owner,
-                    rented: rentalStatus[Ids[index]],
+                    rented: rented,
                   };
 
                   NftSelector(token);
@@ -102,7 +122,7 @@ function ContractNFTs({ contract, selector, Key }) {
                     <Heading fontSize={"24px"}>
                       Token # <b>{Ids[index]}</b>
                     </Heading>
-                    {!rentalStatus[Ids[index]] ? (
+                    {!rented ? (
                       <Button colorScheme={"green"} textColor={"white"}>
                         Available
                       </Button>
