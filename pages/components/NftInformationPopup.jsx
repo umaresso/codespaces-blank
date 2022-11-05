@@ -9,6 +9,7 @@ import {
   HStack,
   Center,
   Img,
+  selector,
 } from "@chakra-ui/react";
 import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
@@ -48,17 +49,17 @@ function getCurrency() {
   }
 }
 function NftInformationPopup({ NFT, displayToggle }) {
+  let Nft = NFT;
   const router = useRouter();
   const [rentWill, setrentWill] = useState(false);
-  const [rentPrice, setRentPrice] = useState("Fetching..");
+  const [rentPrice, setRentPrice] = useState(Nft.rentPrice);
   const [nftTrackerContract, setNftTrackerContract] = useState(null);
   const [rentableContract, setRentableContract] = useState(null);
   const [rentDays, setRentDays] = useState(1);
   const [walletAddress, setWalletAddress] = useState(null);
   const [reload, setReload] = useState(false);
   // console.log("NFT received", NFT);
-  let Nft = NFT;
-  let ErcContractAddress = Nft.contractAddress;
+  let ErcContractAddress = Nft.erc721ContractAddress;
   let owner = Nft.owner;
   let DisplayToggle = displayToggle;
 
@@ -89,7 +90,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
   }
   async function connectWallet() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (signer) {
+      if (signer && !walletAddress) {
         signer.getAddress().then((user) => {
           setWalletAddress(user);
         });
@@ -98,25 +99,17 @@ function NftInformationPopup({ NFT, displayToggle }) {
   }
 
   async function init() {
-    connectWallet();
-    if (walletAddress) {
-      init();
-    }
-    
+    !walletAddress && connectWallet();
+
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
-        // console.log("Tracker contract is ", TrackerContract);
-        let ErcContractAddress = NFT.tokenContract;
-        let _contract = await getRentableContract(
-          TrackerContract,
-          ErcContractAddress,
-          setRentableContract
-        );
-
-        getNftPrice(TrackerContract, _contract, NFT.id).then((_price) => {
-          // console.log("price is ", _price);
-          setRentPrice(_price);
-        });
+        if (!Nft.rentableContract) {
+          getRentableContract(TrackerContract, Nft.erc721ContractAddress).then(
+            (rentableSmartContractInstance) => {
+              setRentableContract(rentableSmartContractInstance);
+            }
+          );
+        }
 
         setNftTrackerContract(TrackerContract);
       }
@@ -126,7 +119,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
   useEffect(() => {
     init();
   }, [walletAddress]);
-  let image = getIpfsImageLink(Nft.metadata.image);
+  let image = getIpfsImageLink(Nft.image);
   return (
     <Center height={"100vh"} width={"100vw"} position={"fixed"} top={"0"}>
       {!rentWill ? (
@@ -137,7 +130,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
             background="rgba(0,0,0,0.9)"
             width={"100vw"}
             padding={20}
-            direction={["column", "colum", "row"]}
+            direction={["column", "column", "row"]}
             spacing={10}
           >
             <Img
@@ -159,24 +152,37 @@ function NftInformationPopup({ NFT, displayToggle }) {
               >
                 <b>Rent Price : </b>
                 <Text>
-                  {rentPrice}
-                  {getCurrency()}
+                  {rentPrice + " "} {getCurrency()}
                 </Text>
               </HStack>
               <HStack align={"center"} justify="space-between">
                 <b>Owner : </b>
-                <Text>{getMinimalAddress(owner)}</Text>
+                <Text>
+                  {walletAddress == Nft.owner && "You -> "}
+                  {getMinimalAddress(owner)}
+                </Text>
               </HStack>
               {Nft.type && (
                 <HStack align={"center"} justify="space-between">
                   <b>Type : </b> <Text>{Nft.type}</Text>
                 </HStack>
               )}
+
               <HStack align={"center"} justify="space-between">
                 <b>Availability : </b>
                 <Text>{!Nft.rented ? "Yes" : "No"}</Text>
               </HStack>
+              {Nft.rented && (
+                <HStack align={"center"} justify="space-between">
+                  <b>Current User : </b>
 
+                  <Text>
+                    {" "}
+                    {walletAddress == Nft.user && "You -> "}
+                    {getMinimalAddress(Nft.user)}
+                  </Text>
+                </HStack>
+              )}
               <HStack paddingTop={"5vh"} justify={"space-between"}>
                 <LinkButton
                   onClick={() => {
@@ -229,7 +235,10 @@ function NftInformationPopup({ NFT, displayToggle }) {
               />
             </NamedInput>
             <NamedInput title={"Price to Pay"}>
-              <Input value={rentPrice * rentDays + " " + getCurrency()} />
+              <Input
+                readOnly
+                value={rentPrice * rentDays + " " + getCurrency()}
+              />
             </NamedInput>
             <HStack width={"50vw"} justify={"space-between"}>
               <LinkButton

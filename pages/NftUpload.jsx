@@ -69,7 +69,7 @@ function NftUpload(props) {
   const [loader, setLoader] = useState(false);
   const [contractAddresses, setContractAddresses] = useState(null);
   const [contractTokens, setContractTokens] = useState(null);
-  let tokenDeploymentInstance= useRef();
+  let tokenDeploymentInstance = useRef();
   let web3ModelRef = useRef();
   function setStatus(message, color) {
     let ele = document.getElementById("creationStatus");
@@ -165,9 +165,8 @@ function NftUpload(props) {
     token.erc721ContractAddress = contractAddress;
     token.id = tokenId;
     console.log("token is ", token);
-    tokenDeploymentInstance.current=token;
+    tokenDeploymentInstance.current = token;
     return token;
-
   }
   async function uploadNFT() {
     if (areValidArguments()) {
@@ -263,7 +262,7 @@ function NftUpload(props) {
     }
   }
 
-  async function trackNFTUpload(deployedContractAddress,tokenInstance) {
+  async function trackNFTUpload(deployedContractAddress, tokenInstance) {
     let contract = NftRentingTracker;
     // console.log("uploading", {
     //   contractAddress,
@@ -307,7 +306,7 @@ function NftUpload(props) {
             setStatus("NFT Upload Error !");
             if (e.toString().includes("invalid token")) {
               setStatus("This NFT is not Minted by anyone", "red");
-            }            
+            }
             setStatus(e.error?.message, "red");
           }
         });
@@ -316,7 +315,11 @@ function NftUpload(props) {
   }
   async function StoreUpdatedcontractsOnIpfs(_contractAddresses) {
     let __contracts = _contractAddresses ? _contractAddresses : [];
-    let uniqueContracts = __contracts.map((item) => item != contractAddress);
+    console.log("previous contracts are ", _contractAddresses);
+    let uniqueContracts = [];
+    __contracts.map((item) => () => {
+      if (item != contractAddress) uniqueContracts.push(item);
+    });
     uniqueContracts.push(contractAddress);
 
     const _blob = new Blob(
@@ -333,12 +336,13 @@ function NftUpload(props) {
   }
   async function StoreUpdatedContractsTokensOnIpfs(
     _contractTokens,
-    currentContract,
+    currentContract
   ) {
-    let newTokenInstance=tokenDeploymentInstance.current;
-    console.log("New Token instance is ",newTokenInstance);
+    console.log("Previous Tokens are ", _contractTokens);
+    let newTokenInstance = tokenDeploymentInstance.current;
+    console.log("New Token instance is ", newTokenInstance);
     let __contractTokens = _contractTokens ? _contractTokens : [];
-    let tokensList=[];
+    let tokensList = [];
     if (__contractTokens) {
       tokensList = __contractTokens[currentContract];
       if (tokensList == undefined) tokensList = [];
@@ -358,7 +362,7 @@ function NftUpload(props) {
       return null;
     }
     uniqueTokensList.push(newTokenInstance);
-console.log("new tokens list");
+    console.log("new tokens list");
     let updatedContractTokens = {
       ...__contractTokens,
       [currentContract]: uniqueTokensList,
@@ -417,11 +421,7 @@ console.log("new tokens list");
     <>
       {!walletAddress && (
         <Card height={"100vh"}>
-          <Button
-            onClick={init}
-            colorScheme={"blue"}
-            variant={"solid"}
-          >
+          <Button onClick={init} colorScheme={"blue"} variant={"solid"}>
             Connect Wallet
           </Button>
         </Card>

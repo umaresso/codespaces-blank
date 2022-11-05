@@ -20,10 +20,9 @@ import { getProviderOrSigner } from "../data/accountsConnection";
 import { getContractName } from "../data/ERC721";
 import { getIpfsImageLink, getTokensMetaData } from "../data/ipfsStuff";
 let NetwokChain = "goerli";
-function NftDetails({ NFT }) {
+function NftDetails({ NFT, selector }) {
   const [loading, setLoading] = useState(true);
-  let Nft ={...NFT} ;
-  console.log("\n\n\n----Showing ",Nft)
+  let Nft = { ...NFT };
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
   const [Owner, setOwner] = useState(null);
@@ -46,38 +45,37 @@ function NftDetails({ NFT }) {
   let img = getIpfsImageLink(Nft.image);
   let Key = Nft.name + Nft.id;
   return (
-      <VStack key={Key}>
-        <Img
-          height={"40vh"}
-          transition={"200ms all ease-in-out"}
-          _hover={{
-            cursor: "pointer",
-            transform: "scale(1.05)",
-          }}
-          borderRadius={"20px"}
-          key={"image of " + Key}
-          src={
-            img
-              ? img
-              : "https://www.miamibeachvca.com/_resources/img/content/repeater-loader.gif"
-          }
-        />
-        <HStack spacing={10}>
-          <Heading fontSize={"24px"}>
-            Token # <b>{Nft.id}</b>
-          </Heading>
-          {!Nft.rented ? (
-            <Button colorScheme={"green"} textColor={"white"}>
-              Available
-            </Button>
-          ) : (
-            <Button colorScheme={"blue"} textColor={"white"} disabled>
-              Rented
-            </Button>
-          )}
-        </HStack>
-      </VStack>
-    
+    <VStack onClick={() => selector(Nft)} height={"fit-content"} key={Key}>
+      <Img
+        height={"300px"}
+        transition={"200ms all ease-in-out"}
+        _hover={{
+          cursor: "pointer",
+          transform: "scale(1.05)",
+        }}
+        key={"image of " + Key}
+        src={
+          img
+            ? img
+            : "https://www.miamibeachvca.com/_resources/img/content/repeater-loader.gif"
+        }
+        borderRadius={"40px"}
+      />
+      <HStack spacing={10}>
+        <Heading fontSize={"24px"}>
+          Token # <b>{Nft.id}</b>
+        </Heading>
+        {!Nft.rented ? (
+          <Button colorScheme={"green"} textColor={"white"}>
+            Available
+          </Button>
+        ) : (
+          <Button colorScheme={"blue"} textColor={"white"} disabled>
+            Rented
+          </Button>
+        )}
+      </HStack>
+    </VStack>
   );
 }
 

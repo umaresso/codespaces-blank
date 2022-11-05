@@ -18,6 +18,7 @@ export const getAllDappsUris = async (contract, setter) => {
   return response.data.dapps;
 };
 function embedGateway(hash) {
+  if (hash.toString().startsWith("http")) return hash;
   console.log("Embedding gateway with ", hash);
   return "https://ipfs.io/ipfs//" + hash;
 }
@@ -77,41 +78,48 @@ export function getImageLinkFromIPFS(cid) {
 }
 
 export const getAllContractAddressess = async (contract, setter) => {
-  
-  let currentIPFSLink = await contract.contractAddressesIpfsLink();
- //console.log("ipfs link for contracts is ", currentIPFSLink);
-  if (currentIPFSLink == "") {
-    if (setter) {
-      setter([]);
+  try {
+    let currentIPFSLink = await contract.contractAddressesIpfsLink();
+    //console.log("ipfs link for contracts is ", currentIPFSLink);
+    if (currentIPFSLink == "") {
+      if (setter) {
+        setter([]);
+      }
+      return [];
     }
-    return [];
+    let link = `https://${currentIPFSLink}.ipfs.w3s.link/contracts.json`;
+    const response = await axios.get(link);
+    // console.log("the contracts are ", response.data.contracts);
+    if (setter) {
+      setter(response.data.contracts);
+    }
+    return response.data.contracts;
+  } catch (e) {
+    console.log("Contract addresses Fetch Error", e);
   }
-  let link = `https://${currentIPFSLink}.ipfs.w3s.link/contracts.json`;
-  const response = await axios.get(link);
-// console.log("the contracts are ", response.data.contracts);
-  if (setter) {
-    setter(response.data.contracts);
-  }
-  return response.data.contracts;
 };
 
 export const getAllContractTokens = async (contract, setter) => {
-  let currentIPFSLink = await contract.contractTokensIpfsLink();
-  console.log("ipfs link for contractsTokens is ", currentIPFSLink);
-  if (currentIPFSLink == "") {
-    if (setter) {
-      setter([]);
+  try {
+    let currentIPFSLink = await contract.contractTokensIpfsLink();
+    console.log("ipfs link for contractsTokens is ", currentIPFSLink);
+    if (currentIPFSLink == "") {
+      if (setter) {
+        setter([]);
+      }
+      return [];
     }
-    return [];
+    let link = `https://${currentIPFSLink}.ipfs.w3s.link/contractTokens.json`;
+    const response = await axios.get(link);
+    // console.log("response is ", response);
+    //  console.log("the contract tokens are ", response.data.contractTokens);
+    if (setter) {
+      setter(response.data.contractTokens);
+    }
+    return response.data.contractTokens;
+  } catch (e) {
+    console.log("getAllContract Tokens error ", e);
   }
-  let link = `https://${currentIPFSLink}.ipfs.w3s.link/contractTokens.json`;
-  const response = await axios.get(link);
-  // console.log("response is ", response);
-  //  console.log("the contract tokens are ", response.data.contractTokens);
-  if (setter) {
-    setter(response.data.contractTokens);
-  }
-  return response.data.contractTokens;
 };
 export function getIpfsImageLink(_link) {
   if (_link.toString().startsWith("ipfs:")) {

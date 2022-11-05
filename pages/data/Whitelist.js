@@ -335,7 +335,7 @@ const ethers = require("ethers");
 //   wallet
 // );
 
-export const fetchWhitelistAddresses = async (contract,owner, setter) => {
+export const fetchWhitelistAddresses = async (contract, owner, setter) => {
   let TrackerContract = contract;
   let numWhitelists = await TrackerContract.userNumberOfWhitelists(owner);
   // let totalWhitelists = await TrackerContract.totalWhitelists();
@@ -351,89 +351,96 @@ export const fetchWhitelistAddresses = async (contract,owner, setter) => {
   return allWhitelists;
 };
 
-export const fetchWhitelists = async (NetworkChain,web3modalRef,owner, arraySetter) => {
+export const fetchWhitelists = async (
+  NetworkChain,
+  web3modalRef,
+  owner,
+  arraySetter
+) => {
   //   console.log("obtaining whitelists for ", owner);
 
   console.log("fetching whitelists");
-  getCustomNetworkWhitelistTrackerContract(NetworkChain,web3modalRef).then(async(TrackerContract)=>{
-    await fetchWhitelistAddresses(
-      TrackerContract,
-      owner,
-      arraySetter
-    ).then(async(whitelists)=>{
+  getCustomNetworkWhitelistTrackerContract(NetworkChain, web3modalRef).then(
+    async (TrackerContract) => {
+      await fetchWhitelistAddresses(TrackerContract, owner, arraySetter).then(
+        async (whitelists) => {
+          let allWhitelists = [];
+          console.log("iterating over");
+          whitelists.map(async (_whitelist, index) => {
+            let whitelistContract = await getCustomNetworkWhitelistContract(
+              NetworkChain,
+              web3modalRef,
+              _whitelist
+            );
 
-      let allWhitelists = [];
-    console.log("iterating over")
-    whitelists.map(async (_whitelist, index) => {
-      
-      let whitelistContract = await getCustomNetworkWhitelistContract(NetworkChain,web3modalRef,_whitelist)
-
-      let hostedWebsite = await WebsiteRentContract.deploymentToWebsite(
-        _whitelist
-      );
-      let name = await whitelistContract.name();
-      let symbol = await whitelistContract.symbol();
-      let baseURI = await whitelistContract.baseURI();
-      let whitelistedCount = await whitelistContract.numAddressesWhitelisted();
-      let startTime = await whitelistContract.startTime();
-      let endTime = await whitelistContract.endTime();
-      let whitelistInstance = {
-        id: index + 1,
-        name,
-        symbol,
-        baseURI,
-        address: _whitelist,
-        website: hostedWebsite,
-        users: whitelistedCount,
-        startTime,
-        endTime,
-        owner,
-      };
-      // console.log("whitelist instance", whitelistInstance);
-      allWhitelists.push(whitelistInstance);
-      if (index + 1 == whitelists.length) {
-        if (arraySetter != undefined) {
-          arraySetter(allWhitelists);
+            let hostedWebsite = await TrackerContract.deploymentToWebsite(
+              _whitelist
+            );
+            let name = await whitelistContract.name();
+            let symbol = await whitelistContract.symbol();
+            let baseURI = await whitelistContract.baseURI();
+            let whitelistedCount =
+              await whitelistContract.numAddressesWhitelisted();
+            let startTime = await whitelistContract.startTime();
+            let endTime = await whitelistContract.endTime();
+            let whitelistInstance = {
+              id: index + 1,
+              name,
+              symbol,
+              baseURI,
+              address: _whitelist,
+              website: hostedWebsite,
+              users: whitelistedCount,
+              startTime,
+              endTime,
+              owner,
+            };
+            // console.log("whitelist instance", whitelistInstance);
+            allWhitelists.push(whitelistInstance);
+            if (index + 1 == whitelists.length) {
+              if (arraySetter != undefined) {
+                arraySetter(allWhitelists);
+              }
+            }
+          });
+          console.log("returning");
+          return allWhitelists;
         }
-      }
-    });
-    console.log("returning")
-    return allWhitelists;
-
-    });
-    
-  })
-
+      );
+    }
+  );
 };
 
-export const getCustomNetworkWhitelistContract=async (network,web3modalRef,contractAddress)=>{
-  let signer = await getProviderOrSigner(network,web3modalRef,true);
+export const getCustomNetworkWhitelistContract = async (
+  network,
+  web3modalRef,
+  contractAddress
+) => {
+  let signer = await getProviderOrSigner(network, web3modalRef, true);
   let whitelistfactory = new ethers.ContractFactory(
     whitelistABI,
     whitelistByteCode.object,
     signer
   );
-  if(contractAddress){
-  whitelistfactory = new ethers.Contract(
+  if (contractAddress) {
+    whitelistfactory = new ethers.Contract(
       contractAddress,
       whitelistABI,
       signer
-      );
-  
+    );
   }
   return whitelistfactory;
-  
-  }
-  
-export const getCustomNetworkWhitelistTrackerContract=async (network,web3modalRef)=>{
-  let signer = await getProviderOrSigner(network,web3modalRef,true);
+};
+
+export const getCustomNetworkWhitelistTrackerContract = async (
+  network,
+  web3modalRef
+) => {
+  let signer = await getProviderOrSigner(network, web3modalRef, true);
   const whitelistTrackerContract = new ethers.Contract(
     whitelistTrackerAddress,
     whitelistTrackerABI,
     signer
-    );
+  );
   return whitelistTrackerContract;
-  
-  }
-
-  
+};

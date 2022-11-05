@@ -7,13 +7,17 @@ import {
   VStack,
   Center,
   Button,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
 import { getProviderOrSigner } from "./data/accountsConnection";
 import {
+  getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
   getNftPrice,
+  getNftUser,
   getRentableContract,
   isRented,
 } from "./data/NftRenting";
@@ -95,26 +99,33 @@ function ExploreNfts(props) {
     });
   }
   async function init() {
-    await connectWallet();
     if (!owner) return;
+    let allNFTs = [];
     let trackerContract = await getCustomNetworkNFTTrackerContract(
       NetworkChain,
       web3ModalRef
     );
     //  console.log("Tracker contract is ",trackerContract);
     let contractsArray = await getAllContractAddressess(trackerContract);
-    //    console.log("Contracts to read from",contractsArray)
+    console.log("Contracts to read from", contractsArray);
     let allContractsTokens = await getAllContractTokens(trackerContract);
-    // console.log("All contract tokens are ", allContractsTokens);
-    let allNFTs = [];
-    contractsArray?.map((contractAddress, contractsAddressIndex) => {
+    console.log("All contract tokens are ", allContractsTokens);
+
+    let indexer = 0;
+    contractsArray?.map(async (contractAddress, contractsAddressIndex) => {
       let thisContractTokens = allContractsTokens[contractAddress];
-      //console.log("contract ",contractAddress, " has tokens ",thisContractTokens);
-      thisContractTokens?.map(async (token) => {
-        let rentableContractAddress = await getRentableContract(
-          trackerContract,
-          contractAddress
-        );
+      let rentableContractAddress = await getRentableContract(
+        trackerContract,
+        contractAddress
+      );
+      let rentableContractInstance = await getCustomNetworkNFTFactoryContract(
+        NetworkChain,
+        web3ModalRef,
+        rentableContractAddress
+      );
+      thisContractTokens?.map(async (token, tokenIndexer) => {
+        console.log("Token is ", token);
+        let currentUser = await getNftUser(rentableContractInstance, token.id);
         let rentPrice = await getNftPrice(
           trackerContract,
           rentableContractAddress,
@@ -125,15 +136,30 @@ function ExploreNfts(props) {
           rentableContractAddress,
           token.id
         );
-        let enhancedToken = { ...token, price: rentPrice, rented };
-        // console.log("enhanced token is ",enhancedToken)
-        allNFTs.push(enhancedToken);
+        if (!rented) {
+          currentUser = null;
+        }
+        let _token = {
+          name: token.name,
+          id: token.id,
+          description: token.description,
+          image: token.image,
+          erc721ContractAddress: token.erc721ContractAddress,
+          owner: token.owner,
+          rentPrice: rentPrice,
+          rented: rented,
+          user: currentUser,
+        };
+        allNFTs.push(_token);
+        // if it's last token to show
+        if (
+          contractsAddressIndex + 1 == contractsArray.length &&
+          tokenIndexer + 1 == thisContractTokens.length
+        ) {
+          setNFTs(allNFTs);
+          setLoading(false);
+        }
       });
-      if (contractsAddressIndex + 1 == contractsArray.length) {
-        //        console.log("setting filtred nfts as ",allNFTs)
-        setNFTs(allNFTs);
-        setLoading(false);
-      }
     });
     setNftRentingTracker(trackerContract);
   }
@@ -149,25 +175,23 @@ function ExploreNfts(props) {
     init();
   }, [owner]);
 
-  let filteredNfts = [...NFTs];
+  // console.log("NFTs are", NFTs);
+  let filteredNfts = [];
+  NFTs?.map((nft) => {
+    if (
+      currentMenu === "all" ||
+      (currentMenu == "rented" && nft.rented) ||
+      (currentMenu == "available" && !nft.rented) ||
+      (currentMenu == "mine" && (nft.owner == owner || nft.user == owner))
+    ) {
+      filteredNfts.push(nft);
+    }
+  });
   console.log("filtered NFT are", filteredNfts);
 
   return (
     <>
-    <VStack
-          paddingTop={"20vh"}
-          height={"100vh"}
-          bg="black"
-          textColor={"white"}
-          width={"100%"}
-        >
-      {filteredNfts?.map((nft) => {
-        return <NftDetails NFT={nft} />;
-      })}
-
-        </VStack>
-
-      {/* {owner == null && (
+      {owner == null && (
         <VStack
           paddingTop={"20vh"}
           height={"100vh"}
@@ -187,7 +211,8 @@ function ExploreNfts(props) {
       {owner != null && (
         <>
           <VStack
-            height={"100vh"}
+            height={filteredNfts.length > 0 ? "fit-content" : "100vh"}
+            minHeight={"100vh"}
             bg="black"
             textColor={"white"}
             width={"100%"}
@@ -197,7 +222,7 @@ function ExploreNfts(props) {
                 <Heading
                   paddingTop={"15vh"}
                   fontSize={"5em"}
-                  width={["80vw", "70vw", "50vw"]}
+                  width={["80vw", "70vw", "60vw"]}
                 >
                   Rent cool NFTs
                 </Heading>
@@ -205,7 +230,7 @@ function ExploreNfts(props) {
                   fontFamily={"sans-serif"}
                   textColor={"grey"}
                   fontSize={"18px"}
-                  width={["80vw", "70vw", "50vw"]}
+                  width={["80vw", "70vw", "60vw"]}
                 >
                   RentWeb3 is your favorite place to rent awesome NFTs to use in
                   your Next game , for attending an event or hosting your
@@ -243,21 +268,38 @@ function ExploreNfts(props) {
               />
             </HStack>
 
-            {loading && <Heading>Loading NFT Collections..</Heading>}
+            {loading && (
+              <Heading fontSize={"24px"}>Loading NFT Collections..</Heading>
+            )}
 
-            <VStack
-              align={"left"}
+            <HStack
+              align={filteredNfts.length == 0 ? "center" : "left"}
               paddingLeft={10}
               width={"100%"}
               height={"fit-content"}
               spacing={10}
             >
-              {
-                filteredNfts?.map(nft=>{
-                 return <NftDetails  NFT={nft}/>
-                })
-              }
-            </VStack>
+              <Wrap spacing={20}>
+                {filteredNfts?.map((nft) => {
+                  return (
+                    <WrapItem key={"wrap " + nft.id + nft.name}>
+                      <NftDetails
+                        key={nft.id + nft.name}
+                        selector={setSelectedNft}
+                        NFT={nft}
+                      />
+                    </WrapItem>
+                  );
+                })}
+              </Wrap>
+
+              {!loading && filteredNfts.length == 0 && (
+                <Heading fontSize={"24px"}>
+                  No Collections for Category{" "}
+                  {`"${currentMenu.toLocaleUpperCase()}"`}
+                </Heading>
+              )}
+            </HStack>
           </VStack>
           {selectedNft != null && (
             <Box width={"100vh"} height="fit-content">
@@ -269,7 +311,6 @@ function ExploreNfts(props) {
           )}
         </>
       )}
-          */}
     </>
   );
 }
