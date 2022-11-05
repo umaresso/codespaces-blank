@@ -2,6 +2,11 @@
 ![image](https://user-images.githubusercontent.com/99790333/199675925-6009689b-9b2c-4ce2-bf1c-c8afce1aa7f0.png)
 
 
+## Github repo Link
+## Devpost URL
+## Video link
+( 3 mins max for tron and <=5 min for chainlink )
+
 
 ## Inspiration
 Web3 is booming. Future is promising with the opportunities Metaverse will bring.<br/>
@@ -89,8 +94,9 @@ Users are People that can borrow NFTs and use them till specific time .
 | Tested smart contracts in Remix ID      | 100%   |
 | Built a dummy UI for uploading NFTs      |  100%  |
 | Uploading NFTs UI integration with smart contracts      |   100% |
-| UI to show available and rented NFTs       |  10%  |
-| NFT renting     |0%    |    
+| UI to show available and rented NFTs       |  50%  |
+|NFT uploading and renting tested|100%|
+|Adding Filters| 10%|
     
 ## Challenges we ran into
 We faced many but here are few
@@ -120,8 +126,13 @@ we wanted the storage to be decentralized but smart contract performs a bunch of
 We could load available NFTs from smart contracts but it is a slow process and User Experience might suffer. <br/>
 We have achieved both User Experience and Decentralized storage properties with **IPFS and filecoin's web3 storage**.
 
+## RentWeb3 Flow
+while writing flow of our project we have to enter images of website.
+
 ## Accomplishments that we're proud of
-To be added
+we have to mention five points of judging criteria <br/>
+plus that we have implemented this project for three different Blockchains (tron ,ethereum ,polygon ,tron).
+
 ## What we learned
 To be added
 ## What's next for RentWeb3
