@@ -30,12 +30,13 @@ function Introduction() {
       bg={"black"}
       paddingBottom={10}
     >
-      <Stack direction={["column", "column", "column", "row"]}>
+      <Stack           spacing={[50,30,30,10]}
+ direction={["column", "column", "column", "row"]}>
         <VStack
           align={"left"}
           padding={20}
           paddingBottom={0}
-          spacing={3}
+          spacing={5}
           width={["100%", "100%", "100%", "60%"]}
           paddingTop={["40vh", "40vh", "20vh"]}
         >

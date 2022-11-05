@@ -375,7 +375,6 @@ export const getCustomNetworkERC721Contract = async (
   let signer = await getProviderOrSigner(
     NetworkChain,
     web3ModalRef,
-    contractAddress
   );
   const erc721Contract = new ethers.Contract(
     contractAddress,
@@ -388,21 +387,35 @@ const ethers = require("ethers");
 function embedGateway(hash) {
   return "https://ipfs.io" + hash;
 }
-export const getTokenUri = async (contract, tokenId) => {
-  let tokenUri = await contract.tokenURI(tokenId);
-  if (tokenUri == "") {
-    return "";
-  } else if (tokenUri.toString().startsWith("/ipfs")) {
-    let newTokenUri = tokenUri.slice(6, -1);
-    return newTokenUri;
-  } else if (tokenUri.toString().startsWith("ipfs://")) {
-    let newTokenUri = tokenUri.slice(7, -1);
-    return newTokenUri;
+
+export const getPureTokenUri = async (contract, tokenId) => {
+  let tokenUri;
+  try{
+    tokenUri = await contract.tokenURI(tokenId);
+    
+    if (tokenUri == "") {
+      return "";
+    } else if (tokenUri.toString().startsWith("/ipfs/")) {
+      let newTokenUri = tokenUri.slice(6,);
+      return newTokenUri;
+    } else if (tokenUri.toString().startsWith("ipfs://")) {
+      let newTokenUri = tokenUri.slice(7);
+      return newTokenUri;
+    }
+    return tokenUri;
+    
+    
   }
-  return tokenUri;
+  catch(e){
+    if(e.toString().includes('invalid token')){
+    alert("You probably dont own this NFT ! ");
+      return "";
+    }
+  }
+  
 };
 
-export function getContractName(NetworkChain, web3ModalRef, contractAddress) {
+export async function getContractName(NetworkChain, web3ModalRef, contractAddress) {
   return getCustomNetworkERC721Contract(
     NetworkChain,
     web3ModalRef,

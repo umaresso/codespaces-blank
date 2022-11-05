@@ -6,6 +6,7 @@ import {
   Link,
   Text,
   HStack,
+  Button,
 } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import React from "react";
@@ -18,12 +19,20 @@ import NamedInput from "./components/NamedInput";
 import SuccessfulDeployment from "./components/SuccessfulDeployment";
 import { getProviderOrSigner } from "./data/accountsConnection";
 import {
+  getCustomNetworkERC721Contract,
+  getPureTokenUri,
+  getTokenOwner,
+} from "./data/ERC721";
+import {
   getAllContractAddressess,
   getAllContractTokens,
+  getTokenMetadata,
 } from "./data/ipfsStuff";
 import {
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
+  getNftPrice,
+  getRentableContract,
 } from "./data/NftRenting";
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -39,27 +48,28 @@ function NftUpload(props) {
   /**
    * Default values
    */
-  let _erc721 = "0xC6d8fcC4abb9F0E16dc14F991fD6b014cfc3Db94";
+  let _erc721 = "0x0574e679d0d7503c3FEdB52b170491741A97f7a1";
 
   let _blockchain = "ethereum";
-  let _price = 0.02;
+  let _price = 0.0002;
   let _tokenId = 1;
   /**
    *
    */
   const [formStep, setFormStep] = useState(1);
-  const [contractAddress, setContractAddress] = useState(null);
-  const [tokenId, setTokenId] = useState(0);
-  const [pricePerDay, setPricePerDay] = useState(0);
-  const [blockchain, setBlockchain] = useState("");
+  const [contractAddress, setContractAddress] = useState(_erc721);
+  const [tokenId, setTokenId] = useState(_tokenId);
+  const [pricePerDay, setPricePerDay] = useState(_price);
+  const [blockchain, setBlockchain] = useState(_blockchain);
 
   const [factoryContract, setFactoryContract] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
-  const [owner, setOwner] = useState(null);
+  const [walletAddress, setWalletAddress] = useState(null);
   const [deployedAddress, setDeployedAddress] = useState(null);
   const [loader, setLoader] = useState(false);
   const [contractAddresses, setContractAddresses] = useState(null);
   const [contractTokens, setContractTokens] = useState(null);
+  let tokenDeploymentInstance= useRef();
   let web3ModelRef = useRef();
   function setStatus(message, color) {
     let ele = document.getElementById("creationStatus");
@@ -119,21 +129,63 @@ function NftUpload(props) {
     }
     return true;
   }
-  function uploadNFT() {
+  async function GatherTokenInformation() {
+    let erc721Contract = await getCustomNetworkERC721Contract(
+      NetworkChain,
+      web3ModelRef,
+      contractAddress
+    );
+    let _owner = await getTokenOwner(erc721Contract, tokenId);
+    let tokenCid = await getPureTokenUri(erc721Contract, tokenId);
+    console.log("Token Cid is ", tokenCid);
+    if (tokenCid == "") {
+      alert("Unable to read token metadata");
+    }
+    let tokenData = await getTokenMetadata(tokenCid);
+    ///console.log("Token Metadata is ",tokenData);
+    let rentableContractAddress = await getRentableContract(
+      NftRentingTracker,
+      contractAddress
+    );
+    //console.log("Rentable version for token is ",rentableContractAddress);
+    let rentableContract = await getCustomNetworkNFTFactoryContract(
+      NetworkChain,
+      web3ModelRef,
+      rentableContractAddress
+    );
+    //console.log("Rentable contract is ",rentableContract);
+    let token = { ...tokenData };
+    if (!_owner.toString().includes("0x000")) {
+      token.owner = _owner;
+    }
+
+    if (!rentableContractAddress.toString().includes("0x000")) {
+      token.rentableContractAddress = rentableContractAddress;
+    }
+    token.erc721ContractAddress = contractAddress;
+    token.id = tokenId;
+    console.log("token is ", token);
+    tokenDeploymentInstance.current=token;
+    return token;
+
+  }
+  async function uploadNFT() {
     if (areValidArguments()) {
-      deployNftUpload();
+      await GatherTokenInformation();
+      await deployNftUpload();
     }
   }
 
   async function init() {
     getProviderOrSigner(NetworkChain, web3ModelRef, true).then((_signer) => {
       _signer?.getAddress().then((_user) => {
-        setOwner(_user);
+        setWalletAddress(_user);
       });
     });
+    if (!walletAddress) return;
     getCustomNetworkNFTFactoryContract(NetworkChain, web3ModelRef).then(
-      (contract) => {
-        setFactoryContract(contract);
+      (factory) => {
+        setFactoryContract(factory);
       }
     );
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModelRef).then(
@@ -150,11 +202,11 @@ function NftUpload(props) {
    *
    */
 
-  async function deployNftUpload(sale) {
+  async function deployNftUpload() {
     if (blockchain == "ethereum") {
       setFormStep((prev) => prev + 1);
       setStatus("Making Ethereum NftUpload..");
-      EthUpload(sale);
+      EthUpload();
     } else if (blockchain == "tron") {
       setFormStep((prev) => prev + 1);
 
@@ -168,20 +220,18 @@ function NftUpload(props) {
   async function EthUpload() {
     async function deploy() {
       try {
-        console.log("upload");
         let factory = factoryContract;
-        console.log("factory", factory);
-        console.log("creating instance");
-        setStatus("Creating Rentable Version of the Contract");
+        setStatus("Seems we did not have this awesome collection before");
+
+        setStatus("Creating Rentable Version of your collection ");
 
         const contract = await factory.deploy(contractAddress);
         await contract.deployed();
 
-        setStatus(`Successfully Created 🎉`);
-
-        setStatus("Contract Address := ");
-        setStatus(getMinimalAddress(contract.address));
-        setStatus("Starting Actual upload ");
+        setStatus(
+          `Rentable version of NFT contract is Successfully Created 🎉`
+        );
+        setStatus("Starting Token Upload");
         await trackNFTUpload(contract.address);
         return contract.address;
       } catch (e) {
@@ -209,34 +259,33 @@ function NftUpload(props) {
 
       trackNFTUpload(response.toString());
     } else {
-      console.log("uploading rentable version of smart contract");
       deploy();
     }
   }
 
-  async function trackNFTUpload(deployedContractAddress) {
+  async function trackNFTUpload(deployedContractAddress,tokenInstance) {
     let contract = NftRentingTracker;
-    console.log("uploading", {
-      contractAddress,
-      deployedContractAddress,
-      tokenId,
-      price: ethers.utils.parseEther(pricePerDay.toString()),
-    });
-    console.log("Storing on IPFS ");
+    // console.log("uploading", {
+    //   contractAddress,
+    //   deployedContractAddress,
+    //   tokenId,
+    //   price: ethers.utils.parseEther(pricePerDay.toString()),
+    // });
+    setStatus("Storing on IPFS ");
     StoreUpdatedcontractsOnIpfs(contractAddresses).then(
       async (contracts_file_cid) => {
-        console.log("current tokenId", tokenId);
+        // console.log("current tokenId", tokenId);
         await StoreUpdatedContractsTokensOnIpfs(
           contractTokens,
           contractAddress,
-          tokenId
+          tokenInstance
         ).then(async (contractTokens_Cid) => {
           if (!contractTokens_Cid) {
             setStatus("Token Already Available for Rent x ", "red");
             return;
           }
           try {
-            console.log("Successfully stored on IPFS !");
+            setStatus("Successfully stored on IPFS 🥳");
             setStatus("Storing on blockchain");
 
             setStatus("Approve Transaction");
@@ -255,11 +304,11 @@ function NftUpload(props) {
 
             setFormStep((prev) => prev + 1);
           } catch (e) {
-            console.log("Upload Error := ", e);
+            setStatus("NFT Upload Error !");
             if (e.toString().includes("invalid token")) {
               setStatus("This NFT is not Minted by anyone", "red");
-            }
-            setStatus(e.error.message, "red");
+            }            
+            setStatus(e.error?.message, "red");
           }
         });
       }
@@ -285,39 +334,31 @@ function NftUpload(props) {
   async function StoreUpdatedContractsTokensOnIpfs(
     _contractTokens,
     currentContract,
-    newToken
   ) {
+    let newTokenInstance=tokenDeploymentInstance.current;
+    console.log("New Token instance is ",newTokenInstance);
     let __contractTokens = _contractTokens ? _contractTokens : [];
-    let tokensList;
-    // console.log(
-    //   "Contract tokens array",
-    //   _contractTokens,
-    //   " token id ",
-    //   tokenId
-    // );
+    let tokensList=[];
     if (__contractTokens) {
-      //  console.log("not undefined !");
       tokensList = __contractTokens[currentContract];
       if (tokensList == undefined) tokensList = [];
     } else {
       tokensList = [];
     }
-    // console.log("tokens before pushing", tokensList);
     let alreadyExists = false;
     let uniqueTokensList = [];
-    tokensList.map((item) => {
-      if (Number(item) === Number(newToken)) {
+    tokensList?.map((item) => {
+      if (Number(item.id) == Number(newTokenInstance.id)) {
         alreadyExists = true;
       } else {
-        uniqueTokensList.push(Number(item));
+        uniqueTokensList.push(item);
       }
     });
     if (alreadyExists) {
       return null;
     }
-    uniqueTokensList.push(Number(newToken));
-    //    console.log("tokens after pushing", uniqueTokensList);
-
+    uniqueTokensList.push(newTokenInstance);
+console.log("new tokens list");
     let updatedContractTokens = {
       ...__contractTokens,
       [currentContract]: uniqueTokensList,
@@ -336,8 +377,8 @@ function NftUpload(props) {
       ],
       { type: "application/json" }
     );
-    const updatedDappInfo = [new File([_blob], `contractTokens.json`)];
-    let newCID = await storeWithProgress(updatedDappInfo);
+    const updatedNFTs = [new File([_blob], `contractTokens.json`)];
+    let newCID = await storeWithProgress(updatedNFTs);
     return newCID;
   }
 
@@ -370,106 +411,125 @@ function NftUpload(props) {
 
   useEffect(() => {
     init();
-  }, []);
+  }, [walletAddress]);
 
   return (
-    <Card height={"100vh"}>
-      {formStep == 1 && (
-        <Box
-          height={"fit-content"}
-          padding={[0, 10, 10]}
-          width={"50vw"}
-          borderRadius={"10px"}
-          background={bg}
-          color={textColor}
-          justifyContent={"center"}
-          alignItems={"center"}
-          boxShadow={"1px 1px 1px 1px grey"}
-        >
-          <Heading align={"center"}>Upload NFTs</Heading>
-          <VStack paddingTop={"2vh"} spacing={5}>
-            <Box>
-              <NamedInput title={"Contract Address"}>
-                <Input
-                  onChange={(e) => setContractAddress(e.target.value)}
-                  placeholder="0x4b26..8c"
-                />
-              </NamedInput>
-              <Box id="contractAddressValidation"></Box>
-            </Box>
-            {/* 
+    <>
+      {!walletAddress && (
+        <Card height={"100vh"}>
+          <Button
+            onClick={init}
+            colorScheme={"blue"}
+            variant={"solid"}
+          >
+            Connect Wallet
+          </Button>
+        </Card>
+      )}
+
+      {walletAddress && (
+        <Card height={"100vh"}>
+          {formStep == 1 && (
+            <Box
+              height={"fit-content"}
+              padding={[0, 10, 10]}
+              width={"50vw"}
+              borderRadius={"10px"}
+              background={bg}
+              color={textColor}
+              justifyContent={"center"}
+              alignItems={"center"}
+              boxShadow={"1px 1px 1px 1px grey"}
+            >
+              <Heading align={"center"}>Upload NFTs</Heading>
+              <VStack paddingTop={"2vh"} spacing={5}>
+                <Box>
+                  <NamedInput title={"Contract Address"}>
+                    <Input
+                      onChange={(e) => setContractAddress(e.target.value)}
+                      placeholder="0x4b26..8c"
+                    />
+                  </NamedInput>
+                  <Box id="contractAddressValidation"></Box>
+                </Box>
+                {/* 
             contractAddressValidation
             tokenIdValidation
             priceValidation
             blockchainValidation
             */}
-            <Box>
-              <NamedInput title={"Token Id"}>
-                <Input
-                  onChange={(e) => setTokenId(e.target.value)}
-                  placeholder="1"
-                />
-              </NamedInput>
-              <Box id="tokenIdValidation"></Box>
-            </Box>
+                <Box>
+                  <NamedInput title={"Token Id"}>
+                    <Input
+                      onChange={(e) => setTokenId(e.target.value)}
+                      placeholder="1"
+                    />
+                  </NamedInput>
+                  <Box id="tokenIdValidation"></Box>
+                </Box>
 
-            <Box>
-              <NamedInput title={"Price per day"}>
-                <Input
-                  onChange={(e) => setPricePerDay(e.target.value)}
-                  placeholder="price per day in "
-                />
-              </NamedInput>
-              <Box id="priceValidation"></Box>
-            </Box>
+                <Box>
+                  <NamedInput title={"Price per day"}>
+                    <Input
+                      onChange={(e) => setPricePerDay(e.target.value)}
+                      placeholder="price per day in "
+                    />
+                  </NamedInput>
+                  <Box id="priceValidation"></Box>
+                </Box>
 
-            <Box>
-              <NamedInput title={"Blockchain"}>
-                <Input
-                  onChange={(e) => setBlockchain(e.target.value)}
-                  placeholder="Ethereum,Tron,polygon"
-                />
-              </NamedInput>
-              <Box id="blockchainValidation"></Box>
-            </Box>
+                <Box>
+                  <NamedInput title={"Blockchain"}>
+                    <Input
+                      onChange={(e) => setBlockchain(e.target.value)}
+                      placeholder="Ethereum,Tron,polygon"
+                    />
+                  </NamedInput>
+                  <Box id="blockchainValidation"></Box>
+                </Box>
 
-            <LinkButton
-              color={"green"}
-              variant={"solid"}
-              onClick={() => uploadNFT()}
-              title={"Upload NFT"}
-            />
+                <LinkButton
+                  color={"green"}
+                  variant={"solid"}
+                  onClick={() => uploadNFT()}
+                  title={"Upload NFT"}
+                />
+              </VStack>
+            </Box>
+          )}
+          <VStack
+            height={formStep >= 2 ? "110vh" : "1px"}
+            bg={"black"}
+            color={"white"}
+            width={"100vw"}
+            paddingTop={"20vh"}
+            align={"center"}
+            display={deployedAddress || formStep < 2 ? "none" : "flex"}
+          >
+            <Heading>NFT Upload Status</Heading>
+            <VStack spacing={5} width="60vw" id="creationStatus">
+              <Text fontSize={"20px"}>
+                {" "}
+                {loader && "Sale Creation Started.."}
+              </Text>
+            </VStack>
           </VStack>
-        </Box>
+          {deployedAddress !== null && (
+            <VStack height={"100vh"} justify={"center"}>
+              <Heading color={"whiteAlpha.800"}>
+                NFT is uploaded Successfully 🥳
+              </Heading>
+              <LinkButton
+                title={"Check here"}
+                href={"ExploreNfts"}
+                color={"messenger"}
+                variant={"solid"}
+              />
+            </VStack>
+          )}
+        </Card>
       )}
-      <VStack
-        height={formStep >= 2 ? "100vh" : "1px"}
-        bg={"black"}
-        color={"white"}
-        width={"100vw"}
-        paddingTop={"20vh"}
-        align={"center"}
-        display={deployedAddress || formStep < 2 ? "none" : "flex"}
-      >
-        <Heading>NFT Upload Status</Heading>
-        <VStack spacing={5} width="60vw" id="creationStatus">
-          <Text fontSize={"20px"}> {loader && "Sale Creation Started.."}</Text>
-        </VStack>
-      </VStack>
-      {deployedAddress !== null && (
-        <VStack height={"90vh"} justify={"center"}>
-          <Heading color={"whiteAlpha.800"}>
-            NFT is uploaded Successfully 🥳
-          </Heading>
-          <LinkButton
-            title={"Check here"}
-            href={"ExploreNfts"}
-            color={"messenger"}
-            variant={"solid"}
-          />
-        </VStack>
-      )}
-    </Card>
+    </>
   );
 }
 

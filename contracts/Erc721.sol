@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract MyToken is ERC721, ERC721URIStorage {
     string baseURI;
 
-    // "BoredApeLocal","ApeLocal","https://gateway.pinata.cloud/ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/"
+    // "bitcoin prime","bitcoin","ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/"
 
     constructor(
         string memory name,

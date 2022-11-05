@@ -10,27 +10,19 @@ import {
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
-import { getProvider } from "@wagmi/core";
-import { connectWallet, getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "./data/accountsConnection";
 import {
   getCustomNetworkNFTTrackerContract,
-  getNftUserAddress,
+  getNftPrice,
   getRentableContract,
+  isRented,
 } from "./data/NftRenting";
 import {
   getAllContractAddressess,
   getAllContractTokens,
 } from "./data/ipfsStuff";
-import {
-  getCustomNetworkERC721Contract,
-  getTokenOwner,
-  getTokenRentStatus,
-  getTokenUri,
-} from "./data/ERC721";
-import ContractNFTs from "./components/ContractNFTs";
 import NftInformationPopup from "./components/NftInformationPopup";
-import Head from "next/head";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import NftDetails from "./components/NftDetails";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
@@ -43,13 +35,10 @@ export async function getStaticProps(context) {
 function ExploreNfts(props) {
   const [currentMenu, setCurrentMenu] = useState("all");
   const [owner, setOwner] = useState(null);
-  //  const [contractAddresses,setContractAddresses]=useState(null);
-  const [contractTokens, setContractTokens] = useState(null);
-  const [contractTokenURIs, setContractTokenURIs] = useState([]);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [NFTs, setNFTs] = useState([]);
   let web3ModalRef = useRef();
   // console.log("contract tokens are", contractTokens);
 
@@ -59,40 +48,40 @@ function ExploreNfts(props) {
    *
    */
 
-  function getAccessToken() {
-    return props.token;
-  }
-  async function storeWithProgress(files) {
-    // show the root cid as soon as it's ready
-    const onRootCidReady = (cid) => {
-      console.log("uploading files with cid:", cid);
-    };
+  // function getAccessToken() {
+  //   return props.token;
+  // }
+  // async function storeWithProgress(files) {
+  //   // show the root cid as soon as it's ready
+  //   const onRootCidReady = (cid) => {
+  //     console.log("uploading files with cid:", cid);
+  //   };
 
-    // when each chunk is stored, update the percentage complete and display
-    const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
-    let uploaded = 0;
+  //   // when each chunk is stored, update the percentage complete and display
+  //   const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
+  //   let uploaded = 0;
 
-    const onStoredChunk = (size) => {
-      uploaded += size;
-      const pct = 100 * (uploaded / totalSize);
-    };
+  //   const onStoredChunk = (size) => {
+  //     uploaded += size;
+  //     const pct = 100 * (uploaded / totalSize);
+  //   };
 
-    const client = makeStorageClient();
-    return client.put(files, { onRootCidReady, onStoredChunk });
-  }
-  async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
-    const _blob = new Blob(
-      [
-        JSON.stringify({
-          contracts: [...contractAddresses],
-        }),
-      ],
-      { type: "application/json" }
-    );
-    const updatedDappInfo = [new File([_blob], `contracts.json`)];
-    let newCID = await storeWithProgress(updatedDappInfo);
-    return newCID;
-  }
+  //   const client = makeStorageClient();
+  //   return client.put(files, { onRootCidReady, onStoredChunk });
+  // }
+  // async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
+  //   const _blob = new Blob(
+  //     [
+  //       JSON.stringify({
+  //         contracts: [...contractAddresses],
+  //       }),
+  //     ],
+  //     { type: "application/json" }
+  //   );
+  //   const updatedDappInfo = [new File([_blob], `contracts.json`)];
+  //   let newCID = await storeWithProgress(updatedDappInfo);
+  //   return newCID;
+  // }
 
   /**      */
 
@@ -100,7 +89,6 @@ function ExploreNfts(props) {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
       if (signer) {
         signer.getAddress().then((user) => {
-          console.log("siger address ", user);
           setOwner(user);
         });
       }
@@ -108,88 +96,46 @@ function ExploreNfts(props) {
   }
   async function init() {
     await connectWallet();
-    console.log("owner ", owner);
     if (!owner) return;
-    await getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
-      async (TrackerContract) => {
-        getAllContractTokens(TrackerContract, setContractTokens).then(
-          (contractTokensArray) => {
-            let addresses = Object.keys(contractTokensArray);
-
-            addresses?.map(async (adr,adrIndex) => {
-              // console.log("address is ", adr);
-              getCustomNetworkERC721Contract(
-                NetworkChain,
-                web3ModalRef,
-                adr
-              ).then((erc721Contract) => {
-                getRentableContract(TrackerContract, adr).then(
-                  (rentableContract) => {
-                    let tokens = contractTokensArray[adr];
-                    console.log(
-                      "Smart contract at ",
-                      adr,
-                      " got tokens: ",
-                      tokens
-                    );
-                    let tokenUris = [];
-                    let tokenRentStatusObject = {};
-                    let Users = [];
-                    tokens?.map((tokenId, index) => {
-                      getTokenUri(erc721Contract, tokenId).then((uri) => {
-                        getTokenOwner(erc721Contract, tokenId).then(
-                          (_owner) => {
-                            getNftUserAddress(
-                              NetworkChain,
-                              web3ModalRef,
-                              rentableContract,
-                              tokenId
-                            ).then(async (nft_user) => {
-                              getTokenRentStatus(
-                                TrackerContract,
-                                rentableContract,
-                                tokenId
-                              ).then((tokenRentStatus) => {
-                                tokenUris.push(uri);
-                                tokenRentStatusObject[tokenId] =
-                                  tokenRentStatus;
-                                Users.push(nft_user);
-                                if (index + 1 == tokens.length) {
-                                  // console.log("Token Base URIs got ", tokenUris);
-                                  let arr = [...contractTokenURIs];
-                                  let contractInstance = {
-                                    ercContractAddress: adr,
-                                    tokenURIs: tokenUris,
-                                    tokenIds: tokens,
-                                    owner: _owner,
-                                    rentableContract,
-                                    rentalStatus: tokenRentStatusObject,
-                                    users: Users,
-                                  };
-                                  arr.push(contractInstance);
-
-                                  setContractTokenURIs(arr);
-                                }
-                              });
-                            });
-                          }
-                        );
-                      });
-                    });
-                  }
-                );
-              });
-              if(adrIndex==addresses.length){
-                setLoading(false);
-              }
-            });
-            
-          }
-        );
-
-        setNftRentingTracker(TrackerContract);
-      }
+    let trackerContract = await getCustomNetworkNFTTrackerContract(
+      NetworkChain,
+      web3ModalRef
     );
+    //  console.log("Tracker contract is ",trackerContract);
+    let contractsArray = await getAllContractAddressess(trackerContract);
+    //    console.log("Contracts to read from",contractsArray)
+    let allContractsTokens = await getAllContractTokens(trackerContract);
+    // console.log("All contract tokens are ", allContractsTokens);
+    let allNFTs = [];
+    contractsArray?.map((contractAddress, contractsAddressIndex) => {
+      let thisContractTokens = allContractsTokens[contractAddress];
+      //console.log("contract ",contractAddress, " has tokens ",thisContractTokens);
+      thisContractTokens?.map(async (token) => {
+        let rentableContractAddress = await getRentableContract(
+          trackerContract,
+          contractAddress
+        );
+        let rentPrice = await getNftPrice(
+          trackerContract,
+          rentableContractAddress,
+          token.id
+        );
+        let rented = await isRented(
+          trackerContract,
+          rentableContractAddress,
+          token.id
+        );
+        let enhancedToken = { ...token, price: rentPrice, rented };
+        // console.log("enhanced token is ",enhancedToken)
+        allNFTs.push(enhancedToken);
+      });
+      if (contractsAddressIndex + 1 == contractsArray.length) {
+        //        console.log("setting filtred nfts as ",allNFTs)
+        setNFTs(allNFTs);
+        setLoading(false);
+      }
+    });
+    setNftRentingTracker(trackerContract);
   }
   function getAccessToken() {
     return props.token;
@@ -203,9 +149,25 @@ function ExploreNfts(props) {
     init();
   }, [owner]);
 
+  let filteredNfts = [...NFTs];
+  console.log("filtered NFT are", filteredNfts);
+
   return (
     <>
-      {owner == null && (
+    <VStack
+          paddingTop={"20vh"}
+          height={"100vh"}
+          bg="black"
+          textColor={"white"}
+          width={"100%"}
+        >
+      {filteredNfts?.map((nft) => {
+        return <NftDetails NFT={nft} />;
+      })}
+
+        </VStack>
+
+      {/* {owner == null && (
         <VStack
           paddingTop={"20vh"}
           height={"100vh"}
@@ -225,7 +187,7 @@ function ExploreNfts(props) {
       {owner != null && (
         <>
           <VStack
-            height={contractTokenURIs.length > 0 ? "fit-content" : "100vh"}
+            height={"100vh"}
             bg="black"
             textColor={"white"}
             width={"100%"}
@@ -281,7 +243,7 @@ function ExploreNfts(props) {
               />
             </HStack>
 
-            {loading && contractTokenURIs.length==0 && <Heading>Loading NFT Collections..</Heading>}
+            {loading && <Heading>Loading NFT Collections..</Heading>}
 
             <VStack
               align={"left"}
@@ -290,23 +252,11 @@ function ExploreNfts(props) {
               height={"fit-content"}
               spacing={10}
             >
-              {contractTokenURIs &&
-                contractTokenURIs.map((ContractInstance, index) => {
-                  return (
-                    <ContractNFTs
-                      key={
-                        ContractInstance.toString() 
-                      }
-                      Key={
-                        ContractInstance.toString() 
-                      }
-                      
-                      currentMenu={currentMenu}
-                      selector={setSelectedNft}
-                      contract={ContractInstance}
-                    />
-                  );
-                })}
+              {
+                filteredNfts?.map(nft=>{
+                 return <NftDetails  NFT={nft}/>
+                })
+              }
             </VStack>
           </VStack>
           {selectedNft != null && (
@@ -319,6 +269,7 @@ function ExploreNfts(props) {
           )}
         </>
       )}
+          */}
     </>
   );
 }

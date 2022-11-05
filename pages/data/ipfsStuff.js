@@ -17,8 +17,13 @@ export const getAllDappsUris = async (contract, setter) => {
   }
   return response.data.dapps;
 };
+function embedGateway(hash) {
+  console.log("Embedding gateway with ", hash);
+  return "https://ipfs.io/ipfs//" + hash;
+}
 
-export const getTokenIpfsData = async (tokenUri) => {
+export const getTokenMetadata = async (tokenUriHash) => {
+  let tokenUri = embedGateway(tokenUriHash);
   const response = await axios.get(tokenUri);
   let metadata = response.data;
   // console.log("metadata inside ipfs fetch is ", metadata);
@@ -27,9 +32,8 @@ export const getTokenIpfsData = async (tokenUri) => {
 
 export const getTokensMetaData = async (tokenURIs, setter) => {
   let metadataArray = [];
-
   return tokenURIs?.map(async (item, index) => {
-    return getTokenIpfsData(item).then(async (metadata) => {
+    return getTokenMetadata(item).then(async (metadata) => {
       metadataArray.push(metadata);
       if (index + 1 == tokenURIs.length) {
         if (setter) {
@@ -73,8 +77,9 @@ export function getImageLinkFromIPFS(cid) {
 }
 
 export const getAllContractAddressess = async (contract, setter) => {
+  
   let currentIPFSLink = await contract.contractAddressesIpfsLink();
-  console.log("ipfs link for contracts is ", currentIPFSLink);
+ //console.log("ipfs link for contracts is ", currentIPFSLink);
   if (currentIPFSLink == "") {
     if (setter) {
       setter([]);
@@ -83,7 +88,7 @@ export const getAllContractAddressess = async (contract, setter) => {
   }
   let link = `https://${currentIPFSLink}.ipfs.w3s.link/contracts.json`;
   const response = await axios.get(link);
-  console.log("the contracts are ", response.data.contracts);
+// console.log("the contracts are ", response.data.contracts);
   if (setter) {
     setter(response.data.contracts);
   }

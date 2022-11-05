@@ -11,8 +11,10 @@ contract NftRentingTracker{
 -> Host an Event
 -> Use Personal data for organization
 */
-
-
+address platformOwner;
+constructor(){
+platformOwner=msg.sender;
+}
  struct NFT{
         address contractAddress;
         uint tokenId;
@@ -148,6 +150,12 @@ function getTokenRentPrice(address contractAddress,uint tokenId)public view retu
 function isRented(address contractAddress,uint tokenId)public view returns(bool){
  IERC4907 _contract =IERC4907(contractAddress);
  return _contract.userExpires(tokenId)>block.timestamp;
+
+}
+
+function withdrawPlatformMoney()public payable{
+    require(msg.sender==platformOwner,"You are not an Owner of Platform");
+    payable(msg.sender).transfer(address(this).balance);
 
 }
     
