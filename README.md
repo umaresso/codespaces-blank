@@ -127,7 +127,13 @@ We could load available NFTs from smart contracts but it is a slow process and U
 We have achieved both User Experience and Decentralized storage properties with **IPFS and filecoin's web3 storage**.
 
 ## RentWeb3 Flow
-while writing flow of our project we have to enter images of website.
+while writing flow of our project we have to enter images of website.<br/>
+We have to make a separate doc for it in which we have to mention <br/>
+(
+key features and how top perform them on website
+)
+
+## Revenue Model
 
 ## Accomplishments that we're proud of
 we have to mention five points of judging criteria <br/>
