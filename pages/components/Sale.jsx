@@ -14,7 +14,7 @@ import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
 
 import { useRouter } from "next/router";
-import { getProviderOrSigner } from "../data/accountsConnection";
+import { getProviderOrSigner } from "../../data/accountsConnection";
 let NetworkChain = "ethereum";
 
 function Sale(props) {

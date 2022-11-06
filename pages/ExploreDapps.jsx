@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Box,
-  Grid,
-  GridItem,
   Heading,
   HStack,
   Img,
@@ -11,21 +8,20 @@ import {
   Wrap,
   Center,
   WrapItem,
-  Button,
+  
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import DappInformationPopup from "./components/DappInformationPopup";
-import { getCustomNetworkWebsiteRentContract } from "./data/WebsiteRent";
-import { fetchWhitelists } from "./data/Whitelist";
-import { fetchSales } from "./data/Sale";
+import { getCustomNetworkWebsiteRentContract } from "../data/WebsiteRent";
+import { fetchWhitelists } from "../data/Whitelist";
+import { fetchSales } from "../data/Sale";
 import {
   fetchDappsContent,
   getAllDappsUris,
-  getImageLinkFromIPFS,
-} from "./data/ipfsStuff";
-import { getProviderOrSigner } from "./data/accountsConnection";
+  
+} from "../data/ipfsStuff";
+import { getProviderOrSigner } from "../data/accountsConnection";
 import { useRef } from "react";
-import Web3Modal from "web3modal";
 
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {

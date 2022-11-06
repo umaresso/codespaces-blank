@@ -9,7 +9,6 @@ import {
   Wrap,
 } from "@chakra-ui/react";
 import LinkButton from "./components/LinkButton/LinkButton";
-import Head from "next/head";
 function Explore() {
   return (
     <VStack height={"100vh"} bg="black" textColor={"white"}>

@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "../data/accountsConnection";
 import {
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
@@ -20,11 +20,11 @@ import {
   getNftUser,
   getRentableContract,
   isRented,
-} from "./data/NftRenting";
+} from "../data/NftRenting";
 import {
   getAllContractAddressess,
   getAllContractTokens,
-} from "./data/ipfsStuff";
+} from "../data/ipfsStuff";
 import NftInformationPopup from "./components/NftInformationPopup";
 import NftDetails from "./components/NftDetails";
 

@@ -16,24 +16,22 @@ import { Web3Storage } from "web3.storage";
 import Card from "./components/Card/Card";
 import LinkButton from "./components/LinkButton/LinkButton";
 import NamedInput from "./components/NamedInput";
-import SuccessfulDeployment from "./components/SuccessfulDeployment";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "../data/accountsConnection";
 import {
   getCustomNetworkERC721Contract,
   getPureTokenUri,
   getTokenOwner,
-} from "./data/ERC721";
+} from "../data/ERC721";
 import {
   getAllContractAddressess,
   getAllContractTokens,
   getTokenMetadata,
-} from "./data/ipfsStuff";
+} from "../data/ipfsStuff";
 import {
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
-  getNftPrice,
   getRentableContract,
-} from "./data/NftRenting";
+} from "../data/NftRenting";
 let NetworkChain = "goerli";
 export async function getStaticProps(context) {
   require("dotenv").config();

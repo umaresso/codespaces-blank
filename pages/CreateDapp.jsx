@@ -17,11 +17,11 @@ import React, { useEffect, useRef, useState } from "react";
 import NamedInput from "./components/NamedInput";
 import LinkButton from "./components/LinkButton/LinkButton";
 import { Web3Storage } from "web3.storage";
-import { getCustomNetworkWebsiteRentContract } from "./data/WebsiteRent";
-import { getAllDappsUris } from "./data/ipfsStuff";
+import { getCustomNetworkWebsiteRentContract } from "../data/WebsiteRent";
+import { getAllDappsUris } from "../data/ipfsStuff";
 import { parseEther } from "ethers/lib/utils";
 import { useRouter } from "next/router";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "../data/accountsConnection";
 
 export async function getStaticProps(context) {
   require("dotenv").config();

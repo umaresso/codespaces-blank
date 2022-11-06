@@ -4,9 +4,9 @@ import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
 import DropDownMenu from "./DropDownMenu";
 import { parseEther } from "ethers/lib/utils";
-import { getCustomNetworkWebsiteRentContract } from "../data/WebsiteRent";
+import { getCustomNetworkWebsiteRentContract } from "../../data/WebsiteRent";
 import { useRef } from "react";
-import { getProviderOrSigner } from "../data/accountsConnection";
+import { getProviderOrSigner } from "../../data/accountsConnection";
 import { getMinimalAddress } from "../../Utilities";
 
 let NetworkChain = "goerli";

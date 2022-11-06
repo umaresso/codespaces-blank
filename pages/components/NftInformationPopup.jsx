@@ -13,25 +13,15 @@ import {
 } from "@chakra-ui/react";
 import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
-import {
-  whitelistABI,
-  whitelistTrackerABI,
-  whitelistTrackerAddress,
-} from "../data/Whitelist";
-import { SaleTrackerABI, SaleTrackerAddress } from "../data/Sale";
-import IntegrateFrontend from "./IntegrateFrontend";
 import { getMinimalAddress } from "../../Utilities";
 import {
-  getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
-  getNftPrice,
   getRentableContract,
   rentNFT,
-} from "../data/NftRenting";
+} from "../../data/NftRenting";
 import { useRef } from "react";
-import { delay } from "framer-motion";
-import { getIpfsImageLink } from "../data/ipfsStuff";
-import { getProviderOrSigner } from "../data/accountsConnection";
+import { getIpfsImageLink } from "../../data/ipfsStuff";
+import { getProviderOrSigner } from "../../data/accountsConnection";
 import { useRouter } from "next/router";
 
 const ethers = require("ethers");

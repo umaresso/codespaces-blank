@@ -11,13 +11,12 @@ import {
 import {
   getCustomNetworkSaleContract,
   getCustomNetworkSaleTrackerContract,
-} from "./data/Sale";
+} from "../data/Sale";
 import {
   fetchWhitelistAddresses,
   getCustomNetworkWhitelistContract,
   getCustomNetworkWhitelistTrackerContract,
-  whitelistABI,
-} from "./data/Whitelist";
+} from "../data/Whitelist";
 
 import React, { useEffect, useState, useRef } from "react";
 import NamedInput from "./components/NamedInput";
@@ -27,7 +26,7 @@ import Sale from "./components/Sale";
 import LinkButton from "./components/LinkButton/LinkButton";
 import DropDownMenu from "./components/DropDownMenu";
 import SuccessfulDeployment from "./components/SuccessfulDeployment";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "../data/accountsConnection";
 import { getMinimalAddress } from "../Utilities";
 
 let NetworkChain = "goerli";

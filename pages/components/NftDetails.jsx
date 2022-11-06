@@ -3,22 +3,12 @@ import {
   Heading,
   HStack,
   Img,
-  Text,
   VStack,
-  Wrap,
-  WrapItem,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { transform } from "lodash";
-import Head from "next/head";
 import React from "react";
 import { useRef } from "react";
 import { useState, useEffect } from "react";
-import { Blob } from "web3.storage";
-import { getMinimalAddress } from "../../Utilities";
-import { getProviderOrSigner } from "../data/accountsConnection";
-import { getContractName } from "../data/ERC721";
-import { getIpfsImageLink, getTokensMetaData } from "../data/ipfsStuff";
+import { getIpfsImageLink } from "../../data/ipfsStuff";
 let NetwokChain = "goerli";
 function NftDetails({ NFT, selector }) {
   const [loading, setLoading] = useState(true);

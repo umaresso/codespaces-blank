@@ -10,14 +10,7 @@ import {
   Center,
   Img,
 } from "@chakra-ui/react";
-import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
-import {
-  whitelistABI,
-  whitelistTrackerABI,
-  whitelistTrackerAddress,
-} from "../data/Whitelist";
-import { SaleTrackerABI, SaleTrackerAddress } from "../data/Sale";
 import IntegrateFrontend from "./IntegrateFrontend";
 const ethers = require("ethers");
 

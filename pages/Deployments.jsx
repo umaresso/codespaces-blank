@@ -1,23 +1,20 @@
-import React, { Component, useEffect, useState ,useRef} from "react";
+import React, {  useEffect, useState ,useRef} from "react";
 import {
   VStack,
   Heading,
   Center,
   Text,
-  Box,
-  HStack,
   WrapItem,
   Wrap,
 } from "@chakra-ui/react";
-import Card from "./components/Card/Card";
 import {
   fetchWhitelists,
-} from "./data/Whitelist";
+} from "../data/Whitelist";
 import {
   fetchSales,
-} from "./data/Sale";
+} from "../data/Sale";
 import DeploymentCard from "./components/DeploymentCard";
-import { getProviderOrSigner } from "./data/accountsConnection";
+import { getProviderOrSigner } from "../data/accountsConnection";
 /**
  *
  * Blockchain Things

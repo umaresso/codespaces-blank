@@ -1,6 +1,6 @@
 import React from "react";
 import { VStack, Heading, Text } from "@chakra-ui/react";
-import { getBlockExplorer } from "../data/blockchainSpecificExports";
+import { getBlockExplorer } from "../../data/blockchainSpecificExports";
 import Link from "next/link";
 import LinkButton from "./LinkButton/LinkButton";
 function SuccessfulDeployment({ address, network }) {

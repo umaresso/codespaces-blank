@@ -4,10 +4,10 @@ import { Center, Box, HStack, VStack, Heading, Text } from "@chakra-ui/react";
 import {
   getCustomNetworkWhitelistContract,
   getCustomNetworkWhitelistTrackerContract,
-} from "./data/Whitelist";
+} from "../data/Whitelist";
 
-import Sale from ".//components/Sale";
-import SuccessfulDeployment from ".//components/SuccessfulDeployment";
+import Sale from "./components/Sale";
+import SuccessfulDeployment from "./components/SuccessfulDeployment";
 import { getMinimalAddress } from "../Utilities";
 
 const ethers = require("ethers");
