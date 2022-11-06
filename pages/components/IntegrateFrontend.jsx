@@ -130,9 +130,7 @@ function IntegrateFrontend(props) {
                     setWebsiteURL(res);
                   }}
                   variant="outline"
-                  defaultValue={() => {
-                    return website ? website : "";
-                  }}
+                  defaultValue={website? website : null}
                   placeholder="https://project.com"
                 />
               </NamedInput>
