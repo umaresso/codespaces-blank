@@ -23,7 +23,7 @@ function Sale(props) {
   let Children = props.children;
   const [startTime, setStartTime] = useState(new Date().getTime());
   const [endTime, setEndTime] = useState(new Date().getTime());
-  const [saleSupply, setSaleSupply] = useState(100);
+  const [saleSupply, setSaleSupply] = useState(null);
   const [name, setName] = useState(props._name);
   const [symbol, setSymbol] = useState(props._symbol);
   const [owner, setOwner] = useState(props._owner);
@@ -95,7 +95,7 @@ function Sale(props) {
               }}
               variant="outline"
               defaultValue={name}
-              
+              placeholder={"e.g Bored Ape Yacht Club"}
             />
           </NamedInput>
           <NamedInput title={"Symbol"}>
@@ -108,6 +108,7 @@ function Sale(props) {
               }}
               variant="outline"
               defaultValue={symbol}
+              placeholder={"e.g Ape"}
             />
           </NamedInput>
           <NamedInput title={"Owner"}>
@@ -133,6 +134,7 @@ function Sale(props) {
               }}
               variant="outline"
               defaultValue={saleSupply}
+              placeholder={"e.g 100"}
             />
           </NamedInput>
 
@@ -146,11 +148,11 @@ function Sale(props) {
               }}
               variant="outline"
               defaultValue={""}
-              placeholder={"ethereum , tron or polygon"}
+              placeholder={"Ethereum , Tron or Polygon"}
             />
           </NamedInput>
 
-          {baseURI && (
+          
             <NamedInput title={"baseURI"}>
               {" "}
               <Input
@@ -160,10 +162,9 @@ function Sale(props) {
                   setBaseURI(res);
                 }}
                 variant="outline"
-                defaultValue={baseURI}
+                placeholder={"e.g  //ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6"}
               />
             </NamedInput>
-          )}
 
           <NamedInput background={"white"} color={"black"} title={"Start Time"}>
             {" "}

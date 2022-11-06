@@ -27,14 +27,6 @@ function CreateWhitelist(props) {
   const [whitelistTracker, setWhitelistTracker] = useState(null);
   const Web3ModalRef = useRef();
 
-  /** Dummy Data */
-  let _name = "bored ape";
-  let _symbol = "monkey";
-  let _owner = "";
-  let _baseURI = "//ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6";
-  let bg = "black";
-  let textColor = "white";
-  let _storagePlatform = "pinata";
 
   /**  */
   function setStatus(message) {
@@ -157,11 +149,7 @@ function CreateWhitelist(props) {
           <Sale
             saleType={"whitelist"}
             deploySale={deployWhitelist}
-            _name={_name}
-            _symbol={_symbol}
-            _owner={_owner}
-            _baseURI={_baseURI}
-            _storagePlatform={_storagePlatform}
+            
           />
         </HStack>
       )}
