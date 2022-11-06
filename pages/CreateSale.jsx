@@ -234,13 +234,13 @@ function CreateSale() {
 
                   <Text color="white">
                     if you have not created whitelist before{" "}
-                    <a href="/CreateWhitelist">
+                    <Link href="/CreateWhitelist">
                       <i
                         style={{ textDecoration: "underline", padding: "4px" }}
                       >
                         Create Here
                       </i>
-                    </a>{" "}
+                    </Link>{" "}
                   </Text>
 
                   <LinkButton

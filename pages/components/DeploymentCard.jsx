@@ -47,7 +47,7 @@ function DeploymentCard(props) {
   return (
     <>
       <VStack
-        key={'deployment' + item.name}
+        key={'deployment' + item?.name}
         border={'1px solid grey'}
         borderRadius={'20px'}
         padding={['10px', '20px', '20px']}
@@ -65,25 +65,25 @@ function DeploymentCard(props) {
             textTransform={'capitalize'}
             fontWeight={"900"}
           >
-            {item.name ? item.name : 'Fetching..'}
+            {item?.name ? item?.name : 'Fetching..'}
           </Heading>
         </VStack>
         <Text>
-          <b>Address</b> : {getMinimalAddress(item.address)}
+          <b>Address</b> : {getMinimalAddress(item?.address)}
         </Text>
         <Text>
-          <b>Created on </b> : {getDate(item.startTime)}
+          <b>Created on </b> : {getDate(item?.startTime)}
         </Text>
         <Text>
           {' '}
           <b>Status </b> : {status}
         </Text>
 
-        {item.website ? (
+        {item?.website ? (
           <LinkButton
             title={'View Deployment'}
             color={'green'}
-            href={item.website}
+            href={item?.website}
             loadingMessage={'none'}
           />
         ) : (

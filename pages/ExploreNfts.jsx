@@ -209,7 +209,7 @@ function ExploreNfts(props) {
                   RentWeb3 is your favorite place to rent awesome NFTs to use in
                   your Next game , for attending an event or hosting your
                   Phenomenal event in the Metaverse. We bring you the NFTs from
-                  World's best creators at affordable prices. So , if you want
+                  World&apos;s best creators at affordable prices. So , if you want
                   to be the part of the family ,Rent an NFT Now !
                 </Text>
               </VStack>

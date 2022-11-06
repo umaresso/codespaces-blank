@@ -8,6 +8,7 @@ import { getCustomNetworkWebsiteRentContract } from "../../data/WebsiteRent";
 import { useRef } from "react";
 import { getProviderOrSigner } from "../../data/accountsConnection";
 import { getMinimalAddress } from "../../Utilities";
+import Link from "next/link"
 
 let NetworkChain = "goerli";
 

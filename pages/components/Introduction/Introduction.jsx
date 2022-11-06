@@ -4,7 +4,7 @@ import Link from "next/link";
 import LinkButton from "../LinkButton/LinkButton";
 import { Grid } from "@chakra-ui/react";
 import { VStack, Stack } from "@chakra-ui/react";
-import { getProviderOrSigner } from "../../data/accountsConnection";
+import { getProviderOrSigner } from "../../../data/accountsConnection";
 let NetworkChain = "goerli";
 
 function Introduction() {

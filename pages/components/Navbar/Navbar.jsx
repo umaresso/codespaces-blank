@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   getProviderOrSigner,
   connectWallet,
-} from "../../data/accountsConnection";
+} from "../../../data/accountsConnection";
 import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import Web3Modal from "web3modal";
 import { connect } from "formik";

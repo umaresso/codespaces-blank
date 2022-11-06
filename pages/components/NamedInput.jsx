@@ -3,19 +3,15 @@ import { Input, InputGroup, InputLeftAddon } from "@chakra-ui/react";
 function NamedInput(props) {
   let bg = "black";
   let textColor = "white";
-
+let title=props.title;
+let children=props.children;
   return (
     <InputGroup  {...props} borderRadius={"10px"}>
-      <InputLeftAddon textTransform={"capitalize"}
-        width={["150px","170px","180px"]}
-        fontWeight={"700"}
-        bg={bg}
-        fontSize={["12px","14px","14px"]}
-        color={textColor}
-        children={props.title}
-        borderRight={"2px white solid"}
+      <Input borderTopRightRadius={"0"}borderBottomRadius={"0"} borderRight={"2px solid white"} value={title} contentEditable={false}  width={"fit-content"} minW={"200px"} textTransform={"capitalize"}
       />
-      {props.children}
+      {
+        children
+      }
     </InputGroup>
   );
 }
