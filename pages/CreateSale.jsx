@@ -58,6 +58,7 @@ function CreateSale() {
   const [saleTrackerContract, setSaleTrackerContract] = useState(null);
   const [saleContract, setSaleContract] = useState(null);
   const [whitelistFactory, setWhitelistFactory] = useState(null);
+  const [fetching,setFetching]=useState(false);
   function setStatus(message) {
     let ele = document.getElementById("creationStatus");
     var p_tag = document.createElement("p");
@@ -67,6 +68,7 @@ function CreateSale() {
   }
 
   async function fetchDetails() {
+    setFetching(true);
     await getCustomNetworkWhitelistContract(
       NetworkChain,
       Web3ModalRef,
@@ -213,11 +215,11 @@ function CreateSale() {
   return (
     <>
       {deployedAddress === null && (
-        <Box>
+        <Box bg={"black"} width={"100vw"} height={"100vh"}>
           {formStep == 1 && (
             <Card>
-              <VStack width={"100%"} height={"90vh"} justify={"center"} color={textColor}>
-                <Heading paddingBottom={"5vh"}>Create Sale</Heading>
+              <VStack  height={"80vh"} justify={"center"} >
+                <Heading  color={textColor} paddingBottom={"5vh"}>Create Sale</Heading>
                 <VStack spacing={30}>
                   <NamedInput title={"Whitelist"}>
                     {
@@ -245,8 +247,7 @@ function CreateSale() {
 
                   <LinkButton
                     onClick={fetchDetails}
-                    title={`Fetch Details`}
-                    loadingMessage={`Fetching Details..`}
+                    title={fetching?"Fetching Detalis...":`Fetch Details`}
                     color={"green"}
                     variant={"solid"}
                   />
@@ -299,7 +300,7 @@ function CreateSale() {
             height={formStep != 2 ? "100vh" : "1px"}
             bg={"black"}
             color={"white"}
-            width={"100vw"}
+            width={"98%"}
             paddingTop={"20vh"}
             align={"center"}
             display={deployedAddress ? "none" : "flex"}
