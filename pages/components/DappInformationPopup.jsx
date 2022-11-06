@@ -48,14 +48,23 @@ function DappInformationPopup(props) {
             <VStack align={"left"}>
               <Heading paddingBottom={"5vh"}>Dapp information</Heading>
               <HStack justify="space-between" width="20vw">
-                <b>Name:</b><Text>{dapp?.name}</Text>
-
+                <b>Name:</b>
+                <Text>{dapp?.name}</Text>
               </HStack>
-              <HStack justify="space-between" width="20vw" textTransform={"capitalize"}>
-                <b>Rent Price:</b><Text>{ dapp?.rentPrice} {dapp?.currency}</Text>
+              <HStack
+                justify="space-between"
+                width="20vw"
+                textTransform={"capitalize"}
+              >
+                <b>Rent Price:</b>
+                <Text>
+                  {dapp?.rentPrice} {dapp?.currency}
+                </Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
-                <b>Owned By:</b><Text>{dapp?.owner.slice(0, 5)}..
+                <b>Owned By:</b>
+                <Text>
+                  {dapp?.owner.slice(0, 5)}..
                   {dapp?.owner.slice(40)}
                 </Text>
               </HStack>
@@ -63,20 +72,22 @@ function DappInformationPopup(props) {
                 <b>Type:</b> <Text>{dapp?.type}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
-                <b>Availability:</b><Text>{!dapp?.rented ? "Available" : "Rented"}</Text>
+                <b>Availability:</b>
+                <Text>{!dapp?.rented ? "Available" : "Rented"}</Text>
               </HStack>
 
               <HStack paddingTop={"5vh"} spacing={20}>
                 <LinkButton
                   onClick={() => {
                     if (dapp?.rented) {
-                      alert("Dapp is already Rented ! \nCome again another time");
+                      alert(
+                        "Dapp is already Rented ! \nCome again another time"
+                      );
                       return;
                     }
 
                     integrate();
-                  }
-                  }
+                  }}
                   title={`Rent`}
                   loadingMessage={`Purchasing..`}
                   color={"green"}
@@ -84,7 +95,6 @@ function DappInformationPopup(props) {
                 />
                 <LinkButton
                   onClick={() => {
-
                     displayToggle(false);
                   }}
                   title={`Close`}
@@ -103,16 +113,9 @@ function DappInformationPopup(props) {
             }}
             website={dapp?.url}
             type={dapp?.type}
-            deployments={()=>{
-              if(dapp?.type)
-                return dapp.type == "whitelist" ? whitelists : sales
-              return "";
-            }
-              
-            }
+            deployments={dapp.type == "whitelist" ? whitelists : sales}
             price={dapp?.rentPrice}
             selected={dapp?.type == "whitelist" ? whitelists[0] : sales[0]}
-
           />
         </Box>
       )}

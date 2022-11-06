@@ -13,6 +13,7 @@ import Link from "next/link";
 let NetworkChain = "goerli";
 
 function IntegrateFrontend(props) {
+  console.log("props are ",props);
   let showToggle = props.showToggle;
   let _deployments = props.deployments;
   let _selectedOption = props.selected;
@@ -151,9 +152,7 @@ function IntegrateFrontend(props) {
                   key={"daysCount"}
                   disabled
                   variant="outline"
-                  value={() => {
-                    return price ? numDays * price : numDays;
-                  }}
+                  value={numDays * price }
                 />
               </NamedInput>
 
