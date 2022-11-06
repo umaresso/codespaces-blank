@@ -43,7 +43,7 @@ function ExploreNfts(props) {
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NFTs, setNFTs] = useState([]);
-  const [filteredNfts, setFilteredNfts] = useState([]);
+ let filteredNfts=[];
   let web3ModalRef = useRef();
   async function connectWallet() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
@@ -116,11 +116,13 @@ function ExploreNfts(props) {
           contractsAddressIndex + 1 == contractsArray.length &&
           tokenIndexer + 1 == thisContractTokens.length
         ) {
+          setLoading(false);
+
+          setCurrentMenu("available")
           setNFTs(allNFTs);
         }
       });
     });
-    setLoading(false);
 
     setNftRentingTracker(trackerContract);
   }
@@ -147,19 +149,13 @@ function ExploreNfts(props) {
         (currentMenu == "mine" &&
           (nft.owner == walletAddress || nft.user == walletAddress))
       ) {
-        filtered.push(nft);
+        filteredNfts.push(nft);
       }
     });
-    if (filtered.length !== filteredNfts.length) setFilteredNfts(filtered);
   } else {
-    filtered=[...filteredNfts];
+    filteredNfts=[...NFTs];
   }
-  if(NFTs.length!==filteredNfts.length){
-    setFilteredNfts(NFTs)
-
-  }else{
-    console.log("preventing render");
-  }
+  
   console.log("filtered NFT are", filteredNfts);
 
   return (
@@ -184,7 +180,7 @@ function ExploreNfts(props) {
       {walletAddress != null && (
         <>
           <VStack
-            height={filteredNfts.length > 0 ? "fit-content" : "100vh"}
+            height={filteredNfts?.length > 0 ? "fit-content" : "100vh"}
             minHeight={"100vh"}
             bg="black"
             textColor={"white"}
