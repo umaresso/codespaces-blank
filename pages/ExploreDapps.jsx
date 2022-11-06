@@ -8,18 +8,13 @@ import {
   Wrap,
   Center,
   WrapItem,
-  
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import DappInformationPopup from "./components/DappInformationPopup";
 import { getCustomNetworkWebsiteRentContract } from "../data/WebsiteRent";
 import { fetchWhitelists } from "../data/Whitelist";
 import { fetchSales } from "../data/Sale";
-import {
-  fetchDappsContent,
-  getAllDappsUris,
-  
-} from "../data/ipfsStuff";
+import { fetchDappsContent, getAllDappsUris } from "../data/ipfsStuff";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { useRef } from "react";
 
@@ -95,16 +90,26 @@ function ExploreDapps(props) {
   /**      */
   async function init() {
     setLoader(true);
-    getCustomNetworkWebsiteRentContract(
+    await getCustomNetworkWebsiteRentContract(
       NetworkChain,
       web3ModalRef,
       setWebsiteRentContract
     ).then(async (contract) => {
-      await getAllDappsUris(contract).then((cids) => {
+      await getAllDappsUris(contract).then(async (cids) => {
         console.log("CIDs are ", cids);
+        setDappCids(cids);
         if (cids.length == 0) {
           setLoader(false);
-        } else fetchDappsContent(cids, setAllDapps, setLoader,NetworkChain,web3ModalRef);
+        } else {
+          await fetchDappsContent(
+            cids,
+            setAllDapps,
+            setLoader,
+            NetworkChain,
+            web3ModalRef
+          );
+          setLoader(false);
+        }
       });
       setWebsiteRentContract(contract);
     });
@@ -113,14 +118,14 @@ function ExploreDapps(props) {
   useEffect(() => {
     init();
   }, []);
-console.log("Filtered Dapps are ",filteredDapps)
+  console.log("Filtered Dapps are ", filteredDapps);
   return (
     <>
       <VStack height={"fit-content"} bg="black" textColor={"white"}>
         <Center>
           <VStack>
             <Heading paddingTop={"10vh"} fontSize={"4.5em"} width={"60vw"}>
-              Rent Awesome Dapps like You 
+              Rent Awesome Dapps like You
             </Heading>
             <Text
               fontFamily={"sans-serif"}
@@ -154,7 +159,7 @@ console.log("Filtered Dapps are ",filteredDapps)
             isClicked={currentMenu === "sale"}
           />
         </HStack>
-        {filteredDapps.length > 0 ? (
+        {filteredDapps?.length > 0 ? (
           <Wrap
             padding={"10px"}
             transition={"display 900ms ease-in-out"}
@@ -211,7 +216,9 @@ console.log("Filtered Dapps are ",filteredDapps)
         ) : (
           <Text height={"50vh"}>
             {" "}
-            {loader ? "Loading Available Dapps" : "No Dapps Available"}{" "}
+            {loader == false && !dappCids?.length
+              ? "No Dapps Available"
+              : "Loading Available Dapps"}{" "}
           </Text>
         )}
       </VStack>
