@@ -140,6 +140,8 @@ export const getAllContractTokens = async (contract, setter) => {
   }
 };
 export function getIpfsImageLink(_link) {
+  if(!_link)
+      return "";
   if (_link.toString().startsWith("ipfs://")) {
     let Cid = _link.toString().slice(7);
     let link = "https://gateway.pinata.cloud/ipfs/" + Cid;

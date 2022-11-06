@@ -7,6 +7,8 @@ const SHASTA_BLOCK_EXPLORER='https://shasta.tronscan.org/#/address/';
 
 
 export function getBlockExplorer(network){
+    if(!network)
+        return null;
     switch (network) {
         case 'ethereum':
             return ETH_BLOCK_EXPLORER;

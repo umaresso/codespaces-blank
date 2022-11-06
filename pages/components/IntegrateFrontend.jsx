@@ -116,7 +116,7 @@ function IntegrateFrontend(props) {
                       setSelectedDeployment(val);
                     }}
                     options={_deployments}
-                    selected={_deployments[0]}
+                    selected={_deployments? _deployments[0]:null}
                   />
                 }
               </NamedInput>

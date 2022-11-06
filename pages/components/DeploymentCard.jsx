@@ -11,7 +11,7 @@ function DeploymentCard(props) {
   let bg = 'black'
   let textColor = 'white'
   let item = props.item
-  let endTime = item.endTime * 1000
+  let endTime = item?.endTime * 1000
   let type = props.type
 
   function navigateToExplore() {
