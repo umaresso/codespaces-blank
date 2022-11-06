@@ -38,19 +38,21 @@ function getCurrency() {
       break;
   }
 }
-function NftInformationPopup({ NFT, displayToggle }) {
+function NftInformationPopup(props) {
+  let NFT=props.NFT;
+  let displayToggle=props.displayToggle;
   let Nft = NFT;
   const router = useRouter();
   const [rentWill, setrentWill] = useState(false);
-  const [rentPrice, setRentPrice] = useState(Nft.rentPrice);
+  const [rentPrice, setRentPrice] = useState(Nft?.rentPrice);
   const [nftTrackerContract, setNftTrackerContract] = useState(null);
   const [rentableContract, setRentableContract] = useState(null);
   const [rentDays, setRentDays] = useState(1);
   const [walletAddress, setWalletAddress] = useState(null);
   const [reload, setReload] = useState(false);
   // console.log("NFT received", NFT);
-  let ErcContractAddress = Nft.erc721ContractAddress;
-  let owner = Nft.owner;
+  let ErcContractAddress = Nft?.erc721ContractAddress;
+  let owner = Nft?.owner;
   let DisplayToggle = displayToggle;
 
   let web3ModalRef = useRef();
@@ -70,7 +72,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
     await rentNFT(
       nftTrackerContract,
       rentableContract,
-      Nft.id,
+      Nft?.id,
       rentDays,
       totalPrice,
       setStatus,
@@ -93,8 +95,8 @@ function NftInformationPopup({ NFT, displayToggle }) {
 
     getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
       async (TrackerContract) => {
-        if (!Nft.rentableContract) {
-          getRentableContract(TrackerContract, Nft.erc721ContractAddress).then(
+        if (!Nft?.rentableContract) {
+          getRentableContract(TrackerContract, Nft?.erc721ContractAddress).then(
             (rentableSmartContractInstance) => {
               setRentableContract(rentableSmartContractInstance);
             }
@@ -109,7 +111,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
   useEffect(() => {
     init();
   }, [walletAddress]);
-  let image = getIpfsImageLink(Nft.image);
+  let image = getIpfsImageLink(Nft?.image);
   return (
     <Center height={"100vh"} width={"100vw"} position={"fixed"} top={"0"}>
       {!rentWill ? (
@@ -133,7 +135,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
               <Heading paddingBottom={"2vh"}>NFT information</Heading>
               <HStack align={"center"} justify="space-between">
                 <b>Token ID : </b>
-                <Text>{Nft.id}</Text>
+                <Text>{Nft?.id}</Text>
               </HStack>
               <HStack
                 align={"center"}
@@ -148,35 +150,35 @@ function NftInformationPopup({ NFT, displayToggle }) {
               <HStack align={"center"} justify="space-between">
                 <b>Owner : </b>
                 <Text>
-                  {walletAddress == Nft.owner && "You -> "}
+                  {walletAddress == Nft?.owner && "You -> "}
                   {getMinimalAddress(owner)}
                 </Text>
               </HStack>
-              {Nft.type && (
+              {Nft?.type && (
                 <HStack align={"center"} justify="space-between">
-                  <b>Type : </b> <Text>{Nft.type}</Text>
+                  <b>Type : </b> <Text>{Nft?.type}</Text>
                 </HStack>
               )}
 
               <HStack align={"center"} justify="space-between">
                 <b>Availability : </b>
-                <Text>{!Nft.rented ? "Yes" : "No"}</Text>
+                <Text>{!Nft?.rented ? "Yes" : "No"}</Text>
               </HStack>
-              {Nft.rented && (
+              {Nft?.rented && (
                 <HStack align={"center"} justify="space-between">
                   <b>Current User : </b>
 
                   <Text>
                     {" "}
-                    {walletAddress == Nft.user && "You -> "}
-                    {getMinimalAddress(Nft.user)}
+                    {walletAddress == Nft?.user && "You -> "}
+                    {getMinimalAddress(Nft?.user)}
                   </Text>
                 </HStack>
               )}
               <HStack paddingTop={"5vh"} justify={"space-between"}>
                 <LinkButton
                   onClick={() => {
-                    if (Nft.rented) {
+                    if (Nft?.rented) {
                       alert(
                         "Nft is already Rented ! \nCome again another time"
                       );
@@ -214,7 +216,7 @@ function NftInformationPopup({ NFT, displayToggle }) {
           <VStack spacing={10} width={"50vw"}>
             <Heading textColor={"white"}>Rent NFT</Heading>
             <NamedInput title={"Token Id"}>
-              <Input readOnly value={Nft.id} />
+              <Input readOnly value={Nft?.id} />
             </NamedInput>
             <NamedInput title={"Rent Days"}>
               <Input
