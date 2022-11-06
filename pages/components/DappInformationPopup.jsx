@@ -43,33 +43,33 @@ function DappInformationPopup(props) {
               height={"35vh"}
               width={"30vw"}
               borderRadius={"20px"}
-              src={dapp.image}
+              src={dapp?.image}
             />
             <VStack align={"left"}>
               <Heading paddingBottom={"5vh"}>Dapp information</Heading>
               <HStack justify="space-between" width="20vw">
-                <b>Name:</b><Text>{dapp.name}</Text>
+                <b>Name:</b><Text>{dapp?.name}</Text>
 
               </HStack>
               <HStack justify="space-between" width="20vw" textTransform={"capitalize"}>
-                <b>Rent Price:</b><Text>{ dapp.rentPrice} {dapp.currency}</Text>
+                <b>Rent Price:</b><Text>{ dapp?.rentPrice} {dapp?.currency}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
                 <b>Owned By:</b><Text>{dapp.owner.slice(0, 5)}..
-                  {dapp.owner.slice(40)}
+                  {dapp?.owner.slice(40)}
                 </Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
-                <b>Type:</b> <Text>{dapp.type}</Text>
+                <b>Type:</b> <Text>{dapp?.type}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
-                <b>Availability:</b><Text>{!dapp.rented ? "Available" : "Rented"}</Text>
+                <b>Availability:</b><Text>{!dapp?.rented ? "Available" : "Rented"}</Text>
               </HStack>
 
               <HStack paddingTop={"5vh"} spacing={20}>
                 <LinkButton
                   onClick={() => {
-                    if (dapp.rented) {
+                    if (dapp?.rented) {
                       alert("Dapp is already Rented ! \nCome again another time");
                       return;
                     }
@@ -101,13 +101,17 @@ function DappInformationPopup(props) {
             showToggle={() => {
               setPurchaseWill(false);
             }}
-            website={dapp.url}
-            type={dapp.type}
-            deployments={
-              dapp.type == "whitelist" ? whitelists : sales
+            website={dapp?.url}
+            type={dapp?.type}
+            deployments={()=>{
+              if(dapp?.type)
+                return dapp.type == "whitelist" ? whitelists : sales
+              return "";
             }
-            price={dapp.rentPrice}
-            selected={dapp.type == "whitelist" ? whitelists[0] : sales[0]}
+              
+            }
+            price={dapp?.rentPrice}
+            selected={dapp?.type == "whitelist" ? whitelists[0] : sales[0]}
 
           />
         </Box>
