@@ -8,7 +8,7 @@ import { getCustomNetworkWebsiteRentContract } from "../../data/WebsiteRent";
 import { useRef } from "react";
 import { getProviderOrSigner } from "../../data/accountsConnection";
 import { getMinimalAddress } from "../../Utilities";
-import Link from "next/link"
+import Link from "next/link";
 
 let NetworkChain = "goerli";
 
@@ -44,7 +44,7 @@ function IntegrateFrontend(props) {
       NetworkChain,
       web3ModalRef
     );
-    console.log("website rent contract ",websiteRentContract)
+    console.log("website rent contract ", websiteRentContract);
     let dayPrice = price;
     let totalPrice = dayPrice * numDays;
     let days = parseInt(numDays);
@@ -64,12 +64,12 @@ function IntegrateFrontend(props) {
       }
       let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
       let gasPrice = await signer.getGasPrice();
-//      gasPrice = parseInt(gasPrice);
+      //      gasPrice = parseInt(gasPrice);
       console.log("gasPrices are ", gasPrice);
       setStatus("Making Dapp Rent Transaction");
       setStatus("Approve Transaction");
       var options = {
-        gasLimit: 3000000 ,
+        gasLimit: 3000000,
         value: parseEther(totalPrice.toString()),
       };
       console.log("renting with ", {
@@ -129,7 +129,9 @@ function IntegrateFrontend(props) {
                     setWebsiteURL(res);
                   }}
                   variant="outline"
-                  defaultValue={website}
+                  defaultValue={() => {
+                    return website ? website : "";
+                  }}
                   placeholder="https://project.com"
                 />
               </NamedInput>
@@ -149,7 +151,9 @@ function IntegrateFrontend(props) {
                   key={"daysCount"}
                   disabled
                   variant="outline"
-                  value={numDays * price}
+                  value={() => {
+                    return price ? numDays * price : numDays;
+                  }}
                 />
               </NamedInput>
 
@@ -160,7 +164,7 @@ function IntegrateFrontend(props) {
                   color={"white"}
                   variant={"outline"}
                   onClick={() => {
-                    showToggle(null);
+                    showToggle && showToggle(null);
                   }}
                 />
                 <LinkButton

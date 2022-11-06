@@ -10,8 +10,10 @@ import { useRef } from "react";
 import { useState, useEffect } from "react";
 import { getIpfsImageLink } from "../../data/ipfsStuff";
 let NetwokChain = "goerli";
-function NftDetails({ NFT, selector }) {
+function NftDetails(props) {
   const [loading, setLoading] = useState(true);
+  let NFT=props.NFT;
+  let selector=props.selector;
   let Nft = { ...NFT };
   const [tokenMetadataArray, setTokenMetadataArray] = useState(null);
   const [contractName, setContractName] = useState(null);
@@ -32,8 +34,8 @@ function NftDetails({ NFT, selector }) {
     // });
   }, []);
 
-  let img = getIpfsImageLink(Nft.image);
-  let Key = Nft.name + Nft.id;
+  let img = getIpfsImageLink(Nft?.image);
+  let Key = Nft?.name + Nft?.id+'key';
   return (
     <VStack onClick={() => selector(Nft)} height={"fit-content"} key={Key}>
       <Img
@@ -53,7 +55,7 @@ function NftDetails({ NFT, selector }) {
       />
       <HStack spacing={5}>
         <Heading fontSize={"20px"}>
-          Token # <b>{Nft.id}</b>
+          Token # <b>{Nft?.id}</b>
         </Heading>
         {!Nft.rented ? (
           <Button size={"sm"}  colorScheme={"green"} textColor={"white"}>
