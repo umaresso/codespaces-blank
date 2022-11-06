@@ -43,52 +43,8 @@ function ExploreNfts(props) {
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NFTs, setNFTs] = useState([]);
+  const [filteredNfts, setFilteredNfts] = useState([]);
   let web3ModalRef = useRef();
-  // console.log("contract tokens are", contractTokens);
-
-  /**
-   *
-   * IPFS
-   *
-   */
-
-  // function getAccessToken() {
-  //   return props.token;
-  // }
-  // async function storeWithProgress(files) {
-  //   // show the root cid as soon as it's ready
-  //   const onRootCidReady = (cid) => {
-  //     console.log("uploading files with cid:", cid);
-  //   };
-
-  //   // when each chunk is stored, update the percentage complete and display
-  //   const totalSize = files.map((f) => f.size).reduce((a, b) => a + b, 0);
-  //   let uploaded = 0;
-
-  //   const onStoredChunk = (size) => {
-  //     uploaded += size;
-  //     const pct = 100 * (uploaded / totalSize);
-  //   };
-
-  //   const client = makeStorageClient();
-  //   return client.put(files, { onRootCidReady, onStoredChunk });
-  // }
-  // async function StoreUpdatedcontractsOnIpfs(contractAddresses) {
-  //   const _blob = new Blob(
-  //     [
-  //       JSON.stringify({
-  //         contracts: [...contractAddresses],
-  //       }),
-  //     ],
-  //     { type: "application/json" }
-  //   );
-  //   const updatedDappInfo = [new File([_blob], `contracts.json`)];
-  //   let newCID = await storeWithProgress(updatedDappInfo);
-  //   return newCID;
-  // }
-
-  /**      */
-
   async function connectWallet() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
       if (signer) {
@@ -161,10 +117,11 @@ function ExploreNfts(props) {
           tokenIndexer + 1 == thisContractTokens.length
         ) {
           setNFTs(allNFTs);
-          setLoading(false);
         }
       });
     });
+    setLoading(false);
+
     setNftRentingTracker(trackerContract);
   }
   function getAccessToken() {
@@ -181,10 +138,8 @@ function ExploreNfts(props) {
   }, [walletAddress]);
 
   // console.log("NFTs are", NFTs);
-  let filteredNfts = [];
-  if (currentMenu === "all") {
-    filteredNfts = NFTs;
-  } else {
+  let filtered = [];
+  if (currentMenu != "all") {
     NFTs?.map((nft) => {
       if (
         (currentMenu == "rented" && nft.rented) ||
@@ -192,11 +147,19 @@ function ExploreNfts(props) {
         (currentMenu == "mine" &&
           (nft.owner == walletAddress || nft.user == walletAddress))
       ) {
-        filteredNfts.push(nft);
+        filtered.push(nft);
       }
     });
+    if (filtered.length !== filteredNfts.length) setFilteredNfts(filtered);
+  } else {
+    filtered=[...filteredNfts];
   }
-  console.log("NFTs are", NFTs);
+  if(NFTs.length!==filteredNfts.length){
+    setFilteredNfts(NFTs)
+
+  }else{
+    console.log("preventing render");
+  }
   console.log("filtered NFT are", filteredNfts);
 
   return (
@@ -228,12 +191,12 @@ function ExploreNfts(props) {
             width={"100%"}
             paddingBottom={"5vh"}
           >
-            <Center  >
-              <VStack  >
+            <Center>
+              <VStack>
                 <Heading
                   paddingTop={"15vh"}
                   fontSize={"4em"}
-                  width={["80vw", "70vw", "40vw"]}
+                  width={["80vw", "70vw", "50vw"]}
                 >
                   Rent cool NFTs
                 </Heading>
@@ -241,7 +204,7 @@ function ExploreNfts(props) {
                   fontFamily={"sans-serif"}
                   textColor={"grey"}
                   fontSize={"18px"}
-                  width={["80vw", "70vw", "40vw"]}
+                  width={["80vw", "70vw", "50vw"]}
                 >
                   RentWeb3 is your favorite place to rent awesome NFTs to use in
                   your Next game , for attending an event or hosting your
@@ -284,16 +247,19 @@ function ExploreNfts(props) {
             )}
 
             <HStack
-              align={"center"}
               paddingLeft={10}
               width={"100%"}
               height={"fit-content"}
               spacing={10}
             >
-              <Wrap justify={"center"} width={"100vw"} spacing={10}>
+              <Wrap
+                justify={"center"}
+                width={filteredNfts.length > 0 ? "100vw" : "0vw"}
+                spacing={10}
+              >
                 {filteredNfts?.map((nft) => {
                   return (
-                    <WrapItem key={"wrap " + nft.id + nft.name}>
+                    <WrapItem key={nft.id + nft.name}>
                       <NftDetails
                         key={nft.id + nft.name}
                         selector={setSelectedNft}
@@ -310,8 +276,7 @@ function ExploreNfts(props) {
                     {currentMenu == "all"
                       ? "No Collections to Display"
                       : `No Collections for Category
-                      "${currentMenu.toLocaleUpperCase()}"
-  `}
+                      "${currentMenu.toLocaleUpperCase()}"`}
                   </Heading>
                 </Center>
               )}
