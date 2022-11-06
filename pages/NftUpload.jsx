@@ -62,7 +62,7 @@ function NftUpload(props) {
   const [factoryContract, setFactoryContract] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
-  const [deployedAddress, setDeployedAddress] = useState(null);
+  const [nftUploaded, setNftUploaded] = useState(null);
   const [loader, setLoader] = useState(false);
   const [contractAddresses, setContractAddresses] = useState(null);
   const [contractTokens, setContractTokens] = useState(null);
@@ -291,7 +291,7 @@ function NftUpload(props) {
 
             setStatus("Approve Transaction");
             let options = {
-              gasLimit: 200000,
+              gasLimit: 300000,
             };
 
             let tx = await contract.uploadNftForRent(
@@ -305,9 +305,8 @@ function NftUpload(props) {
             );
             setStatus("Waiting for Transaction Completion..");
             await tx.wait();
-            setDeployedAddress(deployedContractAddress);
-
             setFormStep((prev) => prev + 1);
+            setNftUploaded(true);
           } catch (e) {
             console.log("\n\nNFT upload Error", e, "\n\n");
 
@@ -509,7 +508,7 @@ function NftUpload(props) {
                   variant={"solid"}
                   onClick={() => uploadNFT()}
                   title={"Upload NFT"}
-                  disabled={shouldDisabled}
+                  
                 />
               </VStack>
             </Box>
@@ -521,7 +520,7 @@ function NftUpload(props) {
             width={"100vw"}
             paddingTop={"2=10vh"}
             align={"center"}
-            display={deployedAddress || formStep < 2 ? "none" : "flex"}
+            display={nftUploaded || formStep < 2 ? "none" : "flex"}
           >
             <Heading>NFT Upload Status</Heading>
             <VStack spacing={3} width="60vw" id="creationStatus">
@@ -530,8 +529,7 @@ function NftUpload(props) {
                 {loader && "Sale Creation Started.."}
               </Text>
             </VStack>
-          </VStack>
-          {deployedAddress !== null && (
+            { (nftUploaded || (!uploadError && formStep==3) ) && (
             <VStack height={"100vh"} justify={"center"}>
               <Heading color={"whiteAlpha.800"}>
                 NFT is uploaded Successfully 🥳
@@ -557,6 +555,10 @@ function NftUpload(props) {
               />
             </VStack>
           )}
+
+          </VStack>
+      
+          
         </Card>
       )}
     </>

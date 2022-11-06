@@ -47,7 +47,7 @@ function NftDetails({ NFT, selector }) {
   return (
     <VStack onClick={() => selector(Nft)} height={"fit-content"} key={Key}>
       <Img
-        height={"300px"}
+        height={"200px"}
         transition={"200ms all ease-in-out"}
         _hover={{
           cursor: "pointer",
@@ -61,16 +61,16 @@ function NftDetails({ NFT, selector }) {
         }
         borderRadius={"40px"}
       />
-      <HStack spacing={10}>
-        <Heading fontSize={"24px"}>
+      <HStack spacing={5}>
+        <Heading fontSize={"20px"}>
           Token # <b>{Nft.id}</b>
         </Heading>
         {!Nft.rented ? (
-          <Button colorScheme={"green"} textColor={"white"}>
+          <Button size={"sm"}  colorScheme={"green"} textColor={"white"}>
             Available
           </Button>
         ) : (
-          <Button colorScheme={"blue"} textColor={"white"} disabled>
+          <Button size={"sm"} colorScheme={"blue"} textColor={"white"} disabled>
             Rented
           </Button>
         )}

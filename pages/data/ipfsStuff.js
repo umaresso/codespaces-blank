@@ -1,4 +1,7 @@
-import { getCustomNetworkWebsiteRentContract, websiteRentContract } from "./WebsiteRent";
+import {
+  getCustomNetworkWebsiteRentContract,
+  websiteRentContract,
+} from "./WebsiteRent";
 
 const axios = require("axios");
 export const getAllDappsUris = async (contract, setter) => {
@@ -19,8 +22,9 @@ export const getAllDappsUris = async (contract, setter) => {
 };
 function embedGateway(hash) {
   if (hash.toString().startsWith("http")) return hash;
-  console.log("Embedding gateway with ", hash);
-  return "https://ipfs.io/ipfs//" + hash;
+
+  let link = "https://gateway.pinata.cloud/ipfs/" + hash;
+  return link;
 }
 
 export const getTokenMetadata = async (tokenUriHash) => {
@@ -45,7 +49,13 @@ export const getTokensMetaData = async (tokenURIs, setter) => {
     });
   });
 };
-export const fetchDappsContent = async (Cids, setter, loader,NetworkChain,web3modalRef) => {
+export const fetchDappsContent = async (
+  Cids,
+  setter,
+  loader,
+  NetworkChain,
+  web3modalRef
+) => {
   let dappArray = [];
   await Cids.map(async (cid, index) => {
     let _link = `https://${cid}.ipfs.w3s.link/metadata.json`;
@@ -53,10 +63,13 @@ export const fetchDappsContent = async (Cids, setter, loader,NetworkChain,web3mo
     let dapp = response.data;
     dapp.image = getImageLinkFromIPFS(dapp.image);
     if (dapp.url) {
-      let websiteRentContract=await getCustomNetworkWebsiteRentContract(NetworkChain,web3modalRef)
+      let websiteRentContract = await getCustomNetworkWebsiteRentContract(
+        NetworkChain,
+        web3modalRef
+      );
       let renttime = await websiteRentContract.rentTime(dapp.url);
       let rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
-      dapp.rentPrice=parseFloat(rentPrice/(10**18));
+      dapp.rentPrice = parseFloat(rentPrice / 10 ** 18);
       if (parseInt(renttime) * 1000 > new Date().getTime()) {
         console.log("rented already !");
         dapp.rented = true;
@@ -65,7 +78,7 @@ export const fetchDappsContent = async (Cids, setter, loader,NetworkChain,web3mo
         dapp.rented = false;
       }
     }
-    console.log("Dapp is ",dapp);
+    console.log("Dapp is ", dapp);
     dappArray.push(dapp);
 
     if (setter != undefined && index + 1 == Cids.length) {
@@ -74,7 +87,6 @@ export const fetchDappsContent = async (Cids, setter, loader,NetworkChain,web3mo
       loader(false);
       return dappArray;
     }
-    
   });
   return dappArray;
 };
@@ -128,9 +140,9 @@ export const getAllContractTokens = async (contract, setter) => {
   }
 };
 export function getIpfsImageLink(_link) {
-  if (_link.toString().startsWith("ipfs:")) {
-    let Cid = _link.toString().slice(5);
-    let link = "https://ipfs.io/ipfs/" + Cid;
+  if (_link.toString().startsWith("ipfs://")) {
+    let Cid = _link.toString().slice(7);
+    let link = "https://gateway.pinata.cloud/ipfs/" + Cid;
     return link;
   }
   return _link;
