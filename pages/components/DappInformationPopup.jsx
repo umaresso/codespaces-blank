@@ -15,10 +15,10 @@ import IntegrateFrontend from "./IntegrateFrontend";
 const ethers = require("ethers");
 
 function DappInformationPopup(props) {
-  let dapp = props.dapp;
-  let displayToggle = props.displayToggle;
-  let sales = props.sales;
-  let whitelists = props.whitelists;
+  let dapp = props?.dapp;
+  let displayToggle = props?.displayToggle;
+  let sales = props?.sales;
+  let whitelists = props?.whitelists;
   const [websiteURL, setWebsiteURL] = useState("");
   const [purchaseWill, setPurchaseWill] = useState(false);
 
@@ -55,7 +55,7 @@ function DappInformationPopup(props) {
                 <b>Rent Price:</b><Text>{ dapp?.rentPrice} {dapp?.currency}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
-                <b>Owned By:</b><Text>{dapp.owner.slice(0, 5)}..
+                <b>Owned By:</b><Text>{dapp?.owner.slice(0, 5)}..
                   {dapp?.owner.slice(40)}
                 </Text>
               </HStack>
