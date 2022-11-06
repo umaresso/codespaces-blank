@@ -38,7 +38,7 @@ export async function getStaticProps(context) {
 
 function ExploreNfts(props) {
   const [currentMenu, setCurrentMenu] = useState("all");
-  const [owner, setOwner] = useState(null);
+  const [walletAddress, setWalletAddress] = useState(null);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -93,13 +93,13 @@ function ExploreNfts(props) {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
       if (signer) {
         signer.getAddress().then((user) => {
-          setOwner(user);
+          setWalletAddress(user);
         });
       }
     });
   }
   async function init() {
-    if (!owner) return;
+    if (!walletAddress) return;
     let allNFTs = [];
     let trackerContract = await getCustomNetworkNFTTrackerContract(
       NetworkChain,
@@ -112,6 +112,10 @@ function ExploreNfts(props) {
     console.log("All contract tokens are ", allContractsTokens);
 
     let indexer = 0;
+    if (contractsArray.length == 0) {
+      setLoading(false);
+      return 0;
+    }
     contractsArray?.map(async (contractAddress, contractsAddressIndex) => {
       let thisContractTokens = allContractsTokens[contractAddress];
       let rentableContractAddress = await getRentableContract(
@@ -172,26 +176,32 @@ function ExploreNfts(props) {
 
   useEffect(() => {
     setLoading(true);
+
     init();
-  }, [owner]);
+  }, [walletAddress]);
 
   // console.log("NFTs are", NFTs);
   let filteredNfts = [];
-  NFTs?.map((nft) => {
-    if (
-      currentMenu === "all" ||
-      (currentMenu == "rented" && nft.rented) ||
-      (currentMenu == "available" && !nft.rented) ||
-      (currentMenu == "mine" && (nft.owner == owner || nft.user == owner))
-    ) {
-      filteredNfts.push(nft);
-    }
-  });
+  if (currentMenu === "all") {
+    filteredNfts = NFTs;
+  } else {
+    NFTs?.map((nft) => {
+      if (
+        (currentMenu == "rented" && nft.rented) ||
+        (currentMenu == "available" && !nft.rented) ||
+        (currentMenu == "mine" &&
+          (nft.owner == walletAddress || nft.user == walletAddress))
+      ) {
+        filteredNfts.push(nft);
+      }
+    });
+  }
+  console.log("NFTs are", NFTs);
   console.log("filtered NFT are", filteredNfts);
 
   return (
     <>
-      {owner == null && (
+      {walletAddress == null && (
         <VStack
           paddingTop={"20vh"}
           height={"100vh"}
@@ -208,7 +218,7 @@ function ExploreNfts(props) {
           </Button>
         </VStack>
       )}
-      {owner != null && (
+      {walletAddress != null && (
         <>
           <VStack
             height={filteredNfts.length > 0 ? "fit-content" : "100vh"}
@@ -216,13 +226,14 @@ function ExploreNfts(props) {
             bg="black"
             textColor={"white"}
             width={"100%"}
+            paddingBottom={"5vh"}
           >
-            <Center>
-              <VStack>
+            <Center  >
+              <VStack  >
                 <Heading
                   paddingTop={"15vh"}
-                  fontSize={"5em"}
-                  width={["80vw", "70vw", "60vw"]}
+                  fontSize={"4em"}
+                  width={["80vw", "70vw", "40vw"]}
                 >
                   Rent cool NFTs
                 </Heading>
@@ -230,7 +241,7 @@ function ExploreNfts(props) {
                   fontFamily={"sans-serif"}
                   textColor={"grey"}
                   fontSize={"18px"}
-                  width={["80vw", "70vw", "60vw"]}
+                  width={["80vw", "70vw", "40vw"]}
                 >
                   RentWeb3 is your favorite place to rent awesome NFTs to use in
                   your Next game , for attending an event or hosting your
@@ -273,13 +284,13 @@ function ExploreNfts(props) {
             )}
 
             <HStack
-              align={filteredNfts.length == 0 ? "center" : "left"}
+              align={"center"}
               paddingLeft={10}
               width={"100%"}
               height={"fit-content"}
               spacing={10}
             >
-              <Wrap spacing={20}>
+              <Wrap justify={"center"} width={"100vw"} spacing={10}>
                 {filteredNfts?.map((nft) => {
                   return (
                     <WrapItem key={"wrap " + nft.id + nft.name}>
@@ -294,10 +305,15 @@ function ExploreNfts(props) {
               </Wrap>
 
               {!loading && filteredNfts.length == 0 && (
-                <Heading fontSize={"24px"}>
-                  No Collections for Category{" "}
-                  {`"${currentMenu.toLocaleUpperCase()}"`}
-                </Heading>
+                <Center width={"100vw"}>
+                  <Heading fontSize={"24px"}>
+                    {currentMenu == "all"
+                      ? "No Collections to Display"
+                      : `No Collections for Category
+                      "${currentMenu.toLocaleUpperCase()}"
+  `}
+                  </Heading>
+                </Center>
               )}
             </HStack>
           </VStack>

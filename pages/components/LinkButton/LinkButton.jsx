@@ -10,6 +10,7 @@ function LinkButton({
   loadingMessage,
   onClick,
   id,
+  disabled
 }) {
   const [navigate, setNavigate] = useState(false);
   const router = useRouter();
@@ -17,9 +18,11 @@ function LinkButton({
   async function LetsNavigate(e) {
     router.push(href);
   }
+  let Key=id ? id : "button" + title;
   return (
     <Button
-      id={id ? id : "button" + title}
+      id={Key}
+      key={Key}
       onClick={async () => {
         if (onClick) await onClick();
         if (href) LetsNavigate();
@@ -27,6 +30,7 @@ function LinkButton({
       colorScheme={color}
       variant={variant}
       width={"fit-content"}
+      disabled={disabled}
     >
       {title}
     </Button>

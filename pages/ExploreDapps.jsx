@@ -49,7 +49,7 @@ function ExploreDapps(props) {
 
   async function Connect() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      signer.getAddress().then(async (user) => {
+      signer?.getAddress().then(async (user) => {
         console.log("user is ", user);
         fetchUserDeployments(user);
         setOwner(user);
@@ -108,7 +108,7 @@ function ExploreDapps(props) {
         console.log("CIDs are ", cids);
         if (cids.length == 0) {
           setLoader(false);
-        } else fetchDappsContent(cids, setAllDapps, setLoader);
+        } else fetchDappsContent(cids, setAllDapps, setLoader,NetworkChain,web3ModalRef);
       });
       setWebsiteRentContract(contract);
     });
@@ -117,14 +117,14 @@ function ExploreDapps(props) {
   useEffect(() => {
     init();
   }, []);
-
+console.log("Filtered Dapps are ",filteredDapps)
   return (
     <>
       <VStack height={"fit-content"} bg="black" textColor={"white"}>
         <Center>
           <VStack>
             <Heading paddingTop={"10vh"} fontSize={"4.5em"} width={"60vw"}>
-              Choose the Best Dapp that Suits your Vision
+              Rent Awesome Dapps like You 
             </Heading>
             <Text
               fontFamily={"sans-serif"}

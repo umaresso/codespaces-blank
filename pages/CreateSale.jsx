@@ -217,7 +217,7 @@ function CreateSale() {
         <Box>
           {formStep == 1 && (
             <Card>
-              <VStack height={"90vh"} justify={"center"} color={textColor}>
+              <VStack width={"100%"} height={"90vh"} justify={"center"} color={textColor}>
                 <Heading paddingBottom={"5vh"}>Create Sale</Heading>
                 <VStack spacing={30}>
                   <NamedInput title={"Whitelist"}>

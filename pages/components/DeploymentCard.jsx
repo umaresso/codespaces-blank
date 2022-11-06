@@ -48,22 +48,22 @@ function DeploymentCard(props) {
     <>
       <VStack
         key={'deployment' + item.name}
-        spacing={5}
         border={'1px solid grey'}
         borderRadius={'20px'}
-        padding={['20px', '40px', '40px']}
+        padding={['10px', '20px', '20px']}
         bg={bg}
         textColor={textColor}
         width={['50vw', '45vw', '35vw','30vw','20vw']}
-        align={'left'}
-        minHeight={'450px'}
         height={'fit-content'}
-        justify={'space-between'}
+        spacing={5}
+        minW={"250px"}
+        align={"center"}
       >
-        <VStack  justify={"center"} height={['5vh', '10vh', '20vh']}>
+        <VStack  justify={"center"} height={['5vh', '8vh', '14vh']}>
           <Heading
-            fontSize={['2em', '2.25em', '2.5em']}
+            fontSize={['20px', '24px', '30px']}
             textTransform={'capitalize'}
+            fontWeight={"900"}
           >
             {item.name ? item.name : 'Fetching..'}
           </Heading>
