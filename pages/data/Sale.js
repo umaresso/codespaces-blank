@@ -759,25 +759,27 @@ export const fetchSales = async (
       try {
         getCustomNetworkSaleTrackerContract(NetworkChain, web3modalRef).then(
           async (TrackerContract) => {
-            console.log('fetching array of sales')
+           // console.log('fetching array of sales')
             await fetchSaleAddresses(TrackerContract, owner, arraySetter).then(
               async (Sales) => {
                 let allSales = []
-                console.log('iterating over')
+               // console.log('iterating over')
                 Sales?.map(async (_Sale, index) => {
-                  let SaleWebsite = await websiteRentContract.deploymentToWebsite(
-                    _Sale,
-                  )
-                  console.log('Sale website', SaleWebsite)
-                  // let SaleContract = new ethers.Contract(_Sale, SaleABI, wallet)
-                  console.log('sale is ', _Sale)
+
+                  let hostedWebsite=await websiteRentContract.deploymentToWebsite(_Sale);
+                  let rentTime=await websiteRentContract.rentTime(hostedWebsite);
+                  console.log("Hosted Sale website is_"+hostedWebsite+'_'+'for '+rentTime);
+                  hostedWebsite=((rentTime*1000)> (new Date()).getTime())?hostedWebsite:null;     
+                  // console.log('Sale website', SaleWebsite)
+                  // // let SaleContract = new ethers.Contract(_Sale, SaleABI, wallet)
+                  // console.log('sale is ', _Sale)
 
                   getCustomNetworkSaleContract(
                     NetworkChain,
                     web3modalRef,
                     _Sale,
                   ).then(async (SaleContract) => {
-                    console.log('sale contract is ', SaleContract)
+                   // console.log('sale contract is ', SaleContract)
                     let name = await SaleContract.name()
                     let symbol = await SaleContract.symbol()
                     let baseURI = await SaleContract.baseURI()
@@ -789,10 +791,12 @@ export const fetchSales = async (
                       symbol,
                       baseURI,
                       address: _Sale,
-                      website: SaleWebsite,
+                      website: hostedWebsite===""?null:hostedWebsite,
                       startTime,
                       endTime,
                       owner,
+                      rentTime:rentTime*1000,
+                      
                     }
                     // console.log("Sale instance", SaleInstance);
                     allSales.push(SaleInstance)
@@ -801,7 +805,7 @@ export const fetchSales = async (
                         arraySetter(allSales)
                       }
                     }
-                    console.log('returning')
+//                    console.log('returning')
                     return allSales
                   })
                 })

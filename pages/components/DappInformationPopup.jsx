@@ -59,7 +59,7 @@ function DappInformationPopup(props) {
 
               </HStack>
               <HStack justify="space-between" width="20vw" textTransform={"capitalize"}>
-                <b>Price:</b><Text>{dapp.price} {dapp.currency}</Text>
+                <b>Rent Price:</b><Text>{ dapp.rentPrice} {dapp.currency}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">
                 <b>Owned By:</b><Text>{dapp.owner.slice(0, 5)}..
@@ -113,7 +113,7 @@ function DappInformationPopup(props) {
             deployments={
               dapp.type == "whitelist" ? whitelists : sales
             }
-            price={dapp.price}
+            price={dapp.rentPrice}
             selected={dapp.type == "whitelist" ? whitelists[0] : sales[0]}
 
           />

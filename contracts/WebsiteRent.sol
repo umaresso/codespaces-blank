@@ -31,7 +31,7 @@ contract WebsiteRent {
     modifier ifWebsiteExists(string memory website) {
         require(
             websiteExists[website],
-            "The Website does not exist on HostMyNFT"
+            "The Website does not exist on RentWeb3"
         );
         _;
     }
@@ -45,8 +45,8 @@ contract WebsiteRent {
             rentTime[website] < block.timestamp,
             "Website is already rented"
         );
-        require(msg.value >= prices[website]);
-        rentTime[website] = block.timestamp + (86400 * rentDays);
+        require(msg.value >= prices[website],"Insufficient Funds Sent");
+        rentTime[website] = block.timestamp + (60 * rentDays); //replace 60 with 86400
         websiteToDeployment[website] = deployment;
         deploymentToWebsite[deployment] = website;
         uint256 fee = (prices[website] * 5) / 100;

@@ -48,19 +48,16 @@ function NftUpload(props) {
   /**
    * Default values
    */
-  let _erc721 = "0x0574e679d0d7503c3FEdB52b170491741A97f7a1";
 
-  let _blockchain = "ethereum";
-  let _price = 0.0002;
-  let _tokenId = 1;
+  
   /**
    *
    */
   const [formStep, setFormStep] = useState(1);
-  const [contractAddress, setContractAddress] = useState(_erc721);
-  const [tokenId, setTokenId] = useState(_tokenId);
-  const [pricePerDay, setPricePerDay] = useState(_price);
-  const [blockchain, setBlockchain] = useState(_blockchain);
+  const [contractAddress, setContractAddress] = useState(null);
+  const [tokenId, setTokenId] = useState(null);
+  const [pricePerDay, setPricePerDay] = useState(null);
+  const [blockchain, setBlockchain] = useState(null);
 
   const [factoryContract, setFactoryContract] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
@@ -69,7 +66,10 @@ function NftUpload(props) {
   const [loader, setLoader] = useState(false);
   const [contractAddresses, setContractAddresses] = useState(null);
   const [contractTokens, setContractTokens] = useState(null);
+  const [uploadError, setUploadError] = useState(false);
+  const [shouldDisabled,setShouldDisabled]=useState(false);
   let tokenDeploymentInstance = useRef();
+
   let web3ModelRef = useRef();
   function setStatus(message, color) {
     let ele = document.getElementById("creationStatus");
@@ -127,6 +127,7 @@ function NftUpload(props) {
       );
       return false;
     }
+    setShouldDisabled(true);
     return true;
   }
   async function GatherTokenInformation() {
@@ -171,6 +172,7 @@ function NftUpload(props) {
   async function uploadNFT() {
     if (areValidArguments()) {
       await GatherTokenInformation();
+      
       await deployNftUpload();
     }
   }
@@ -288,6 +290,9 @@ function NftUpload(props) {
             setStatus("Storing on blockchain");
 
             setStatus("Approve Transaction");
+            let options = {
+              gasLimit: 200000,
+            };
 
             let tx = await contract.uploadNftForRent(
               contractAddress,
@@ -295,7 +300,8 @@ function NftUpload(props) {
               tokenId,
               ethers.utils.parseEther(pricePerDay.toString()),
               contracts_file_cid,
-              contractTokens_Cid
+              contractTokens_Cid,
+              options
             );
             setStatus("Waiting for Transaction Completion..");
             await tx.wait();
@@ -303,11 +309,21 @@ function NftUpload(props) {
 
             setFormStep((prev) => prev + 1);
           } catch (e) {
+            console.log("\n\nNFT upload Error", e, "\n\n");
+
             setStatus("NFT Upload Error !");
+
             if (e.toString().includes("invalid token")) {
               setStatus("This NFT is not Minted by anyone", "red");
+              setStatus(e.error?.message, "red");
+            } else if (
+              e.message.toString().includes("User denied transaction signature")
+            ) {
+              setStatus("You have rejected the transaction", "red");
+            } else {
+              setStatus("You probably do not own the token", "red");
             }
-            setStatus(e.error?.message, "red");
+            setUploadError(true);
           }
         });
       }
@@ -428,7 +444,7 @@ function NftUpload(props) {
       )}
 
       {walletAddress && (
-        <Card height={"100vh"}>
+        <Card height={"fit-content"} minHeight={"100vh"}>
           {formStep == 1 && (
             <Box
               height={"fit-content"}
@@ -493,6 +509,7 @@ function NftUpload(props) {
                   variant={"solid"}
                   onClick={() => uploadNFT()}
                   title={"Upload NFT"}
+                  disabled={shouldDisabled}
                 />
               </VStack>
             </Box>
@@ -502,12 +519,12 @@ function NftUpload(props) {
             bg={"black"}
             color={"white"}
             width={"100vw"}
-            paddingTop={"20vh"}
+            paddingTop={"2=10vh"}
             align={"center"}
             display={deployedAddress || formStep < 2 ? "none" : "flex"}
           >
             <Heading>NFT Upload Status</Heading>
-            <VStack spacing={5} width="60vw" id="creationStatus">
+            <VStack spacing={3} width="60vw" id="creationStatus">
               <Text fontSize={"20px"}>
                 {" "}
                 {loader && "Sale Creation Started.."}
@@ -522,6 +539,19 @@ function NftUpload(props) {
               <LinkButton
                 title={"Check here"}
                 href={"ExploreNfts"}
+                color={"messenger"}
+                variant={"solid"}
+              />
+            </VStack>
+          )}
+          {uploadError && (
+            <VStack height={"100vh"} justify={"center"}>
+              <Heading color={"whiteAlpha.800"}>
+                NFT is uploaded Unsuccessful
+              </Heading>
+              <LinkButton
+                title={"Explore NFTs"}
+                href={"/ExploreNfts"}
                 color={"messenger"}
                 variant={"solid"}
               />

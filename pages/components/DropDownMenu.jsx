@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Menu, MenuItem, MenuButton, MenuList, Button } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState } from "react";
@@ -10,11 +10,16 @@ function DropDownMenu(props) {
   let theme = { background: "white", textColor: "black" };
   let selected = props.selected;
   function getMinimalAddress() {
-    let adr=props.selected;
-    if(!adr)
-      return "No Selected Option"
+    let adr = props.selected;
+    if (!adr) return "No Option Selected ";
     return adr.slice(0, 6) + ".." + adr.slice(40);
   }
+
+  useEffect(() => {
+  selector(selected);
+    
+  }, [])
+  
   return (
     <Menu colorScheme={"green"}>
       <MenuButton
@@ -25,7 +30,7 @@ function DropDownMenu(props) {
         as={Button}
         rightIcon={<ChevronDownIcon />}
       >
-        { getMinimalAddress()}
+        {!selected ? "Fetching.." : getMinimalAddress()}
       </MenuButton>
       {options !== undefined && (
         <MenuList {...theme}>
