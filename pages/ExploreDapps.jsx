@@ -31,7 +31,7 @@ function ExploreDapps(props) {
   const [selectedDapp, setSelectedDapp] = useState(null);
   const [allDapps, setAllDapps] = useState([]);
   const [dappCids, setDappCids] = useState([]);
-  const [loader, setLoader] = useState(false);
+  const [loader, setLoader] = useState(true);
   const [whitelistDeployments, setWhitelistDeployments] = useState([]);
   const [saleDeployments, setSaleDeployments] = useState([]);
   const [owner, setOwner] = useState();
@@ -89,7 +89,6 @@ function ExploreDapps(props) {
 
   /**      */
   async function init() {
-    setLoader(true);
     await getCustomNetworkWebsiteRentContract(
       NetworkChain,
       web3ModalRef,
@@ -104,7 +103,6 @@ function ExploreDapps(props) {
           await fetchDappsContent(
             cids,
             setAllDapps,
-            setLoader,
             NetworkChain,
             web3ModalRef
           );
@@ -119,6 +117,8 @@ function ExploreDapps(props) {
     init();
   }, []);
   console.log("Filtered Dapps are ", filteredDapps);
+  console.log("loader is ",loader)
+  console.log("cids ",dappCids.length)
   return (
     <>
       <VStack height={"fit-content"} bg="black" textColor={"white"}>
@@ -215,10 +215,13 @@ function ExploreDapps(props) {
           </Wrap>
         ) : (
           <Text height={"50vh"}>
-            {" "}
-            {loader == false && !dappCids?.length
-              ? "No Dapps Available"
-              : "Loading Available Dapps"}{" "}
+{
+  loader && "Loading Available Dapps"
+}
+{
+  !loader && dappCids.length==0 && "No Dapps Available"
+}
+
           </Text>
         )}
       </VStack>

@@ -52,7 +52,6 @@ export const getTokensMetaData = async (tokenURIs, setter) => {
 export const fetchDappsContent = async (
   Cids,
   setter,
-  loader,
   NetworkChain,
   web3modalRef
 ) => {
@@ -84,7 +83,6 @@ export const fetchDappsContent = async (
     if (setter != undefined && index + 1 == Cids.length) {
       console.log("Dapps are : ", dappArray);
       setter(dappArray);
-      loader(false);
       return dappArray;
     }
   });
