@@ -67,7 +67,6 @@ function IntegrateFrontend(props) {
       console.log("gasPrices are ", gasPrice);
       setStatus("Making Dapp Rent Transaction");
       setStatus("Approve Transaction");
-
       var options = {
         gasLimit: 3000000 ,
         value: parseEther(totalPrice.toString()),

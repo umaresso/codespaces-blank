@@ -158,7 +158,7 @@ function CreateDapp(props) {
       setStatus("Uploading on Smart contract !");
       setStatus("Kindly approve the Transaction");
       let signer = await getProviderOrSigner(NetworkChain, Web3ModalRef);
-      var options = { gasLimit: 120000};
+      var options = { gasLimit: 300000};
       try{
         console.log("Arguments passing",{
           url,_price:parseInt(_price).toString(),owner,options

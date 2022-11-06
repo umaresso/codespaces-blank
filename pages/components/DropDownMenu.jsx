@@ -30,7 +30,7 @@ function DropDownMenu(props) {
         as={Button}
         rightIcon={<ChevronDownIcon />}
       >
-        {!selected ? "Fetching.." : getMinimalAddress()}
+        { getMinimalAddress()}
       </MenuButton>
       {options !== undefined && (
         <MenuList {...theme}>
