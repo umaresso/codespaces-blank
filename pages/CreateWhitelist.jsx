@@ -14,10 +14,6 @@ const ethers = require("ethers");
 
 let NetworkChain = "goerli";
 
-const provider = ethers.providers.getDefaultProvider(
-  "wss://little-quaint-liquid.ethereum-goerli.discover.quiknode.pro/b2367619fda52ade145960cc52e5bd23015b30ae/"
-);
-
 function CreateWhitelist(props) {
   const [deployedAddress, setDeployedAddress] = useState(null);
   const [loader, setLoader] = useState(false);
@@ -26,7 +22,6 @@ function CreateWhitelist(props) {
     useState(null);
   const [whitelistTracker, setWhitelistTracker] = useState(null);
   const Web3ModalRef = useRef();
-
 
   /**  */
   function setStatus(message) {
@@ -38,37 +33,24 @@ function CreateWhitelist(props) {
   }
 
   async function deployWhitelist(sale) {
-    if (sale.blockchain == "ethereum") {
+    let blockchain = sale?.blockchain;
+    blockchain = blockchain.toString().toLowerCase();
+    if (blockchain == "ethereum") {
       setFormStage((prev) => prev + 1);
       setStatus("Creating Ethereum whitelist..");
       deployEthWhitelist(sale);
-    } else if (sale.blockchain == "tron") {
+    } else if (blockchain == "tron") {
       setFormStage((prev) => prev + 1);
-
       setStatus("Creating Tron whitelist..");
-    } else if (sale.blockchain == "polygon") {
+    } else if (blockchain == "polygon") {
       setFormStage((prev) => prev + 1);
-
       setStatus("Creatibg Polygon whitelist..");
     }
   }
   function deployEthWhitelist(Sale) {
     async function deploy(sale) {
-      // Deploy the contract to Ethereum test network - Goerli
-      console.log("inside deploy");
       let factory = whitelistFactoryContract;
       console.log("factory", factory);
-      // const price = ethers.utils.formatUnits(
-      //   await provider.getGasPrice(),
-      //   "gwei"
-      // );
-      // const options = {
-      //   gasLimit: 100000,
-      //   gasPrice: ethers.utils.parseUnits(price, "gwei"),
-      // };
-
-      // Deploy the contract
-      //        const contract = await factory.deploy("uar",100,owner,baseURI,12,12);
       console.log("creating instance");
       const contract = await factory.deploy(
         sale.name,
@@ -146,21 +128,17 @@ function CreateWhitelist(props) {
     <>
       {formStage == 1 && (
         <HStack height={"100%"}>
-          <Sale
-            saleType={"whitelist"}
-            deploySale={deployWhitelist}
-            
-          />
+          <Sale saleType={"whitelist"} deploySale={deployWhitelist} />
         </HStack>
       )}
       {
         <VStack
           height={formStage >= 2 ? "100vh" : "0.001vh"}
           bg={"black"}
-          paddingTop={"10vh"}
           color={"white"}
           width={"100%"}
           align={"center"}
+          paddingTop={"15vh"}
           display={deployedAddress ? "none" : "flex"}
         >
           <Heading fontSize={["30px", "40px", "50px"]}>

@@ -162,7 +162,7 @@ function Sale(props) {
                   setBaseURI(res);
                 }}
                 variant="outline"
-                placeholder={"e.g  //ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6"}
+                placeholder={"e.g ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6"}
               />
             </NamedInput>
 
