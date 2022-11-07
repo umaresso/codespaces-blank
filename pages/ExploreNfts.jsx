@@ -116,10 +116,13 @@ function ExploreNfts(props) {
           contractsAddressIndex + 1 == contractsArray.length &&
           tokenIndexer + 1 == thisContractTokens.length
         ) {
-          setLoading(false);
 
-          setCurrentMenu("available")
           setNFTs(allNFTs);
+          setTimeout(() => {
+            setLoading(false);
+            setCurrentMenu("all")
+            
+          }, 2000);
         }
       });
     });
