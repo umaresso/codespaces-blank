@@ -32,10 +32,10 @@ function Create() {
           Let&apos; Earn Money
         </Heading>
         <Text width={"40vw"} fontSize={"20px"}>
-          After creating a dapp or owning an NFT , do you feel it's residing in
+          After creating a dapp or owning an NFT , do you feel it&apos;s residing in
           the home with no use ? It&apos;Time to rent your work and passive
           income. Lend your previously created Dapps or NFTs with exchange of
-          cool Money . So , Let's do it{" "}
+          cool Money . So , Let&apos;s do it{" "}
         </Text>
         <Wrap width={"40vw"} spacing={5}>
           <WrapItem>
