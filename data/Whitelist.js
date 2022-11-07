@@ -323,6 +323,9 @@ export const whitelistTrackerByteCode = {
 };
 export const whitelistTrackerAddress =
   "0x023C4FA23c25d3Ec5227E64593E65297F8eF8141";
+  export const whitelistTrackerTronNileAddress =
+  "TEy4cELfgsoEgiLvsMqwannhXvLz8pYKB9";
+    
 const ethers = require("ethers");
 // const privateKey =
 //   "d4cf4655e36805f04fe2c1238ca872367021378c93bd12e9d8dcba3a55b44c0b";
@@ -455,3 +458,5 @@ export const getCustomNetworkWhitelistTrackerContract = async (
   );
   return whitelistTrackerContract;
 };
+
+

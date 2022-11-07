@@ -31,6 +31,7 @@
     "nodemon": "^2.0.20",
     "react": "^18.2.0",
     "react-dom": "18.2.0",
+    "tronweb": "^4.4.0",
     "wagmi": "^0.6.8",
     "web3.storage": "^4.4.0",
     "web3modal": "^1.9.9",
