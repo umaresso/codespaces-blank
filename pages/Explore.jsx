@@ -15,7 +15,7 @@ function Explore() {
       <Center>
         <VStack paddingTop={"15vh"} spacing={5}>
           <Heading fontSize={"4em"} width={"50vw"}>
-            Explore Web3 Assets
+            Rent Web3 Assets
           </Heading>
           <Text
             fontFamily={"sans-serif"}
@@ -36,7 +36,7 @@ function Explore() {
             <Wrap paddingBottom={"vh"} spacing={20}>
               <WrapItem>
                 <LinkButton
-                  title={"Explore NFTs"}
+                  title={"Rent NFTs"}
                   href={"/ExploreNfts"}
                   color={"blue"}
                   variant={"solid"}
@@ -44,7 +44,7 @@ function Explore() {
               </WrapItem>
               <WrapItem>
                 <LinkButton
-                  title={"Explore Dapps"}
+                  title={"Rent Dapps"}
                   href={"/ExploreDapps"}
                   color={"green"}
                   variant={"solid"}

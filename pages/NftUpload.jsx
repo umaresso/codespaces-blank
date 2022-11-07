@@ -137,43 +137,55 @@ function NftUpload(props) {
       web3ModelRef,
       contractAddress
     );
-    let _owner = await getTokenOwner(erc721Contract, tokenId);
-    let tokenCid = await getPureTokenUri(erc721Contract, tokenId);
-    console.log("Token Cid is ", tokenCid);
-    if (tokenCid == "") {
-      alert("Unable to read token metadata");
+    try{
+      let _owner = await getTokenOwner(erc721Contract, tokenId);
+      let tokenCid = await getPureTokenUri(erc721Contract, tokenId);
+      console.log("Token Cid is ", tokenCid);
+      if (tokenCid == "") {
+        alert("Unable to read token metadata");
+      }
+      let tokenData = await getTokenMetadata(tokenCid);
+      ///console.log("Token Metadata is ",tokenData);
+      let rentableContractAddress = await getRentableContract(
+        NftRentingTracker,
+        contractAddress
+      );
+      //console.log("Rentable version for token is ",rentableContractAddress);
+      let rentableContract = await getCustomNetworkNFTFactoryContract(
+        NetworkChain,
+        web3ModelRef,
+        rentableContractAddress
+      );
+      //console.log("Rentable contract is ",rentableContract);
+      let token = { ...tokenData };
+      if (!_owner.toString().includes("0x000")) {
+        token.owner = _owner;
+      }
+  
+      if (!rentableContractAddress.toString().includes("0x000")) {
+        token.rentableContractAddress = rentableContractAddress;
+      }
+      token.erc721ContractAddress = contractAddress;
+      token.id = tokenId;
+      console.log("token is ", token);
+      tokenDeploymentInstance.current = token;
+      return token;
     }
-    let tokenData = await getTokenMetadata(tokenCid);
-    ///console.log("Token Metadata is ",tokenData);
-    let rentableContractAddress = await getRentableContract(
-      NftRentingTracker,
-      contractAddress
-    );
-    //console.log("Rentable version for token is ",rentableContractAddress);
-    let rentableContract = await getCustomNetworkNFTFactoryContract(
-      NetworkChain,
-      web3ModelRef,
-      rentableContractAddress
-    );
-    //console.log("Rentable contract is ",rentableContract);
-    let token = { ...tokenData };
-    if (!_owner.toString().includes("0x000")) {
-      token.owner = _owner;
+    catch(e){
+      if(e.toString().includes("invalid token ID")){
+        alert("Invalid TokenID")
+      }
+      else
+        alert("Error occured in Token ID fetching ..")
+      return null;
     }
-
-    if (!rentableContractAddress.toString().includes("0x000")) {
-      token.rentableContractAddress = rentableContractAddress;
-    }
-    token.erc721ContractAddress = contractAddress;
-    token.id = tokenId;
-    console.log("token is ", token);
-    tokenDeploymentInstance.current = token;
-    return token;
+    
   }
   async function uploadNFT() {
     if (areValidArguments()) {
-      await GatherTokenInformation();
-
+     let tokenFetchSuccessful= await GatherTokenInformation();
+      if(tokenFetchSuccessful==null)
+        return null;
       await deployNftUpload();
     }
   }
@@ -342,7 +354,14 @@ function NftUpload(props) {
     console.log("previous contracts are ", contractAddresses);
     console.log("current contract address", contractAddress);
     let uniqueContracts = [...contractAddresses];
-    uniqueContracts.push(contractAddress);
+    let exists=false;
+    uniqueContracts.map(item=>{
+      if(item.toString()==contractAddress){
+        exists=true;
+      }
+    })
+    if(!exists)
+      uniqueContracts.push(contractAddress);
     console.log("\n\n------\nUnique Contracts to upload", uniqueContracts);
     console.log("\n\n\n");
 

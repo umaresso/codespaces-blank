@@ -144,6 +144,7 @@ function ExploreNfts(props) {
 
   // console.log("NFTs are", NFTs);
   let filtered = [];
+  filteredNfts=[];
   if (currentMenu != "all") {
     NFTs?.map((nft) => {
       if (
@@ -256,11 +257,13 @@ function ExploreNfts(props) {
                 width={filteredNfts.length > 0 ? "100vw" : "0vw"}
                 spacing={10}
               >
-                {filteredNfts?.map((nft) => {
+                {filteredNfts?.map((nft,index) => {
                   return (
-                    <WrapItem key={nft.id + nft.name}>
+                    <WrapItem key={'wrap'+ nft.erc721ContractAddress.toString()+index}>
                       <NftDetails
-                        key={''+nft.id + nft.name+nft.erc721ContractAddress.toString()}
+                        Key={'nftDetails'+nft.id +  nft.erc721ContractAddress.toString()+index}
+                        key={'nftDetailsKey'+nft.id +  nft.erc721ContractAddress.toString()+index}
+        
                         selector={setSelectedNft}
                         NFT={nft}
                       />

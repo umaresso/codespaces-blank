@@ -174,7 +174,8 @@ function CreateDapp(props) {
         setStatus("Successfully Mined 🎉");
         setStatus("Uploading global IPFS Link ");
         try{
-          let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(newCID);
+          console.log("updating websites ipfs link on contract ",newCID);
+          let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(newCID,options);
           setStatus("Transaction Mining.. ");
           await _tx.wait();
           setStatus("Successfully storage 🎉");
@@ -182,7 +183,7 @@ function CreateDapp(props) {
   
         }
         catch(e){
-          console.log("ipfs link upload error")
+          console.log("ipfs link upload error",e)
         }
     
       }
