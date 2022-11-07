@@ -117,8 +117,8 @@ function ExploreDapps(props) {
     init();
   }, []);
   console.log("Filtered Dapps are ", filteredDapps);
-  console.log("loader is ",loader)
-  console.log("cids ",dappCids.length)
+  console.log("loader is ", loader);
+  console.log("cids ", dappCids.length);
   return (
     <>
       <VStack height={"fit-content"} bg="black" textColor={"white"}>
@@ -214,15 +214,10 @@ function ExploreDapps(props) {
             })}
           </Wrap>
         ) : (
-          <Text height={"50vh"}>
-{
-  loader && "Loading Available Dapps"
-}
-{
-  !loader && dappCids.length==0 && "No Dapps Available"
-}
-
-          </Text>
+          <Heading fontSize={"24px"} height={"50vh"}>
+            {loader && "Loading Available Dapps"}
+            {!loader && dappCids.length == 0 && "No Dapps Available"}
+          </Heading>
         )}
       </VStack>
       {selectedDapp != null && (
