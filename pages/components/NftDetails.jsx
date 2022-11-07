@@ -35,7 +35,7 @@ function NftDetails(props) {
   }, []);
 
   let img = getIpfsImageLink(Nft?.image);
-  let Key = Nft?.name + Nft?.id+'key';
+  let Key = Nft?.name + Nft?.id+'key'+Nft?.erc721ContractAddress.toString();
   return (
     <VStack onClick={() => selector(Nft)} height={"fit-content"} key={Key}>
       <Img
@@ -54,8 +54,10 @@ function NftDetails(props) {
         borderRadius={"40px"}
       />
       <HStack spacing={5}>
-        <Heading fontSize={"20px"}>
-          Token # <b>{Nft?.id}</b>
+        <Heading textTransform={"capitalize"} fontSize={"20px"}>
+          {
+            Nft?.name
+          }
         </Heading>
         {!Nft.rented ? (
           <Button size={"sm"}  colorScheme={"green"} textColor={"white"}>

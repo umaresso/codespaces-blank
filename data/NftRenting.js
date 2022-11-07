@@ -1068,7 +1068,7 @@ const NftRentingTrackerABI = [
     type: "function",
   },
 ];
-const NftRentingTrackerAddress = "0xa60f56E187449a72074b3223ccf589f35cA7b857";
+const NftRentingTrackerAddress = "0xc16305f0f68353F106E3E2E14F871cC797a5CE26";
 
 export const getCustomNetworkNFTFactoryContract = async (
   network,

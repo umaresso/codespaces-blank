@@ -47,11 +47,13 @@ function NftUpload(props) {
    * Default values
    */
 
-  
   /**
    *
    */
   const [formStep, setFormStep] = useState(1);
+  // has to change it
+  const [nftUploaded, setNftUploaded] = useState(false);
+
   const [contractAddress, setContractAddress] = useState(null);
   const [tokenId, setTokenId] = useState(null);
   const [pricePerDay, setPricePerDay] = useState(null);
@@ -60,12 +62,12 @@ function NftUpload(props) {
   const [factoryContract, setFactoryContract] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
-  const [nftUploaded, setNftUploaded] = useState(null);
+
   const [loader, setLoader] = useState(false);
   const [contractAddresses, setContractAddresses] = useState(null);
   const [contractTokens, setContractTokens] = useState(null);
   const [uploadError, setUploadError] = useState(false);
-  const [shouldDisabled,setShouldDisabled]=useState(false);
+  const [shouldDisabled, setShouldDisabled] = useState(false);
   let tokenDeploymentInstance = useRef();
 
   let web3ModelRef = useRef();
@@ -79,9 +81,9 @@ function NftUpload(props) {
     ele.append(newElement);
   }
 
-  function isValidBlockchain(_blockchain) {
-    if (!_blockchain) return false;
-    let blockchainPlatform = _blockchain.toString().toLowerCase();
+  function isValidBlockchain() {
+    if (!blockchain) return false;
+    let blockchainPlatform = blockchain.toString().toLowerCase();
     if (
       blockchainPlatform == "ethereum" ||
       blockchainPlatform == "eth" ||
@@ -118,13 +120,14 @@ function NftUpload(props) {
       projectError("priceValidation", "Please Enter Price greater than zero");
       return false;
     }
-    if (!isValidBlockchain(blockchain)) {
+    if (!isValidBlockchain()) {
       projectError(
         "blockchainValidation",
         "Sorry , We do not support " + blockchain + " yet"
       );
       return false;
     }
+    console.log("Arguments are valid");
     setShouldDisabled(true);
     return true;
   }
@@ -170,7 +173,7 @@ function NftUpload(props) {
   async function uploadNFT() {
     if (areValidArguments()) {
       await GatherTokenInformation();
-      
+
       await deployNftUpload();
     }
   }
@@ -182,16 +185,21 @@ function NftUpload(props) {
       });
     });
     if (!walletAddress) return;
-    getCustomNetworkNFTFactoryContract(NetworkChain, web3ModelRef).then(
+    await getCustomNetworkNFTFactoryContract(NetworkChain, web3ModelRef).then(
       (factory) => {
         setFactoryContract(factory);
       }
     );
-    getCustomNetworkNFTTrackerContract(NetworkChain, web3ModelRef).then(
+    await getCustomNetworkNFTTrackerContract(NetworkChain, web3ModelRef).then(
       (contract) => {
+        getAllContractTokens(contract).then((_contractTokens) => {
+          console.log("The all contrac tokens are", _contractTokens);
+          console.log("The all addresses are", Object.keys(_contractTokens));
+          let arr =Object.keys(_contractTokens).map(item=>item)          
+          setContractTokens(_contractTokens);
+          setContractAddresses(arr);
+        });
         setNftRentingTracker(contract);
-        getAllContractAddressess(contract, setContractAddresses);
-        getAllContractTokens(contract, setContractTokens);
       }
     );
   }
@@ -202,18 +210,21 @@ function NftUpload(props) {
    */
 
   async function deployNftUpload() {
-    if (blockchain == "ethereum") {
+    let _blockchain = blockchain?.toString().toLowerCase();
+    if (_blockchain == "ethereum") {
       setFormStep((prev) => prev + 1);
       setStatus("Making Ethereum NftUpload..");
       EthUpload();
-    } else if (blockchain == "tron") {
+    } else if (_blockchain == "tron") {
       setFormStep((prev) => prev + 1);
 
       setStatus("Making Tron NftUpload..");
-    } else if (blockchain == "polygon") {
+    } else if (_blockchain == "polygon") {
       setFormStep((prev) => prev + 1);
 
       setStatus("Making Polygon NftUpload..");
+    } else {
+      alert("We dont support " + _blockchain + " Blockchain yet");
     }
   }
   async function EthUpload() {
@@ -285,7 +296,7 @@ function NftUpload(props) {
           }
           try {
             setStatus("Successfully stored on IPFS 🥳");
-            setStatus("Storing on blockchain");
+            setStatus("Time to Store on Blockchain");
 
             setStatus("Approve Transaction");
             let options = {
@@ -303,8 +314,9 @@ function NftUpload(props) {
             );
             setStatus("Waiting for Transaction Completion..");
             await tx.wait();
-            setFormStep((prev) => prev + 1);
             setNftUploaded(true);
+
+            setFormStep((prev) => prev + 1);
           } catch (e) {
             console.log("\n\nNFT upload Error", e, "\n\n");
 
@@ -326,14 +338,13 @@ function NftUpload(props) {
       }
     );
   }
-  async function StoreUpdatedcontractsOnIpfs(_contractAddresses) {
-    let __contracts = _contractAddresses ? _contractAddresses : [];
-    console.log("previous contracts are ", _contractAddresses);
-    let uniqueContracts = [];
-    __contracts.map((item) => () => {
-      if (item != contractAddress) uniqueContracts.push(item);
-    });
+  async function StoreUpdatedcontractsOnIpfs() {
+    console.log("previous contracts are ", contractAddresses);
+    console.log("current contract address", contractAddress);
+    let uniqueContracts = [...contractAddresses];
     uniqueContracts.push(contractAddress);
+    console.log("\n\n------\nUnique Contracts to upload", uniqueContracts);
+    console.log("\n\n\n");
 
     const _blob = new Blob(
       [
@@ -365,7 +376,7 @@ function NftUpload(props) {
     let alreadyExists = false;
     let uniqueTokensList = [];
     tokensList?.map((item) => {
-      if (Number(item.id) == Number(newTokenInstance.id)) {
+      if (item.id == newTokenInstance.id) {
         alreadyExists = true;
       } else {
         uniqueTokensList.push(item);
@@ -375,7 +386,10 @@ function NftUpload(props) {
       return null;
     }
     uniqueTokensList.push(newTokenInstance);
-    console.log("new tokens list");
+    console.log("\n\n------\n Tokens to upload", " \n---");
+    console.log(uniqueTokensList);
+    console.log("\n\n\n");
+
     let updatedContractTokens = {
       ...__contractTokens,
       [currentContract]: uniqueTokensList,
@@ -429,7 +443,7 @@ function NftUpload(props) {
   useEffect(() => {
     init();
   }, [walletAddress]);
-
+  
   return (
     <>
       {!walletAddress && (
@@ -459,7 +473,9 @@ function NftUpload(props) {
                 <Box>
                   <NamedInput title={"Contract Address"}>
                     <Input
-                      onChange={(e) => setContractAddress(e.target.value)}
+                      onChange={(e) => {
+                        setContractAddress(e.target.value);
+                      }}
                       placeholder="0x4b26..8c"
                     />
                   </NamedInput>
@@ -506,7 +522,6 @@ function NftUpload(props) {
                   variant={"solid"}
                   onClick={() => uploadNFT()}
                   title={"Upload NFT"}
-                  
                 />
               </VStack>
             </Box>
@@ -527,11 +542,23 @@ function NftUpload(props) {
                 {loader && "Sale Creation Started.."}
               </Text>
             </VStack>
-            { (nftUploaded || (!uploadError && formStep==3) ) && (
-            <VStack height={"100vh"} justify={"center"}>
-              <Heading color={"whiteAlpha.800"}>
-                NFT is uploaded Successfully 🥳
-              </Heading>
+            {uploadError && (
+              <VStack height={"100vh"} justify={"center"}>
+                <Heading color={"whiteAlpha.800"}>
+                  NFT is uploaded Unsuccessful
+                </Heading>
+                <LinkButton
+                  title={"Explore NFTs"}
+                  href={"/ExploreNfts"}
+                  color={"messenger"}
+                  variant={"solid"}
+                />
+              </VStack>
+            )}
+          </VStack>
+          {nftUploaded && (
+            <VStack justify={"center"}>
+              <Heading color={"white"}>NFT is uploaded Successfully 🥳</Heading>
               <LinkButton
                 title={"Check here"}
                 href={"ExploreNfts"}
@@ -540,23 +567,6 @@ function NftUpload(props) {
               />
             </VStack>
           )}
-          {uploadError && (
-            <VStack height={"100vh"} justify={"center"}>
-              <Heading color={"whiteAlpha.800"}>
-                NFT is uploaded Unsuccessful
-              </Heading>
-              <LinkButton
-                title={"Explore NFTs"}
-                href={"/ExploreNfts"}
-                color={"messenger"}
-                variant={"solid"}
-              />
-            </VStack>
-          )}
-
-          </VStack>
-      
-          
         </Card>
       )}
     </>

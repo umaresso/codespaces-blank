@@ -63,9 +63,9 @@ function ExploreNfts(props) {
     );
     //  console.log("Tracker contract is ",trackerContract);
     let contractsArray = await getAllContractAddressess(trackerContract);
-    console.log("Contracts to read from", contractsArray);
+    // console.log("Contracts to read from", contractsArray);
     let allContractsTokens = await getAllContractTokens(trackerContract);
-    console.log("All contract tokens are ", allContractsTokens);
+    // console.log("All contract tokens are ", allContractsTokens);
 
     let indexer = 0;
     if (contractsArray.length == 0) {
@@ -257,7 +257,7 @@ function ExploreNfts(props) {
                   return (
                     <WrapItem key={nft.id + nft.name}>
                       <NftDetails
-                        key={nft.id + nft.name}
+                        key={''+nft.id + nft.name+nft.erc721ContractAddress.toString()}
                         selector={setSelectedNft}
                         NFT={nft}
                       />
