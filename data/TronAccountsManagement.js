@@ -1,5 +1,8 @@
 import TronWeb from "tronweb";
 import { getMinimalAddress } from "../Utilities";
+const tronPrivateKey =
+  "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
+
 export const tronConnect = async () => {
   try {
     //      debugger;
@@ -20,10 +23,9 @@ async function getTronwebShasta() {
   const fullNode = new HttpProvider("https://api.shasta.trongrid.io");
   const solidityNode = new HttpProvider("https://api.shasta.trongrid.io");
   const eventServer = new HttpProvider("https://api.shasta.trongrid.io");
-  const privateKey =
-    "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
-  const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+  const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
   return tronWeb;
+
 }
 async function getTronwebMainnet() {}
 
@@ -40,6 +42,18 @@ async function getNetworkTronweb(network) {
     default:
       break;
   }
+}
+
+
+export function getNileTronWeb(){
+    const HttpProvider = TronWeb.providers.HttpProvider;
+    const fullNode = new HttpProvider("https://api.nileex.io/");
+    const solidityNode = new HttpProvider("https://api.nileex.io/");
+    const eventServer = new HttpProvider("https://event.nileex.io/");
+    const privateKey =
+      "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
+    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+    return tronWeb;
 }
 export async function deploy_tron_contract(
   network,
@@ -58,9 +72,7 @@ export async function deploy_tron_contract(
     const solidityNode = new HttpProvider("https://api.nileex.io/");
     const eventServer = new HttpProvider("https://event.nileex.io/");
 
-    const privateKey =
-      "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
-    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
 
     // let tronWeb = getNetworkTronweb(network);
 

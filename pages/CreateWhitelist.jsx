@@ -95,6 +95,7 @@ function CreateWhitelist(props) {
     let contract = await tronWeb.contract().at(trackerAddress);
 
     setStatus("Keeping track of your contract for future");
+    setStatus("Waiting for Transaction Completion..");
 
     let result = await contract.addUserWhitelist(owner, contractAddress).send({
       feeLimit: 100000000,
@@ -104,7 +105,6 @@ function CreateWhitelist(props) {
       shouldPollResponse: true,
     });
     console.log("receipt is ", result);
-    setStatus("Waiting for Transaction Completion..");
 
     setStatus("Transaction Completed ✅");
 

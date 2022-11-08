@@ -1,4 +1,4 @@
-import React, {  useEffect, useState ,useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   VStack,
   Heading,
@@ -7,20 +7,21 @@ import {
   WrapItem,
   Wrap,
 } from "@chakra-ui/react";
-import {
-  fetchWhitelists,
-} from "../data/Whitelist";
-import {
-  fetchSales,
-} from "../data/Sale";
+import { fetchWhitelists } from "../data/Whitelist";
+import { fetchSales } from "../data/Sale";
 import DeploymentCard from "./components/DeploymentCard";
 import { getProviderOrSigner } from "../data/accountsConnection";
+import { tronConnect } from "../data/TronAccountsManagement";
 /**
  *
  * Blockchain Things
  */
 
- let NetworkChain = "goerli";
+//  let NetworkChain = "goerli";
+// let Blockchain="ethereum"
+
+let NetworkChain = "nile";
+let Blockchain = "tron";
 
 function Deployments() {
   const [loading, setLoading] = useState("");
@@ -30,31 +31,53 @@ function Deployments() {
   const [totalWhitelistCount, setTotalWhitelistCount] = useState(0);
   const [totalSaleCount, setTotalSaleCount] = useState(0);
   const [selectedDeployment, setSelectedDeployment] = useState(null);
-  const [owner,setOwner]=useState(null)
+  const [owner, setOwner] = useState(null);
   const Web3ModalRef = useRef();
 
-
-
   async function init() {
-    getProviderOrSigner(NetworkChain, Web3ModalRef, true).then(signer => {
-      signer?.getAddress().then(async (user) => {
-        fetchUserDeployments(user);
-        setOwner(user);
-
-      }).catch(console.log);
-
-    });
-
-
+    if (Blockchain == "ethreum") {
+      console.log("Ethereum Fetch...");
+      getProviderOrSigner(NetworkChain, Web3ModalRef, true).then((signer) => {
+        signer
+          ?.getAddress()
+          .then(async (user) => {
+            fetchUserDeployments(user);
+            setOwner(user);
+          })
+          .catch(console.log);
+      });
+    } else if (Blockchain == "tron") {
+      console.log("Tron Fetch...");
+      let ownerAddress = await tronConnect();
+      console.log("Tron connected with address :", ownerAddress);
+      fetchUserDeployments(ownerAddress);
+      setOwner(ownerAddress);
+    } else if (Blockchain == "polygon") {
+    } else {
+      alert("Invalid Blockchain" + Blockchain);
+    }
   }
   useEffect(() => {
-  init();
+    init();
   }, []);
 
   async function fetchUserDeployments(_owner) {
     setLoading(true);
-    await fetchWhitelists(NetworkChain,Web3ModalRef,_owner, setWhitelistDeployments);
-    await fetchSales(NetworkChain,Web3ModalRef,_owner, setSaleDeployments);
+    await fetchWhitelists(
+      NetworkChain,
+      Web3ModalRef,
+      _owner,
+      setWhitelistDeployments,
+      Blockchain
+    );
+    // await fetchSales(
+    //   NetworkChain,
+    //   Web3ModalRef,
+    //   _owner,
+    //   setSaleDeployments,
+    //   Blockchain
+    // );
+
     setLoading(false);
   }
 
@@ -68,7 +91,9 @@ function Deployments() {
           paddingTop={"10vh"}
           textColor={"white"}
         >
-          <Heading fontSize={["2em","3em","4em"]} marginTop={"10px"}>My Deployments</Heading>
+          <Heading fontSize={["2em", "3em", "4em"]} marginTop={"10px"}>
+            My Deployments
+          </Heading>
 
           {whitelistDeployments.length > 0 ? (
             <Center>
@@ -80,9 +105,8 @@ function Deployments() {
                       <WrapItem key={"wrapWhitelist" + item.name + index}>
                         <DeploymentCard
                           item={item}
-                          key={"whitelist" + item.name}
+                          key={"whitelist" + item.id+item.id}
                           type={"whitelist"}
-
                           showIntegratePopup={() =>
                             setSelectedDeployment({
                               ...item,
@@ -98,7 +122,9 @@ function Deployments() {
             </Center>
           ) : (
             <Text fontSize={"24px"} fontWeight={"700"} height={"50vh"}>
-              {!loading ? "No Whitelist Deployments Found" : "Fetching Whitelists..."}
+              {!loading
+                ? "No Whitelist Deployments Found"
+                : "Fetching Whitelists..."}
             </Text>
           )}
 
@@ -128,7 +154,6 @@ function Deployments() {
           </Center>
         </VStack>
       )}
-
     </>
   );
 }
