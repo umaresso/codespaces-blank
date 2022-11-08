@@ -70,13 +70,13 @@ function Deployments() {
       setWhitelistDeployments,
       Blockchain
     );
-    // await fetchSales(
-    //   NetworkChain,
-    //   Web3ModalRef,
-    //   _owner,
-    //   setSaleDeployments,
-    //   Blockchain
-    // );
+    await fetchSales(
+      NetworkChain,
+      Web3ModalRef,
+      _owner,
+      setSaleDeployments,
+      Blockchain
+    );
 
     setLoading(false);
   }
@@ -135,7 +135,7 @@ function Deployments() {
                 <Wrap justify={"center"} spacing={10}>
                   {saleDeployments.map((item, index) => {
                     return (
-                      <WrapItem key={"wrapSale" + item.name + index}>
+                      <WrapItem key={"wrapSale" + item.name+item.id + index}>
                         <DeploymentCard
                           item={item}
                           key={"sale" + item.name}

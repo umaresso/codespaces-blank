@@ -15,7 +15,11 @@ import LinkButton from "./LinkButton/LinkButton";
 
 import { useRouter } from "next/router";
 import { getProviderOrSigner } from "../../data/accountsConnection";
-let NetworkChain = "ethereum";
+import { getCurrentConnectedOwner } from "../../data/blockchainSpecificExports";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum"
+let NetworkChain = "nile";
+let Blockchain="tron"
 
 function Sale(props) {
   let bg = "black";
@@ -26,9 +30,9 @@ function Sale(props) {
   const [saleSupply, setSaleSupply] = useState(null);
   const [name, setName] = useState(props._name);
   const [symbol, setSymbol] = useState(props._symbol);
-  const [owner, setOwner] = useState(props._owner);
+  const [owner, setOwner] = useState(null);
   const [baseURI, setBaseURI] = useState(props._baseURI);
-  const [blockchain, setBlockchain] = useState(NetworkChain);
+  const [blockchain, setBlockchain] = useState(props._blockchain);
   const [metadataContract, setMetadataContract] = useState(null);
   const router = useRouter();
   let Web3ModalRef = useRef();
@@ -48,21 +52,14 @@ function Sale(props) {
       startTime: parseInt(startTime / 1000),
       endTime: parseInt(endTime / 1000),
     };
-
+    console.log("sale object is ",obj);
     await props.deploySale(obj);
   }
 
-  async function getOwner() {
-    getProviderOrSigner(NetworkChain, Web3ModalRef, true).then(signer => {
-      signer.getAddress().then(setOwner).catch(console.log);
-
-    });
-
-  }
 
   useEffect(() => {
+ getCurrentConnectedOwner(Blockchain,NetworkChain,Web3ModalRef,setOwner);
 
-    getOwner();
 
   }, [])
 
@@ -146,9 +143,12 @@ function Sale(props) {
                 let res = e.target.value;
                 setBlockchain(res);
               }}
+              textTransform={"capitalize"}
               variant="outline"
-              defaultValue={""}
-              placeholder={"Ethereum , Tron or Polygon"}
+              // defaultValue={""}
+              // placeholder={"Ethereum , Tron or Polygon"}
+              value={blockchain?blockchain:null}
+              disabled={blockchain?true:false}
             />
           </NamedInput>
 

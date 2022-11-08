@@ -5,21 +5,23 @@ import LinkButton from "../LinkButton/LinkButton";
 import { Grid } from "@chakra-ui/react";
 import { VStack, Stack } from "@chakra-ui/react";
 import { getProviderOrSigner } from "../../../data/accountsConnection";
-let NetworkChain = "goerli";
+import { getCurrentConnectedOwner } from "../../../data/blockchainSpecificExports";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain="tron";
 
 function Introduction() {
   // theme
+
   let bg = "black";
   let textColor = "white";
   //  _____
   let web3ModalRef = useRef();
 
   async function Connect() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (!signer) {
-        Connect();
-      }
-    });
+    getCurrentConnectedOwner(Blockchain,NetworkChain,web3ModalRef);
+
   }
 
   return (

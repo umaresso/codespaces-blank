@@ -59,6 +59,7 @@ function CreateWhitelist(props) {
       setFormStage((prev) => prev + 1);
       setStatus("Creatibg Polygon whitelist..");
     }
+    
   }
   async function deployTronWhitelist(sale, owner) {
     let paramters = [

@@ -12,13 +12,21 @@ import {
 import FilterMenuItem from "./components/FilterMenuItem";
 import DappInformationPopup from "./components/DappInformationPopup";
 import { getCustomNetworkWebsiteRentContract } from "../data/WebsiteRent";
-import { fetchWhitelists } from "../data/Whitelist";
+import {
+  fetchWhitelists,
+  getBlockchainSpecificWebsiteRentContract,
+} from "../data/Whitelist";
 import { fetchSales } from "../data/Sale";
 import { fetchDappsContent, getAllDappsUris } from "../data/ipfsStuff";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { useRef } from "react";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 
-let NetworkChain = "goerli";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
+
 export async function getStaticProps(context) {
   require("dotenv").config();
   return {
@@ -38,21 +46,8 @@ function ExploreDapps(props) {
   const [websiteRentContract, setWebsiteRentContract] = useState(null);
   let web3ModalRef = useRef();
 
-  async function Connect() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      signer?.getAddress().then(async (user) => {
-        console.log("user is ", user);
-        fetchUserDeployments(user);
-        setOwner(user);
-      });
-    });
-  }
 
-  useEffect(() => {
-    if (!owner) {
-      Connect();
-    }
-  }, []);
+
 
   async function fetchUserDeployments(Owner) {
     setLoader(true);
@@ -60,9 +55,16 @@ function ExploreDapps(props) {
       NetworkChain,
       web3ModalRef,
       Owner,
-      setWhitelistDeployments
+      setWhitelistDeployments,
+      Blockchain
     );
-    await fetchSales(NetworkChain, web3ModalRef, Owner, setSaleDeployments);
+    await fetchSales(
+      NetworkChain,
+      web3ModalRef,
+      Owner,
+      setSaleDeployments,
+      Blockchain
+    );
     setLoader(false);
   }
 
@@ -89,36 +91,49 @@ function ExploreDapps(props) {
 
   /**      */
   async function init() {
-    await getCustomNetworkWebsiteRentContract(
+    await getCurrentConnectedOwner(
+      Blockchain,
       NetworkChain,
       web3ModalRef,
-      setWebsiteRentContract
-    ).then(async (contract) => {
-      await getAllDappsUris(contract).then(async (cids) => {
-        console.log("CIDs are ", cids);
-        setDappCids(cids);
-        if (cids.length == 0) {
-          setLoader(false);
-        } else {
-          await fetchDappsContent(
-            cids,
-            setAllDapps,
-            NetworkChain,
-            web3ModalRef
-          );
-          setLoader(false);
-        }
-      });
-      setWebsiteRentContract(contract);
-    });
+      setOwner
+    );
+
+    if (!owner) return null;
+    await fetchUserDeployments(owner);
+
+    let contract = await getBlockchainSpecificWebsiteRentContract(
+      Blockchain,
+      NetworkChain,
+      web3ModalRef
+    );
+
+    let cids = await getAllDappsUris(contract, setDappCids, Blockchain);
+    if (cids.length == 0) {
+      setLoader(false);
+    } else {
+      await fetchDappsContent(
+        cids,
+        setAllDapps,
+        NetworkChain,
+        web3ModalRef,
+        Blockchain
+      );
+      setLoader(false);
+    }
+
+    setWebsiteRentContract(contract);
   }
 
   useEffect(() => {
     init();
-  }, []);
-  console.log("Filtered Dapps are ", filteredDapps);
-  console.log("loader is ", loader);
-  console.log("cids ", dappCids.length);
+  }, [owner]);
+  // console.log("Deployments");
+  // console.log("Sales ", saleDeployments);
+  // console.log("whitelists", whitelistDeployments);
+  // console.log("Filtered Dapps are ", filteredDapps);
+  // console.log("loader is ", loader);
+  // console.log("cids ", dappCids.length);
+
   return (
     <>
       <VStack height={"fit-content"} bg="black" textColor={"white"}>

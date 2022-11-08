@@ -22,6 +22,8 @@ import { getAllDappsUris } from "../data/ipfsStuff";
 import { parseEther } from "ethers/lib/utils";
 import { useRouter } from "next/router";
 import { getProviderOrSigner } from "../data/accountsConnection";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
+import { getBlockchainSpecificWebsiteRentContract } from "../data/Whitelist";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -30,7 +32,11 @@ export async function getStaticProps(context) {
   };
 }
 
-let NetworkChain = "goerli";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
+
 function CreateDapp(props) {
   const [name, setName] = useState("");
   const [url, setUrl] = useState("https://");
@@ -128,8 +134,21 @@ function CreateDapp(props) {
       alert("Kindly upload an image");
       return 0;
     }
-    let WebsiteRentContract = await getCustomNetworkWebsiteRentContract(NetworkChain,Web3ModalRef);
-    let ifExists = await WebsiteRentContract.websiteExists(url);
+    let WebsiteRentContract = await getBlockchainSpecificWebsiteRentContract(
+      Blockchain,
+      NetworkChain,
+      Web3ModalRef
+    );
+    let ifExists = false;
+    if (Blockchain == "tron") {
+      ifExists = await WebsiteRentContract.websiteExists(url).call();
+    } else if (Blockchain == "ethereum") {
+      ifExists = await WebsiteRentContract.websiteExists(url);
+    } else if (Blockchain == "polygon") {
+    } else {
+      // we dont support that blockchain
+    }
+
     if (!ifExists) {
       setFormStep((prev) => prev + 1);
       setStatus("Website Approved 🥳 ");
@@ -150,47 +169,103 @@ function CreateDapp(props) {
     // ipfs storing part
     let newCID = await StoreUpdatedDappsOnIpfs(existingDapps);
     setStatus("Success on IPFS Storage 🎉");
-  
-      setStatus("Storing on Smart contract !");
-      // smart contract part
-      let _price = parseEther(price);
-      console.log("Price to pay is ", _price);
+
+    setStatus("Storing on Smart contract !");
+    // smart contract part
+    let _price = price;
+    if (Blockchain == "tron") {
+      _price = _price * 10 ** 6;
+    } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
+      _price = parseEther(price);
+    } else {
+    }
+
+    console.log("Price to pay is ", _price);
+    var options = { gasLimit: 300000 };
+    try {
       setStatus("Uploading on Smart contract !");
-      setStatus("Kindly approve the Transaction");
-      let signer = await getProviderOrSigner(NetworkChain, Web3ModalRef);
-      var options = { gasLimit: 300000};
-      try{
-        console.log("Arguments passing",{
-          url,_price:parseInt(_price).toString(),owner,options
-        })
-        let tx = await WebsiteRentContract.uploadWebsite(
-          url,
-          parseInt(_price).toString(),
-          owner,
-          options
-        );
-        setStatus("Transaction Mining.. ");
-        await tx.wait();
-        setStatus("Successfully Mined 🎉");
-        setStatus("Uploading global IPFS Link ");
-        try{
-          console.log("updating websites ipfs link on contract ",newCID);
-          let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(newCID,options);
+
+      if (Blockchain == "tron") {
+        setStatus("Transaction initiated.. ");
+        try {
+          setStatus("Wating for transaction completion");
+          let tx = await WebsiteRentContract.uploadWebsite(
+            url,
+            parseInt(_price).toString(),
+            owner
+          ).send({
+            feeLimit: 100000000,
+            callValue: 0,
+            tokenId: "",
+            tokenValue: "",
+            shouldPollResponse: true,
+          });
+          setStatus("Successfully stored dapp on Blockchain 🥳");
+        } catch (e) {
+          alert("website Upload was Un-successful");
+        }
+      } else if (Blockchain == "ethereum") {
+        setStatus("Kindly approve the Transaction");
+        try {
+          let tx = await WebsiteRentContract.uploadWebsite(
+            url,
+            parseInt(_price).toString(),
+            owner,
+            options
+          );
+          setStatus("Transaction Mining.. ");
+          await tx.wait();
+          setStatus("Successfully Mined 🎉");
+        } catch (e) {
+          alert("website Upload was Un-successful");
+        }
+      } else if (Blockchain == "polygon") {
+      } else {
+        // no support yet
+      }
+      setStatus("Uploading global IPFS Link ");
+      console.log("updating websites ipfs link on contract ", newCID);
+      if (Blockchain == "tron") {
+        setTimeout(() => {
+          setStatus("We are almost there :) ");
+          setStatus("Wating for transaction completion");
+        }, 4000);
+
+        try {
+          let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(
+            newCID
+          ).send({
+            feeLimit: 100000000,
+            callValue: 0,
+            tokenId: "",
+            tokenValue: "",
+            shouldPollResponse: true,
+          });
+          setStatus("Successfully stored 🎉");
+          router.push("/Explore");
+        } catch (e) {
+          console.log("ipfs link upload error", e);
+        }
+      } else if (Blockchain == "ethereum") {
+        try {
+          let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(
+            newCID,
+            options
+          );
           setStatus("Transaction Mining.. ");
           await _tx.wait();
           setStatus("Successfully storage 🎉");
           router.push("/Explore");
-  
+        } catch (e) {
+          console.log("ipfs link upload error", e);
         }
-        catch(e){
-          console.log("ipfs link upload error",e)
-        }
-    
+      } else if (Blockchain == "polygon") {
+      } else {
+        // not supported
       }
-      catch(e){
-        console.log("error in upload ",e);
-      }
-    
+    } catch (e) {
+      console.log("error in upload ", e);
+    }
   }
 
   async function getUserInfo() {
@@ -199,23 +274,20 @@ function CreateDapp(props) {
     });
   }
   async function init() {
-    await getUserInfo();
-    getCustomNetworkWebsiteRentContract(
+    getCurrentConnectedOwner(Blockchain, NetworkChain, Web3ModalRef, setOwner);
+    if (!owner) return null;
+    let contract = await getBlockchainSpecificWebsiteRentContract(
+      Blockchain,
       NetworkChain,
-      Web3ModalRef,
-      setWebsiteRentContract
-    )
-      .then(async (contract) => {
-        await getAllDappsUris(contract, setAllDapps);
-        setWebsiteRentContract(contract);
-      })
-      .catch((e) => {
-        console.log("error  in obtaining the contract ");
-      });
+      websiteRentContract
+    );
+
+    await getAllDappsUris(contract, setAllDapps, Blockchain);
+    setWebsiteRentContract(contract);
   }
   useEffect(() => {
     init();
-  }, []);
+  }, [owner]);
   return (
     <Center
       bg="black"
@@ -302,6 +374,15 @@ function CreateDapp(props) {
                     let res = e.target.value;
                     setPrice(res);
                   }}
+                  placeholder={
+                    Blockchain == "tron"
+                      ? "How many TRX"
+                      : Blockchain == "ethereum"
+                      ? "How many Eth"
+                      : Blockchain == "polygon"
+                      ? "How many MATIC"
+                      : ""
+                  }
                   variant="outline"
                 />
               </NamedInput>
@@ -313,7 +394,10 @@ function CreateDapp(props) {
                   onChange={(e) => {
                     setBlockchain(e.target.value);
                   }}
+                  textTransform={"capitalize"}
                   placeholder={"Ethereum , Tron"}
+                  value={Blockchain ? Blockchain : null}
+                  disabled={Blockchain ? true : false}
                 />
               </NamedInput>
 
@@ -387,7 +471,8 @@ function CreateDapp(props) {
       )}
       <VStack
         paddingTop={formStep != 2 ? "0" : "20vh"}
-        height={formStep != 2 ? "0.01vh" : "100vh"}
+        height={formStep != 2 ? "0.01vh" : "fit-content"}
+        minH={formStep != 2 ? "0.01vh" : "fit-content"}
         width={"100vw"}
       >
         <Heading> {formStep == 2 ? "Dapp Upload Started" : ""} </Heading>

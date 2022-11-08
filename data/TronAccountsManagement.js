@@ -6,36 +6,58 @@ const tronPrivateKey =
 export const tronConnect = async () => {
   try {
     //      debugger;
-    await window.tronLink.request({ method: "tron_requestAccounts" });
-    let accounts = await window.tronLink;
-    let address = accounts.tronWeb.defaultAddress.base58;
-    console.log(accounts.tronWeb);
-    return address;
+    let tronlink = await window.tronLink;
+    if (!tronlink) {
+      alert("Please Install tronlink First ");
+      return null;
+    }
+
+    await tronlink.request({ method: "tron_requestAccounts" });
+
+    let tronWeb = await tronlink?.tronWeb;
+    if(tronWeb==false)
+        return null;
+    let address = tronWeb.defaultAddress;
+    return address.base58;
   } catch (err) {
     console.log("Error: ", err);
     alert("Error: TronLink extension is not installed");
   }
 };
 
-async function getTronwebNile() {}
 async function getTronwebShasta() {
   const HttpProvider = TronWeb.providers.HttpProvider;
   const fullNode = new HttpProvider("https://api.shasta.trongrid.io");
   const solidityNode = new HttpProvider("https://api.shasta.trongrid.io");
   const eventServer = new HttpProvider("https://api.shasta.trongrid.io");
-  const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
+  const tronWeb = new TronWeb(
+    fullNode,
+    solidityNode,
+    eventServer,
+    tronPrivateKey
+  );
   return tronWeb;
-
 }
+export function getNileTronWeb() {
+    const HttpProvider = TronWeb.providers.HttpProvider;
+    const fullNode = new HttpProvider("https://api.nileex.io/");
+    const solidityNode = new HttpProvider("https://api.nileex.io/");
+    const eventServer = new HttpProvider("https://event.nileex.io/");
+    const privateKey =
+      "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
+    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+    return tronWeb;
+  }
+  
 async function getTronwebMainnet() {}
 
-async function getNetworkTronweb(network) {
+export async function getNetworkTronweb(network) {
   let Network = network.toString().toLowerCase();
   switch (Network) {
     case "shasta":
       return getTronwebShasta();
     case "nile":
-      return getTronwebNile();
+      return getNileTronWeb();
     case "mainnet":
       return getTronwebMainnet();
 
@@ -45,16 +67,6 @@ async function getNetworkTronweb(network) {
 }
 
 
-export function getNileTronWeb(){
-    const HttpProvider = TronWeb.providers.HttpProvider;
-    const fullNode = new HttpProvider("https://api.nileex.io/");
-    const solidityNode = new HttpProvider("https://api.nileex.io/");
-    const eventServer = new HttpProvider("https://event.nileex.io/");
-    const privateKey =
-      "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
-    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-    return tronWeb;
-}
 export async function deploy_tron_contract(
   network,
   abi,
@@ -72,7 +84,12 @@ export async function deploy_tron_contract(
     const solidityNode = new HttpProvider("https://api.nileex.io/");
     const eventServer = new HttpProvider("https://event.nileex.io/");
 
-    let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
+    let tronWeb = new TronWeb(
+      fullNode,
+      solidityNode,
+      eventServer,
+      tronPrivateKey
+    );
 
     // let tronWeb = getNetworkTronweb(network);
 

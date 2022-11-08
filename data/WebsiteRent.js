@@ -1,5 +1,5 @@
 import { getProviderOrSigner } from "./accountsConnection";
-import { getNileTronWeb } from "./TronAccountsManagement";
+import {getNetworkTronweb } from "./TronAccountsManagement";
 
 export const WebsiteRentABI =[
 	{
@@ -259,7 +259,7 @@ export const WebsiteRentBytecode = {
 export const WebsiteRentAddress = "0xe266CDb9F138d2cbC010225aC66AdCAae61761A2"; 
 // Tron 
 // Nile
-export const WebsiteRentNileAddress="TDdQtf1LjigmRggGBh9tWyEtZ6xN6ePFSk";
+export const WebsiteRentNileAddress="TPSNKbvn6vwL21TCUUFtUmombs2x4LTSqM";
 // Shasta
 export const WebsiteRentShastaAddress=null;
 //
@@ -289,7 +289,7 @@ const websiteRentContract = new ethers.Contract(
 	WebsiteRentAddress,
 	WebsiteRentABI,
 	signer
-  );
+  ); 
   if(contractSetter){
 	contractSetter(websiteRentContract);
   }
@@ -302,7 +302,10 @@ export const getTronWebsiteRentContract=async (network)=>{
 	if(network=="nile"){	
 		contractAddress=WebsiteRentNileAddress;
 	}
-	let tronWeb =  getNileTronWeb();
+	// let tronWeb =await getNetworkTronweb(network);
+	console.log("tronlink is ",  window.tronLink)
+	let tronWeb=await window.tronLink.tronWeb;
+
 	let contract = await tronWeb.contract().at(contractAddress);
 	return contract;
 	

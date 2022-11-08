@@ -17,7 +17,7 @@ function Explore() {
           <Heading fontSize={"4em"} width={"50vw"}>
             Rent Web3 Assets
           </Heading>
-          <Text
+          <Text as={"div"}
             fontFamily={"sans-serif"}
             textColor={"grey"}
             fontSize={"18px"}

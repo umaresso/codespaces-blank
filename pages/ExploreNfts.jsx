@@ -27,8 +27,13 @@ import {
 } from "../data/ipfsStuff";
 import NftInformationPopup from "./components/NftInformationPopup";
 import NftDetails from "./components/NftDetails";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 
-let NetworkChain = "goerli";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
+
 export async function getStaticProps(context) {
   require("dotenv").config();
   return {
@@ -43,7 +48,7 @@ function ExploreNfts(props) {
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NFTs, setNFTs] = useState([]);
- let filteredNfts=[];
+  let filteredNfts = [];
   let web3ModalRef = useRef();
   async function connectWallet() {
     getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
@@ -55,6 +60,13 @@ function ExploreNfts(props) {
     });
   }
   async function init() {
+    let _user = await getCurrentConnectedOwner(
+      Blockchain,
+      NetworkChain,
+      web3ModalRef,
+      setWalletAddress
+    );
+
     if (!walletAddress) return;
     let allNFTs = [];
     let trackerContract = await getCustomNetworkNFTTrackerContract(
@@ -116,12 +128,10 @@ function ExploreNfts(props) {
           contractsAddressIndex + 1 == contractsArray.length &&
           tokenIndexer + 1 == thisContractTokens.length
         ) {
-
           setNFTs(allNFTs);
           setTimeout(() => {
             setLoading(false);
-            setCurrentMenu("all")
-            
+            setCurrentMenu("all");
           }, 2000);
         }
       });
@@ -137,14 +147,12 @@ function ExploreNfts(props) {
   }
 
   useEffect(() => {
-    setLoading(true);
-
     init();
   }, [walletAddress]);
 
   // console.log("NFTs are", NFTs);
   let filtered = [];
-  filteredNfts=[];
+  filteredNfts = [];
   if (currentMenu != "all") {
     NFTs?.map((nft) => {
       if (
@@ -157,9 +165,9 @@ function ExploreNfts(props) {
       }
     });
   } else {
-    filteredNfts=[...NFTs];
+    filteredNfts = [...NFTs];
   }
-  
+
   console.log("filtered NFT are", filteredNfts);
 
   return (
@@ -209,8 +217,8 @@ function ExploreNfts(props) {
                   RentWeb3 is your favorite place to rent awesome NFTs to use in
                   your Next game , for attending an event or hosting your
                   Phenomenal event in the Metaverse. We bring you the NFTs from
-                  World&apos;s best creators at affordable prices. So , if you want
-                  to be the part of the family ,Rent an NFT Now !
+                  World&apos;s best creators at affordable prices. So , if you
+                  want to be the part of the family ,Rent an NFT Now !
                 </Text>
               </VStack>
             </Center>
@@ -257,13 +265,26 @@ function ExploreNfts(props) {
                 width={filteredNfts.length > 0 ? "100vw" : "0vw"}
                 spacing={10}
               >
-                {filteredNfts?.map((nft,index) => {
+                {filteredNfts?.map((nft, index) => {
                   return (
-                    <WrapItem key={'wrap'+ nft.erc721ContractAddress.toString()+index}>
+                    <WrapItem
+                      key={
+                        "wrap" + nft.erc721ContractAddress.toString() + index
+                      }
+                    >
                       <NftDetails
-                        Key={'nftDetails'+nft.id +  nft.erc721ContractAddress.toString()+index}
-                        key={'nftDetailsKey'+nft.id +  nft.erc721ContractAddress.toString()+index}
-        
+                        Key={
+                          "nftDetails" +
+                          nft.id +
+                          nft.erc721ContractAddress.toString() +
+                          index
+                        }
+                        key={
+                          "nftDetailsKey" +
+                          nft.id +
+                          nft.erc721ContractAddress.toString() +
+                          index
+                        }
                         selector={setSelectedNft}
                         NFT={nft}
                       />

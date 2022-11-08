@@ -1,6 +1,10 @@
 import { parseEther } from "ethers/lib/utils";
 import { getProviderOrSigner } from "./accountsConnection";
-import { getCustomNetworkWebsiteRentContract } from "./WebsiteRent";
+import {getNetworkTronweb } from "./TronAccountsManagement";
+import {
+  getCustomNetworkWebsiteRentContract,
+  getTronWebsiteRentContract,
+} from "./WebsiteRent";
 export const SaleABI = [
   {
     inputs: [
@@ -715,6 +719,7 @@ export const SaleTrackerAddress = "0x2A22Bf734Aa8250A320B63F56441e52b2F904A32";
 
 // Tron
 // Nile
+
 export const SaleTrackerNileAddress = "TMN4Xc2XUVi4TmiiL7FzwTrYDh1JL7QWA6";
 
 // Shasta
@@ -763,7 +768,7 @@ async function getBlockchainSpecificSaleTrackerContract(
   let contract = null;
   if (Blockchain == "tron") {
     contract = await getTronSaleTrackerContract(NetworkChain);
-    console.log("want to return Sale Tracker contract ", contract);
+    // console.log("want to return Sale Tracker contract ", contract);
     return contract;
   } else if (!Blockchain || Blockchain == "ethereum") {
     contract = await getCustomNetworkSaleTrackerContract(
@@ -787,7 +792,7 @@ async function getBlockchainSpecificSaleFactoryContract(
   let contract = null;
   if (Blockchain == "tron") {
     contract = await getTronSaleFactory(NetworkChain, contractAddress);
-    console.log("want to return whitelistTracker ", contract);
+    // console.log("want to return whitelistTracker ", contract);
     return contract;
   } else if (!Blockchain || Blockchain == "ethereum") {
     contract = await getCustomNetworkSaleContract(
@@ -802,29 +807,51 @@ async function getBlockchainSpecificSaleFactoryContract(
   } else {
     return null;
   }
+  return contract;
 }
 
-export const fetchSaleAddresses = async (contract, owner, setter) => {
+export const fetchSaleAddresses = async (
+  contract,
+  owner,
+  setter,
+  Blockchain
+) => {
   let TrackerContract = contract;
   try {
-    console.log("getting sales for", owner, "in", TrackerContract);
-    return await TrackerContract.userNumberOfSales(owner.toString()).then(
-      async (numSales) => {
-        let allSales = [];
-        //   console.log("Owner has ", numSales, " Sales");
-        for (let index = 0; index < numSales; index++) {
-          let SaleAddress = await TrackerContract.userToSale(owner, index);
-          allSales.push(SaleAddress);
-        }
-        if (setter != undefined) {
-          setter(allSales);
-        }
+    // console.log("getting sales for", owner, "in", TrackerContract);
 
-        return allSales;
+    if (Blockchain == "tron") {
+      let numSales = await TrackerContract.userNumberOfSales(owner).call();
+      let allSales = [];
+      // console.log("Owner has ", numSales, " Sales");
+      for (let index = 0; index < numSales; index++) {
+        let SaleAddress = await TrackerContract.userToSale(owner, index).call();
+        allSales.push(SaleAddress);
       }
-    );
+      if (setter != undefined) {
+        setter(allSales);
+      }
+
+      return allSales;
+    } else if (!Blockchain || Blockchain == "ethereum") {
+      return await TrackerContract.userNumberOfSales(owner).then(
+        async (numSales) => {
+          let allSales = [];
+          //   console.log("Owner has ", numSales, " Sales");
+          for (let index = 0; index < numSales; index++) {
+            let SaleAddress = await TrackerContract.userToSale(owner, index);
+            allSales.push(SaleAddress);
+          }
+          if (setter != undefined) {
+            setter(allSales);
+          }
+
+          return allSales;
+        }
+      );
+    }
   } catch (e) {
-    console.log("unable to get sale address", e);
+    console.log("unable to get sale addresses", e);
   }
   // let totalSales = await TrackerContract.totalSales();
 };
@@ -835,7 +862,7 @@ export const fetchSales = async (
   arraySetter,
   Blockchain
 ) => {
-  //   console.log("obtaining Sales for ", owner);
+  // console.log("obtaining Sales for ", owner);
   let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
     Blockchain,
     NetworkChain,
@@ -848,80 +875,83 @@ export const fetchSales = async (
   );
   try {
     // console.log('fetching array of sales')
-    await fetchSaleAddresses(TrackerContract, owner, arraySetter).then(
-      async (Sales) => {
-        let allSales = [];
-        // console.log('iterating over')
-        Sales?.map(async (_Sale, index) => {
-          let hostedWebsite;
-          let rentTime;
-          if (Blockchain == "tron") {
-            rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
-            hostedWebsite = await websiteRentContract
-              .deploymentToWebsite(_Sale)
-              .call();
-          } else if (!Blockchain || Blockchain == "ethereum") {
-            rentTime = await websiteRentContract.rentTime(hostedWebsite);
-            hostedWebsite = await websiteRentContract.deploymentToWebsite(
-              _Sale
-            );
-          } else if (Blockchain == "polygon") {
-            // polygon pull
-          } else {
-            // no support
-          }
+    await fetchSaleAddresses(
+      TrackerContract,
+      owner,
+      arraySetter,
+      Blockchain
+    ).then(async (Sales) => {
+      let allSales = [];
+      // console.log("Sales obtained are ", Sales);
+      // console.log('iterating over')
+      Sales?.map(async (_Sale, index) => {
+        let hostedWebsite;
+        let rentTime;
+        if (Blockchain == "tron") {
+          hostedWebsite = await websiteRentContract
+            .deploymentToWebsite(_Sale)
+            .call();
+          rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
+        } else if (!Blockchain || Blockchain == "ethereum") {
+          rentTime = await websiteRentContract.rentTime(hostedWebsite);
+          hostedWebsite = await websiteRentContract.deploymentToWebsite(_Sale);
+        } else if (Blockchain == "polygon") {
+          // polygon pull
+        } else {
+          // no support
+        }
 
-          hostedWebsite =
-            rentTime * 1000 > new Date().getTime() ? hostedWebsite : null;
+        hostedWebsite =
+          rentTime * 1000 > new Date().getTime() ? hostedWebsite : null;
 
-          let SaleContract = await getBlockchainSpecificSaleFactoryContract(
-            NetworkChain,
-            web3modalRef,
-            _Sale
-          );
-          console.log("sale contract is ", SaleContract);
-          let name, symbol, baseURI, startTime, endTime;
-          if (Blockchain == "tron") {
-            name = await SaleContract.name().call();
-            symbol = await SaleContract.symbol().call();
-            baseURI = await SaleContract.baseURI().call();
-            startTime = await SaleContract.startTime().call();
-            endTime = await SaleContract.endTime().call();
-          } else if (!Blockchain || Blockchain == "ethereum") {
-            name = await SaleContract.name();
-            symbol = await SaleContract.symbol();
-            baseURI = await SaleContract.baseURI();
-            startTime = await SaleContract.startTime();
-            endTime = await SaleContract.endTime();
-          } else if (Blockchain == "polygon") {
-            //
-          } else {
-            return null;
-          }
+        let SaleContract = await getBlockchainSpecificSaleFactoryContract(
+          Blockchain,
+          NetworkChain,
+          web3modalRef,
+          _Sale
+        );
+        // console.log("sale contract is ", SaleContract);
+        let name, symbol, baseURI, startTime, endTime;
+        if (Blockchain == "tron") {
+          name = await SaleContract.name().call();
+          symbol = await SaleContract.symbol().call();
+          baseURI = await SaleContract.baseURI().call();
+          startTime = await SaleContract.startTime().call();
+          endTime = await SaleContract.endTime().call();
+        } else if (!Blockchain || Blockchain == "ethereum") {
+          name = await SaleContract.name();
+          symbol = await SaleContract.symbol();
+          baseURI = await SaleContract.baseURI();
+          startTime = await SaleContract.startTime();
+          endTime = await SaleContract.endTime();
+        } else if (Blockchain == "polygon") {
+          //
+        } else {
+          return null;
+        }
 
-          let SaleInstance = {
-            id: index + 1,
-            name,
-            symbol,
-            baseURI,
-            address: _Sale,
-            website: hostedWebsite === "" ? null : hostedWebsite,
-            startTime,
-            endTime,
-            owner,
-            rentTime: rentTime * 1000,
-          };
-          console.log("Sale instance", SaleInstance);
-          allSales.push(SaleInstance);
-          if (index + 1 == Sales.length) {
-            if (arraySetter != undefined) {
-              arraySetter(allSales);
-            }
+        let SaleInstance = {
+          id: index + 1,
+          name,
+          symbol,
+          baseURI,
+          address: _Sale,
+          website: hostedWebsite === "" ? null : hostedWebsite,
+          startTime,
+          endTime,
+          owner,
+          rentTime: rentTime * 1000,
+        };
+        // console.log("Sale instance", SaleInstance);
+        allSales.push(SaleInstance);
+        if (index + 1 == Sales.length) {
+          if (arraySetter != undefined) {
+            arraySetter(allSales);
           }
-          return allSales;
-        });
-      }
-    );
+        }
+        return allSales;
+      });
+    });
   } catch (e) {
     console.log("unable to fetch deploymments");
   }
@@ -961,12 +991,13 @@ export const getTronSaleTrackerContract = async (network) => {
   if (network == "nile") {
     contractAddress = SaleTrackerNileAddress;
   }
-  let tronWeb = getNileTronWeb();
+  let tronWeb = await getNetworkTronweb(network);
   let contract = await tronWeb.contract().at(contractAddress);
+  // console.log("sale tracker is ", contract);
   return contract;
 };
 export const getTronSaleFactory = async (network, contractAddress) => {
-  let tronWeb = getNileTronWeb();
+  let tronWeb = await getNetworkTronweb(network);
   let contract = await tronWeb.contract().at(contractAddress);
   return contract;
 };
