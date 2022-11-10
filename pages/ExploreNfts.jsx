@@ -73,6 +73,7 @@ function ExploreNfts(props) {
       NetworkChain,
       web3ModalRef
     );
+    
     //  console.log("Tracker contract is ",trackerContract);
     let contractsArray = await getAllContractAddressess(trackerContract);
     // console.log("Contracts to read from", contractsArray);

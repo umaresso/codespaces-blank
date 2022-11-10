@@ -10,17 +10,18 @@ function LinkButton({
   loadingMessage,
   onClick,
   id,
-  disabled
+  disabled,
+  marginTop
 }) {
   const [navigate, setNavigate] = useState(false);
   const router = useRouter();
-
   async function LetsNavigate(e) {
     router.push(href);
   }
   let Key=id ? id : "button" + title;
   return (
     <Button
+    
       id={Key}
       key={Key}
       onClick={async () => {
@@ -31,6 +32,7 @@ function LinkButton({
       variant={variant}
       width={"fit-content"}
       disabled={disabled}
+      marginTop={marginTop}
     >
       {title}
     </Button>

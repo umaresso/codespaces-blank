@@ -38,7 +38,7 @@ contract Sale is ERC721, ERC721URIStorage{
     // 0x2C0c67324F5B35EfBbb027e3798E388c06BE3DA4
     // 0x159bedaB39B971583cCd58F17744B709C9860567 - beneficiary
   
-    // 0xf51C21c44A836125A81da92556aaf5d67C7ca6d5,"Bitcoin Prime","bitcoin",0xf5a6Bf94e82972c8bf7B23858Ec62a8f840B8d79,"ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/",1665914714,1665919507,1000000000000000,2000000000000000,10
+    // 0xf51C21c44A836125A81da92556aaf5d67C7ca6d5,"Bitcoin Prime","bitcoin",0xf5a6Bf94e82972c8bf7B23858Ec62a8f840B8d79,"ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/",1665914714,1665919507,1000000000000000,2000000000000000,100
     
     constructor(
       address whitelistContractAddress,
@@ -85,7 +85,6 @@ contract Sale is ERC721, ERC721URIStorage{
       return price;
 
     }
-
     function withdraw()public onlyBeneficiary{
            payable(PLATFORM_BENEFICIARY).transfer(address(this).balance);
     }
@@ -220,10 +219,6 @@ contract Sale is ERC721, ERC721URIStorage{
     function endTime()public view returns(uint){
       return closingTime;
     }
-    function isTokenIdExists(uint tokenId)public view returns(bool){
-      if(_exists(tokenId)==true)
-        return true;
-      return false;
-    }
+    
     
 }

@@ -292,7 +292,7 @@ function CreateDapp(props) {
     <Center
       bg="black"
       textColor={"white"}
-      height={loader ? "fit-content" : "100vh"}
+      height={["fit-content","fit-content" , "100vh"]}
       width={"100vw"}
       flexDirection={"column"}
       align={"left"}
@@ -301,14 +301,16 @@ function CreateDapp(props) {
         <>
           {" "}
           <Stack
-            width={"80vw"}
+            width={["95vw","90vw","80vw"]}
             flexDirection={["column", "column", "row"]}
             align="center"
             justify={"space-evenly"}
             spacing={30}
-            height={"80vh"}
+            height={["fit-content","fit-content","80vh"]}
+            paddingTop={["20vh","20vh","0"]}
+            
           >
-            <VStack width={"40vw"} spacing={5}>
+            <VStack width={["80vw","60vw","40vw"]} spacing={5}>
               <NamedInput title={"Name"}>
                 {" "}
                 <Input
@@ -416,8 +418,8 @@ function CreateDapp(props) {
             </VStack>
             <VStack>
               <Img
-                width={"30vw"}
-                height={"40vh"}
+                width={["70vw","60vw","30vw"]}
+                objectFit={"contain"}
                 borderRadius="10px"
                 src={
                   dappImage ? dappImage : "https://i.stack.imgur.com/tDPMH.png"
@@ -465,6 +467,8 @@ function CreateDapp(props) {
               key={"creating dapp"}
               color={"green"}
               variant={"solid"}
+              marginTop={["10vh","5vh","0vh"]}
+
             />
           </Box>
         </>

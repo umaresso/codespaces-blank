@@ -1068,7 +1068,15 @@ const NftRentingTrackerABI = [
     type: "function",
   },
 ];
+// Deployment Addresses
+// Ethereum
 const NftRentingTrackerAddress = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
+// Tron
+const NftRentingTrackerAddressNile = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
+const NftRentingTrackerAddressShasta = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
+
+// Polygon
+
 
 export const getCustomNetworkNFTFactoryContract = async (
   network,
@@ -1090,9 +1098,25 @@ export const getCustomNetworkNFTFactoryContract = async (
   }
   return nftFactory;
 };
+
+export async function getBlockchainSpecificNFTTracker(Blockchain,NetworkChain,web3ModalRef){
+if(Blockchain=="tron"){
+  let contract = 
+}
+else if(Blockchain=="ethereum"){
+
+}
+else if(Blockchain=="polygon"){
+
+}
+else{
+  // no support 
+  return null;
+}
+}
 export const getCustomNetworkNFTTrackerContract = async (
   network,
-  web3modalRef
+  web3modalRef,Blockchain
 ) => {
   let signer = await getProviderOrSigner(network, web3modalRef, true);
   let nftTracker = new ethers.Contract(

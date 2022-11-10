@@ -46,9 +46,6 @@ function ExploreDapps(props) {
   const [websiteRentContract, setWebsiteRentContract] = useState(null);
   let web3ModalRef = useRef();
 
-
-
-
   async function fetchUserDeployments(Owner) {
     setLoader(true);
     await fetchWhitelists(
@@ -195,8 +192,8 @@ function ExploreDapps(props) {
                 >
                   <VStack key={"item" + item.name}>
                     <Img
-                      height={"40vh"}
-                      width={"30vw"}
+                      width={["70vw", "60vw", "40vw"]}
+                      objectFit={"contain"}
                       src={item.image}
                       borderRadius={"20px"}
                     />
