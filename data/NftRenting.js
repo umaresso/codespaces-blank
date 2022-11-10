@@ -1098,12 +1098,26 @@ export const getCustomNetworkNFTFactoryContract = async (
   }
   return nftFactory;
 };
+async function getTronNetworkNFTTracker(network){
+	let contractAddress=null;
+	if(network=="nile"){	
+		contractAddress=nftnile;
+	}
+	// let tronWeb =await getNetworkTronweb(network);
+	console.log("tronlink is ",  window.tronLink)
+	let tronWeb=await window.tronLink.tronWeb;
+
+	let contract = await tronWeb.contract().at(contractAddress);
+	return contract;
+
+}
 
 export async function getBlockchainSpecificNFTTracker(Blockchain,NetworkChain,web3ModalRef){
 if(Blockchain=="tron"){
-  let contract = 
+  let contract = await getTronNetworkNFTTracker(NetworkChain);
 }
 else if(Blockchain=="ethereum"){
+let contract =await getCustomNetworkNFTTrackerContract(NetworkChain,web3ModalRef);
 
 }
 else if(Blockchain=="polygon"){
