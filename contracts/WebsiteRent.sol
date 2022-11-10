@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.11;
+pragma solidity 0.8.6;
 
 contract WebsiteRent {
     mapping(string => address) public websiteToDeployment; // which smart contract is to be displayed on screen
