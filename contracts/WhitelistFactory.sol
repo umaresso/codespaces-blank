@@ -34,7 +34,7 @@ contract WhitelistFactory is IWhitelist{
     uint public startTime;
     uint public endTime;
     string public baseURI;
-        
+    uint public totalSupply;
 
     constructor(
         string memory _name,
@@ -42,11 +42,12 @@ contract WhitelistFactory is IWhitelist{
         uint _maxWhitelistedAddresses,
         address _owner,
         string memory _baseURI,
+        uint _totalSupply,
         uint _startTime,
         uint _endTime
         ) {
     // Demo Data for testing
-    // "seemal","sam",100,0xf5a6Bf94e82972c8bf7B23858Ec62a8f840B8d79,"//ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/",,1665933948,1665936347
+    // "seemal","sam",100,0x7bD5EBac8A1dD13f3698C7ddFC77803CdE039BA6,"//ipfs/QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/",10,1665933948,1668042730
         maxWhitelistedAddresses =  _maxWhitelistedAddresses;
         name=_name;
         symbol=_symbol;
@@ -54,6 +55,7 @@ contract WhitelistFactory is IWhitelist{
         baseURI=_baseURI;
         startTime=_startTime;
         endTime=_endTime;
+        totalSupply=_totalSupply;
         
     }
 

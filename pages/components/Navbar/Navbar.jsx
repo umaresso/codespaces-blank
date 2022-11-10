@@ -8,8 +8,14 @@ import {
 import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import Web3Modal from "web3modal";
 import { connect } from "formik";
+import { tronConnect } from "../../../data/TronAccountsManagement";
+import { getCurrentConnectedOwner } from "../../../data/blockchainSpecificExports";
 
-let NetworkChain = "goerli";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum"
+let NetworkChain = "nile";
+let Blockchain = "tron";
+
 function Navbar() {
   const [walletAddress, setWalletAddress] = useState(null);
   const web3ModalRef = useRef();
@@ -27,13 +33,7 @@ function Navbar() {
   // for intra and inter-Blockchain connection
 
   async function Connect() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (signer) {
-        signer.getAddress().then((user) => {
-          setWalletAddress(user);
-        });
-      }
-    });
+    getCurrentConnectedOwner(Blockchain,NetworkChain,web3ModalRef,setWalletAddress);
   }
   useEffect(() => {
     if (!walletAddress) {

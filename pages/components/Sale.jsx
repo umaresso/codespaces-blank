@@ -9,13 +9,17 @@ import {
 } from "@chakra-ui/react";
 import { SingleDatepicker } from "chakra-dayzed-datepicker";
 
-import Card from "./Card/Card"
+import Card from "./Card/Card";
 import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
 
 import { useRouter } from "next/router";
 import { getProviderOrSigner } from "../../data/accountsConnection";
-let NetworkChain = "ethereum";
+import { getCurrentConnectedOwner } from "../../data/blockchainSpecificExports";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum"
+let NetworkChain = "nile";
+let Blockchain = "tron";
 
 function Sale(props) {
   let bg = "black";
@@ -26,15 +30,16 @@ function Sale(props) {
   const [saleSupply, setSaleSupply] = useState(null);
   const [name, setName] = useState(props._name);
   const [symbol, setSymbol] = useState(props._symbol);
-  const [owner, setOwner] = useState(props._owner);
+  const [owner, setOwner] = useState(null);
   const [baseURI, setBaseURI] = useState(props._baseURI);
-  const [blockchain, setBlockchain] = useState(NetworkChain);
+  const [maxWhitelists, setMaxWhitelists] = useState(null);
+  const [blockchain, setBlockchain] = useState(props._blockchain);
   const [metadataContract, setMetadataContract] = useState(null);
   const router = useRouter();
   let Web3ModalRef = useRef();
+  let saleType = props.saleType;
 
-
-  function validateArguments() { }
+  function validateArguments() {}
   async function createSale() {
     validateArguments();
 
@@ -42,30 +47,20 @@ function Sale(props) {
       name,
       symbol,
       saleSupply,
+      maxWhitelists,
       owner,
       baseURI,
       blockchain,
       startTime: parseInt(startTime / 1000),
       endTime: parseInt(endTime / 1000),
     };
-
+    console.log("sale object is ", obj);
     await props.deploySale(obj);
   }
 
-  async function getOwner() {
-    getProviderOrSigner(NetworkChain, Web3ModalRef, true).then(signer => {
-      signer.getAddress().then(setOwner).catch(console.log);
-
-    });
-
-  }
-
   useEffect(() => {
-
-    getOwner();
-
-  }, [])
-
+    getCurrentConnectedOwner(Blockchain, NetworkChain, Web3ModalRef, setOwner);
+  }, []);
 
   return (
     <Card>
@@ -123,10 +118,26 @@ function Sale(props) {
               defaultValue={owner}
             />
           </NamedInput>
-          <NamedInput title={"Supply"}>
+          {saleType == "whitelist" && (
+            <NamedInput title={"Max Whitelists"}>
+              {" "}
+              <Input
+                key={"Sale Supply"}
+                type={"number"}
+                onChange={(e) => {
+                  let res = e.target.value;
+                  setMaxWhitelists(res);
+                }}
+                variant="outline"
+                defaultValue={maxWhitelists}
+                placeholder={"e.g 100"}
+              />
+            </NamedInput>
+          )}
+          <NamedInput title={"Total Supply"}>
             {" "}
             <Input
-              key={"Sale Supply"}
+              key={"Total Supply"}
               type={"number"}
               onChange={(e) => {
                 let res = e.target.value;
@@ -134,7 +145,7 @@ function Sale(props) {
               }}
               variant="outline"
               defaultValue={saleSupply}
-              placeholder={"e.g 100"}
+              placeholder={"Tokens total supply e.g 100"}
             />
           </NamedInput>
 
@@ -146,25 +157,29 @@ function Sale(props) {
                 let res = e.target.value;
                 setBlockchain(res);
               }}
+              textTransform={"capitalize"}
               variant="outline"
-              defaultValue={""}
-              placeholder={"Ethereum , Tron or Polygon"}
+              // defaultValue={""}
+              // placeholder={"Ethereum , Tron or Polygon"}
+              value={blockchain ? blockchain : null}
+              disabled={blockchain ? true : false}
             />
           </NamedInput>
 
-          
-            <NamedInput title={"baseURI"}>
-              {" "}
-              <Input
-                key={"baseURI"}
-                onChange={(e) => {
-                  let res = e.target.value;
-                  setBaseURI(res);
-                }}
-                variant="outline"
-                placeholder={"e.g ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6"}
-              />
-            </NamedInput>
+          <NamedInput title={"baseURI"}>
+            {" "}
+            <Input
+              key={"baseURI"}
+              onChange={(e) => {
+                let res = e.target.value;
+                setBaseURI(res);
+              }}
+              variant="outline"
+              placeholder={
+                "e.g ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6"
+              }
+            />
+          </NamedInput>
 
           <NamedInput background={"white"} color={"black"} title={"Start Time"}>
             {" "}

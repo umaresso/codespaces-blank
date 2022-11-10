@@ -9,11 +9,15 @@ import { useRef } from "react";
 import { getProviderOrSigner } from "../../data/accountsConnection";
 import { getMinimalAddress } from "../../Utilities";
 import Link from "next/link";
+import { getBlockchainSpecificWebsiteRentContract } from "../../data/Whitelist";
+import { addScaleCorrector } from "framer-motion";
 
-let NetworkChain = "goerli";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
 
 function IntegrateFrontend(props) {
-  console.log("props are ",props);
   let showToggle = props.showToggle;
   let _deployments = props.deployments;
   let _selectedOption = props.selected;
@@ -41,55 +45,60 @@ function IntegrateFrontend(props) {
     setStatus("Renting Statrted ✔ ");
     setStatus("Assembling arguments for upload ..");
     // need metamask sign on transaction
-    let websiteRentContract = await getCustomNetworkWebsiteRentContract(
+    let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
+      Blockchain,
       NetworkChain,
       web3ModalRef
     );
-    console.log("website rent contract ", websiteRentContract);
+    // console.log("website rent contract ", websiteRentContract);
     let dayPrice = price;
     let totalPrice = dayPrice * numDays;
     let days = parseInt(numDays);
-    // console.log("price to pay", totalPrice);
-    // console.log("renting with ", {
-    //   websiteURL,
-    //   selectedDeployment,
-    //   days,
-    // });
-
-    // console.log("Selected Deply is ", selectedDeployment);
 
     try {
       if (!selectedDeployment) {
         alert("select a deployment address first");
         return;
       }
-      let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
-      let gasPrice = await signer.getGasPrice();
-      //      gasPrice = parseInt(gasPrice);
-      console.log("gasPrices are ", gasPrice);
       setStatus("Making Dapp Rent Transaction");
-      setStatus("Approve Transaction");
+      setStatus("Approve Transaction !");
       var options = {
         gasLimit: 3000000,
-        value: parseEther(totalPrice.toString()),
       };
       console.log("renting with ", {
         websiteURL,
         selectedDeployment,
         days,
-        options,
       });
-      let tx = await websiteRentContract.rentDapp(
-        websiteURL,
-        selectedDeployment,
-        days,
-        options
-      );
+      if (Blockchain == "tron") {
+        console.log("Transaction in progress..")
+        let tx = await websiteRentContract
+          .rentDapp(websiteURL, selectedDeployment, days)
+          .send({
+            feeLimit: 100000000,
+            callValue: parseInt(totalPrice * 10 ** 6),
+            tokenId: "",
+            tokenValue: "",
+            shouldPollResponse: true,
+          });
+        setStatus("SuccessFully Rented 🥳");
+      } else if (Blockchain == "ethereum") {
+        setStatus("Waiting for Transaction Completion");
 
-      setStatus("Waiting for Transaction Completion");
-      setStatus("Tx Hash is " + getMinimalAddress(tx.hash.toString()));
-      await tx.wait();
-      setStatus("FrontEnd is Integrated🎉");
+        let tx = await websiteRentContract.rentDapp(
+          websiteURL,
+          selectedDeployment,
+          days,
+          options
+        );
+        setStatus("Tx Hash is " + getMinimalAddress(tx.hash.toString()));
+        await tx.wait();
+        setStatus("FrontEnd is Integrated🎉");
+      } else if (Blockchain == "polygon") {
+        // yet to implement
+      } else {
+        return null;
+      }
     } catch (e) {
       alert("Dapp renting failed , console for erros");
       console.log("Dapp rent failed ", e);
@@ -117,7 +126,7 @@ function IntegrateFrontend(props) {
                       setSelectedDeployment(val);
                     }}
                     options={_deployments}
-                    selected={_deployments? _deployments[0]:null}
+                    selected={_deployments ? _deployments[0] : null}
                   />
                 }
               </NamedInput>
@@ -130,7 +139,7 @@ function IntegrateFrontend(props) {
                     setWebsiteURL(res);
                   }}
                   variant="outline"
-                  defaultValue={website? website : null}
+                  defaultValue={website ? website : null}
                   placeholder="https://project.com"
                 />
               </NamedInput>
@@ -150,11 +159,11 @@ function IntegrateFrontend(props) {
                   key={"daysCount"}
                   disabled
                   variant="outline"
-                  value={numDays * price }
+                  value={numDays * price}
                 />
               </NamedInput>
 
-              <HStack>
+              <HStack spacing={10}>
                 <LinkButton
                   title={`Back`}
                   loadingMessage={`Going Back`}
@@ -182,13 +191,13 @@ function IntegrateFrontend(props) {
           width={"100vw"}
           textColor={"white"}
         >
-          <Heading> {formStep == 2 ? "Dapp Renting Status" : ""} </Heading>
+          <Heading> {formStep == 2 ? "FrontEnd Integration" : ""} </Heading>
           <VStack id="creationStatus" width={"50vw"} align={"center"}></VStack>
         </VStack>
 
         {formStep == 3 && (
           <VStack>
-            <Heading>Successfully Published 🥳</Heading>
+            <Heading>Successfully Integrated 🥳</Heading>
             <Link href="/ExploreDapps">Click Here</Link> to see the uploaded
             Dapps
           </VStack>

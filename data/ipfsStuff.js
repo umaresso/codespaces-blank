@@ -2,11 +2,18 @@ import {
   getCustomNetworkWebsiteRentContract,
   websiteRentContract,
 } from "./WebsiteRent";
+import { getBlockchainSpecificWebsiteRentContract } from "./Whitelist";
 
 const axios = require("axios");
-export const getAllDappsUris = async (contract, setter) => {
-  let currentIPFSLink = await contract.allWebsitesIPFSCid();
+export const getAllDappsUris = async (contract, setter, Blockchain) => {
+  let currentIPFSLink;
 
+  if (Blockchain == "tron") {
+    currentIPFSLink = await contract.allWebsitesIPFSCid().call();
+    // console.log("ipfs link is ", currentIPFSLink);
+  } else {
+    currentIPFSLink = await contract.allWebsitesIPFSCid();
+  }
   if (currentIPFSLink == "") {
     if (setter) {
       setter([]);
@@ -53,35 +60,46 @@ export const fetchDappsContent = async (
   Cids,
   setter,
   NetworkChain,
-  web3modalRef
+  web3modalRef,
+  Blockchain
 ) => {
   let dappArray = [];
+  let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
+    Blockchain,
+    NetworkChain,
+    web3modalRef
+  );
+
   await Cids.map(async (cid, index) => {
     let _link = `https://${cid}.ipfs.w3s.link/metadata.json`;
     const response = await axios.get(_link);
     let dapp = response.data;
     dapp.image = getImageLinkFromIPFS(dapp.image);
     if (dapp.url) {
-      let websiteRentContract = await getCustomNetworkWebsiteRentContract(
-        NetworkChain,
-        web3modalRef
-      );
-      let renttime = await websiteRentContract.rentTime(dapp.url);
-      let rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
-      dapp.rentPrice = parseFloat(rentPrice / 10 ** 18);
+      let renttime, rentPrice;
+      if (Blockchain == "tron") {
+        renttime = await websiteRentContract.rentTime(dapp.url).call();
+        rentPrice = await websiteRentContract.getDappRentPrice(dapp.url).call();
+        dapp.rentPrice = parseFloat(parseInt(rentPrice)/10**6);
+        console.log("rent price is ",dapp.rentPrice )
+      } else if (Blockchain == "ethereum") {
+        renttime = await websiteRentContract.rentTime(dapp.url);
+        rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
+        dapp.rentPrice = parseFloat(rentPrice / 10 ** 18);
+      }
+
       if (parseInt(renttime) * 1000 > new Date().getTime()) {
-        console.log("rented already !");
+        // console.log("rented already !");
         dapp.rented = true;
       } else {
         console.log("Not rented !");
         dapp.rented = false;
       }
     }
-    console.log("Dapp is ", dapp);
+    console.log("dapp is ", dapp);
     dappArray.push(dapp);
 
     if (setter != undefined && index + 1 == Cids.length) {
-      console.log("Dapps are : ", dappArray);
       setter(dappArray);
       return dappArray;
     }
@@ -96,7 +114,7 @@ export function getImageLinkFromIPFS(cid) {
 export const getAllContractAddressess = async (contract, setter) => {
   try {
     let currentIPFSLink = await contract.contractAddressesIpfsLink();
-    console.log("ipfs link for contracts is ", currentIPFSLink);
+    // console.log("ipfs link for contracts is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {
         setter([]);
@@ -105,7 +123,7 @@ export const getAllContractAddressess = async (contract, setter) => {
     }
     let link = `https://${currentIPFSLink}.ipfs.w3s.link/contracts.json`;
     const response = await axios.get(link);
-    console.log("the contracts are ", response.data.contracts);
+    // console.log("the contracts are ", response.data.contracts);
     if (setter) {
       setter(response.data.contracts);
     }
@@ -118,7 +136,7 @@ export const getAllContractAddressess = async (contract, setter) => {
 export const getAllContractTokens = async (contract, setter) => {
   try {
     let currentIPFSLink = await contract.contractTokensIpfsLink();
-    console.log("ipfs link for contractsTokens is ", currentIPFSLink);
+    // console.log("ipfs link for contractsTokens is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {
         setter([]);
@@ -138,8 +156,7 @@ export const getAllContractTokens = async (contract, setter) => {
   }
 };
 export function getIpfsImageLink(_link) {
-  if(!_link)
-      return "";
+  if (!_link) return "";
   if (_link.toString().startsWith("ipfs://")) {
     let Cid = _link.toString().slice(7);
     let link = "https://gateway.pinata.cloud/ipfs/" + Cid;

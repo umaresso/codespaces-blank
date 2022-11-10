@@ -12,7 +12,12 @@ import {
 } from "@chakra-ui/react";
 import LinkButton from "./LinkButton/LinkButton";
 import IntegrateFrontend from "./IntegrateFrontend";
+import e from "cors";
 const ethers = require("ethers");
+// let NetworkChain="goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
 
 function DappInformationPopup(props) {
   let dapp = props?.dapp;
@@ -27,6 +32,12 @@ function DappInformationPopup(props) {
   async function integrate() {
     // alert("purchasing...");
     setPurchaseWill(true);
+  }
+  function getCurrency() {
+    if (Blockchain == "tron") return "TRX";
+    else if (Blockchain == "ethereum") return "ETH";
+    else if (Blockchain == "polygon") return "MATIC";
+    return null;
   }
   return (
     <Center
@@ -58,7 +69,7 @@ function DappInformationPopup(props) {
               >
                 <b>Rent Price:</b>
                 <Text>
-                  {dapp?.rentPrice} {dapp?.currency}
+                  {dapp?.rentPrice} {getCurrency()}
                 </Text>
               </HStack>
               <HStack justify="space-between" width="20vw">

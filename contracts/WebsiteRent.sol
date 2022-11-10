@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.6;
 
 contract WebsiteRent {
     mapping(string => address) public websiteToDeployment; // which smart contract is to be displayed on screen
@@ -95,12 +95,12 @@ contract WebsiteRent {
         websiteToDeployment[website] = address(0x0);
         prices[website] = price;
     }
-
+// need to deploy
     function updateRentFee(uint256 Percentage) external onlyBeneficiary {
         rentFeePercentage = Percentage;
     }
 
-    function updateWebsitesIPFSLink(string memory cid) public onlyBeneficiary {
+    function updateWebsitesIPFSLink(string memory cid) public {
         allWebsitesIPFSCid = cid;
     }
 }

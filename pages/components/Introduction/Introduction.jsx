@@ -5,21 +5,23 @@ import LinkButton from "../LinkButton/LinkButton";
 import { Grid } from "@chakra-ui/react";
 import { VStack, Stack } from "@chakra-ui/react";
 import { getProviderOrSigner } from "../../../data/accountsConnection";
-let NetworkChain = "goerli";
+import { getCurrentConnectedOwner } from "../../../data/blockchainSpecificExports";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain="tron";
 
 function Introduction() {
   // theme
+
   let bg = "black";
   let textColor = "white";
   //  _____
   let web3ModalRef = useRef();
 
   async function Connect() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (!signer) {
-        Connect();
-      }
-    });
+    getCurrentConnectedOwner(Blockchain,NetworkChain,web3ModalRef);
+
   }
 
   return (
@@ -29,6 +31,7 @@ function Introduction() {
       height={"fit-content"}
       bg={"black"}
       paddingBottom={10}
+      paddingTop={10}
     >
       <Stack           spacing={[50,30,30,10]}
  direction={["column", "column", "column", "row"]}>
@@ -38,7 +41,8 @@ function Introduction() {
           paddingBottom={0}
           spacing={5}
           width={["100%", "100%", "100%", "60%"]}
-          paddingTop={["40vh", "40vh", "20vh"]}
+          // paddingTop={["40vh", "40vh", "0vh"]}
+        paddingTop={"15vh"}
         >
           <Heading
             fontSize={["2em", "4em", "5em"]}
@@ -80,9 +84,9 @@ function Introduction() {
           </HStack>
         </VStack>
 
-        <VStack bg={"black"} justifyContent={"center"} height={"100vh"}>
+        <VStack paddingTop={["5vh","2vh","2vh","0"]} bg={"black"} justifyContent={"center"} height={"100vh"}>
           <Img
-            height={"fit-content"}
+            height={["90vh","80vh","fit-content"]}
             width={"90%"}
             border={"10px solid black"}
             borderRadius={"40px"}
