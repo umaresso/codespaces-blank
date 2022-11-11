@@ -283,45 +283,6 @@ library Counters {
 }
 
 
-contract MinterRole is Context {
-    using Roles for Roles.Role;
-
-    event MinterAdded(address indexed account);
-    event MinterRemoved(address indexed account);
-
-    Roles.Role private _minters;
-
-    constructor ()  {
-        _addMinter(_msgSender());
-    }
-
-    modifier onlyMinter() {
-        require(isMinter(_msgSender()), "MinterRole: caller does not have the Minter role");
-        _;
-    }
-
-    function isMinter(address account) public view returns (bool) {
-        return _minters.has(account);
-    }
-
-    function addMinter(address account) public onlyMinter {
-        _addMinter(account);
-    }
-
-    function renounceMinter() public {
-        _removeMinter(_msgSender());
-    }
-
-    function _addMinter(address account) internal {
-        _minters.add(account);
-        emit MinterAdded(account);
-    }
-
-    function _removeMinter(address account) internal {
-        _minters.remove(account);
-        emit MinterRemoved(account);
-    }
-}
 
 /**
  * @dev Interface of the   standard.
@@ -688,7 +649,7 @@ contract TRC721 is Context,  ITRC721 {
      * Reverts if the token does not exist.
      * @param tokenId uint256 ID of the token being burned
      */
-    function _burn(uint256 tokenId) internal {
+    function _burn(uint256 tokenId) virtual internal {
         _burn(ownerOf(tokenId), tokenId);
     }
 
@@ -866,12 +827,12 @@ contract TRC721Metadata is Context,  TRC721, ITRC721Metadata {
  * @title TRC721MetadataMintable
  * @dev TRC721 minting logic with metadata.
  */
-abstract contract TRC721MetadataMintable is TRC721, TRC721Metadata, MinterRole {
+abstract contract TRC721MetadataMintable is TRC721, TRC721Metadata {
          function _burn(address owner, uint256 tokenId) virtual override(TRC721,TRC721Metadata) internal {
              super._burn(owner,tokenId);
          }
 
-    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) public onlyMinter returns (bool) {
+    function mintWithTokenURI(address to, uint256 tokenId, string memory tokenURI) public   returns (bool) {
         _mint(to, tokenId);
         _setTokenURI(tokenId, tokenURI);
         return true;
@@ -883,14 +844,14 @@ abstract contract TRC721MetadataMintable is TRC721, TRC721Metadata, MinterRole {
  * @title TRC721Mintable
  * @dev TRC721 minting logic.
  */
-contract TRC721Mintable is TRC721, MinterRole {
+contract TRC721Mintable is TRC721 {
     /**
      * @dev Function to mint tokens.
      * @param to The address that will receive the minted token.
      * @param tokenId The token id to mint.
      * @return A boolean that indicates if the operation was successful.
      */
-    function mint(address to, uint256 tokenId) public onlyMinter returns (bool) {
+    function mint(address to, uint256 tokenId) public   returns (bool) {
         _mint(to, tokenId);
         return true;
     }
@@ -901,7 +862,7 @@ contract TRC721Mintable is TRC721, MinterRole {
      * @param tokenId The token id to mint.
      * @return A boolean that indicates if the operation was successful.
      */
-    function safeMint(address to, uint256 tokenId) public onlyMinter returns (bool) {
+    function safeMint(address to, uint256 tokenId) public   returns (bool) {
         _safeMint(to, tokenId);
         return true;
     }
@@ -913,7 +874,7 @@ contract TRC721Mintable is TRC721, MinterRole {
      * @param _data bytes data to send along with a safe transfer check.
      * @return A boolean that indicates if the operation was successful.
      */
-    function safeMint(address to, uint256 tokenId, bytes memory _data) public onlyMinter returns (bool) {
+    function safeMint(address to, uint256 tokenId, bytes memory _data) public   returns (bool) {
         _safeMint(to, tokenId, _data);
         return true;
     }
@@ -930,16 +891,14 @@ contract TRC721Mintable is TRC721, MinterRole {
 
 // "bitcoin prime x4","bitcoin3","ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/"
 
- contract BitcoinPrime is TRC721MetadataMintable {
+ contract BitcoinPrime is TRC721MetadataMintable,TRC721Mintable {
     
     constructor(string memory name,string memory symbol,string memory _baseURI) public TRC721Metadata(name, symbol) {
        _setBaseURI(_baseURI);
     }
+     function _burn(address owner, uint256 tokenId) override(TRC721,TRC721MetadataMintable) virtual internal {
+         
+     }
     
 
 }
-/**
-
-(base58) TEAUjLjnbmg1ifjswEPLiZP2J5XrHU5Mmw
-    (hex) 412e0235686ae44a59ed68a80b392121e9c566fd76
- */
