@@ -31,8 +31,16 @@ import {
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
   getRentableContract,
+  NftRentingFactoryABI,
+  NftRentingFactoryBytecode,
 } from "../data/NftRenting";
-let NetworkChain = "goerli";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
+import { deploy_tron_contract } from "../data/TronAccountsManagement";
+// let NetworkChain = "goerli";
+// let Blockchain="ethereum";
+let NetworkChain = "nile";
+let Blockchain = "tron";
+
 export async function getStaticProps(context) {
   require("dotenv").config();
   return {
@@ -137,7 +145,7 @@ function NftUpload(props) {
       web3ModelRef,
       contractAddress
     );
-    try{
+    try {
       let _owner = await getTokenOwner(erc721Contract, tokenId);
       let tokenCid = await getPureTokenUri(erc721Contract, tokenId);
       console.log("Token Cid is ", tokenCid);
@@ -161,7 +169,7 @@ function NftUpload(props) {
       if (!_owner.toString().includes("0x000")) {
         token.owner = _owner;
       }
-  
+
       if (!rentableContractAddress.toString().includes("0x000")) {
         token.rentableContractAddress = rentableContractAddress;
       }
@@ -170,32 +178,29 @@ function NftUpload(props) {
       console.log("token is ", token);
       tokenDeploymentInstance.current = token;
       return token;
-    }
-    catch(e){
-      if(e.toString().includes("invalid token ID")){
-        alert("Invalid TokenID")
-      }
-      else
-        alert("Error occured in Token ID fetching ..")
+    } catch (e) {
+      if (e.toString().includes("invalid token ID")) {
+        alert("Invalid TokenID");
+      } else alert("Error occured in Token ID fetching ..");
       return null;
     }
-    
   }
   async function uploadNFT() {
     if (areValidArguments()) {
-     let tokenFetchSuccessful= await GatherTokenInformation();
-      if(tokenFetchSuccessful==null)
-        return null;
+      let tokenFetchSuccessful = await GatherTokenInformation();
+      if (tokenFetchSuccessful == null) return null;
       await deployNftUpload();
     }
   }
 
   async function init() {
-    getProviderOrSigner(NetworkChain, web3ModelRef, true).then((_signer) => {
-      _signer?.getAddress().then((_user) => {
-        setWalletAddress(_user);
-      });
-    });
+    await getCurrentConnectedOwner(
+      Blockchain,
+      NetworkChain,
+      web3ModelRef,
+      setWalletAddress
+    );
+
     if (!walletAddress) return;
     await getCustomNetworkNFTFactoryContract(NetworkChain, web3ModelRef).then(
       (factory) => {
@@ -207,7 +212,7 @@ function NftUpload(props) {
         getAllContractTokens(contract).then((_contractTokens) => {
           console.log("The all contrac tokens are", _contractTokens);
           console.log("The all addresses are", Object.keys(_contractTokens));
-          let arr =Object.keys(_contractTokens).map(item=>item)          
+          let arr = Object.keys(_contractTokens).map((item) => item);
           setContractTokens(_contractTokens);
           setContractAddresses(arr);
         });
@@ -222,40 +227,39 @@ function NftUpload(props) {
    */
 
   async function deployNftUpload() {
-    let _blockchain = blockchain?.toString().toLowerCase();
-    if (_blockchain == "ethereum") {
-      setFormStep((prev) => prev + 1);
-      setStatus("Making Ethereum NftUpload..");
-      EthUpload();
-    } else if (_blockchain == "tron") {
-      setFormStep((prev) => prev + 1);
-
-      setStatus("Making Tron NftUpload..");
-    } else if (_blockchain == "polygon") {
-      setFormStep((prev) => prev + 1);
-
-      setStatus("Making Polygon NftUpload..");
-    } else {
-      alert("We dont support " + _blockchain + " Blockchain yet");
-    }
+    setFormStep((prev) => prev + 1);
+    setStatus("Making " + Blockchain + "NftUpload..");
+    NFT_Upload();
   }
-  async function EthUpload() {
+
+  async function NFT_Upload() {
     async function deploy() {
       try {
         let factory = factoryContract;
         setStatus("Seems we did not have this awesome collection before");
-
         setStatus("Creating Rentable Version of your collection ");
-
-        const contract = await factory.deploy(contractAddress);
-        await contract.deployed();
-
-        setStatus(
-          `Rentable version of NFT contract is Successfully Created 🎉`
-        );
-        setStatus("Starting Token Upload");
-        await trackNFTUpload(contract.address);
-        return contract.address;
+        if (Blockchain == "tron") {
+          let abi = NftRentingFactoryABI;
+          let bytecode = NftRentingFactoryBytecode;
+          let parameters = [contractAddress];
+          await deploy_tron_contract(
+            NetworkChain,
+            abi,
+            bytecode,
+            parameters,
+            setStatus,
+            trackNFTUpload
+          );
+        } else if (Blockchain == "ethereum") {
+          const contract = await factory.deploy(contractAddress);
+          await contract.deployed();
+          await trackNFTUpload(contract.address);
+          return contract.address;
+        } else if (Blockchain == "polygon") {
+          //
+        } else {
+          // we dont support this blockchain yet
+        }
       } catch (e) {
         if (e.toString().includes("user rejected transaction")) {
           setStatus("You Rejected Uploading..");
@@ -293,6 +297,9 @@ function NftUpload(props) {
     //   tokenId,
     //   price: ethers.utils.parseEther(pricePerDay.toString()),
     // });
+    setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
+    setStatus("Starting Token Upload");
+
     setStatus("Storing on IPFS ");
     StoreUpdatedcontractsOnIpfs(contractAddresses).then(
       async (contracts_file_cid) => {
@@ -354,14 +361,13 @@ function NftUpload(props) {
     console.log("previous contracts are ", contractAddresses);
     console.log("current contract address", contractAddress);
     let uniqueContracts = [...contractAddresses];
-    let exists=false;
-    uniqueContracts.map(item=>{
-      if(item.toString()==contractAddress){
-        exists=true;
+    let exists = false;
+    uniqueContracts.map((item) => {
+      if (item.toString() == contractAddress) {
+        exists = true;
       }
-    })
-    if(!exists)
-      uniqueContracts.push(contractAddress);
+    });
+    if (!exists) uniqueContracts.push(contractAddress);
     console.log("\n\n------\nUnique Contracts to upload", uniqueContracts);
     console.log("\n\n\n");
 
@@ -462,7 +468,7 @@ function NftUpload(props) {
   useEffect(() => {
     init();
   }, [walletAddress]);
-  
+
   return (
     <>
       {!walletAddress && (
