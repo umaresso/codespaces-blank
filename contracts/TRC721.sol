@@ -1,4 +1,4 @@
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.6;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -324,28 +324,19 @@ contract MinterRole is Context {
 }
 
 /**
- * @dev Interface of the TRC165 standard.
+ * @dev Interface of the   standard.
  *
  * Implementers can declare support of contract interfaces, which can then be
- * queried by others ({TRC165Checker}).
+ * queried by others ({ Checker}).
  *
- * For an implementation, see {TRC165}.
+ * For an implementation, see { }.
  */
-interface ITRC165 {
-    /**
-     * @dev Returns true if this contract implements the interface defined by
-     * `interfaceId`.
-     *
-     * This function call must use less than 30 000 gas.
-     */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-}
 
 
 /**
  * @dev Required interface of an TRC721 compliant contract.
  */
-abstract contract ITRC721 is ITRC165 {
+abstract contract ITRC721  {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
@@ -407,80 +398,19 @@ abstract contract ITRC721Metadata is ITRC721 {
  * @dev Interface for any contract that wants to support safeTransfers
  * from TRC721 asset contracts.
  */
-abstract contract ITRC721Receiver {
-    /**
-     * @notice Handle the receipt of an NFT
-     * @dev The TRC721 smart contract calls this function on the recipient
-     * after a {ITRC721-safeTransferFrom}. This function MUST return the function selector,
-     * otherwise the caller will revert the transaction. The selector to be
-     * returned can be obtained as `this.onTRC721Received.selector`. This
-     * function MAY throw to revert and reject the transfer.
-     * Note: the TRC721 contract address is always the message sender.
-     * @param operator The address which called `safeTransferFrom` function
-     * @param from The address which previously owned the token
-     * @param tokenId The NFT identifier which is being transferred
-     * @param data Additional data with no specified format
-     * @return bytes4 `bytes4(keccak256("onTRC721Received(address,address,uint256,bytes)"))`
-     */
-    function onTRC721Received(address operator, address from, uint256 tokenId, bytes memory data)
-    public virtual returns (bytes4);
-}
 
 
 /**
- * @dev Implementation of the {ITRC165} interface.
+ * @dev Implementation of the {I } interface.
  *
  * Contracts may inherit from this and call {_registerInterface} to declare
  * their support of an interface.
  */
-contract TRC165 is ITRC165 {
-    /*
-     * bytes4(keccak256('supportsInterface(bytes4)')) == 0x01ffc9a7
-     */
-    bytes4 private constant _INTERFACE_ID_TRC165 = 0x01ffc9a7;
-
-    /**
-     * @dev Mapping of interface ids to whether or not it's supported.
-     */
-    mapping(bytes4 => bool) private _supportedInterfaces;
-
-    constructor ()  {
-        // Derived contracts need only register support for their own interfaces,
-        // we register support for TRC165 itself here
-        _registerInterface(_INTERFACE_ID_TRC165);
-    }
-
-    /**
-     * @dev See {ITRC165-supportsInterface}.
-     *
-     * Time complexity O(1), guaranteed to always use less than 30 000 gas.
-     */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
-        return _supportedInterfaces[interfaceId];
-    }
-
-    /**
-     * @dev Registers the contract as an implementer of the interface defined by
-     * `interfaceId`. Support of the actual TRC165 interface is automatic and
-     * registering its interface id is not required.
-     *
-     * See {ITRC165-supportsInterface}.
-     *
-     * Requirements:
-     *
-     * - `interfaceId` cannot be the TRC165 invalid interface (`0xffffffff`).
-     */
-    function _registerInterface(bytes4 interfaceId) internal {
-        require(interfaceId != 0xffffffff, "TRC165: invalid interface id");
-        _supportedInterfaces[interfaceId] = true;
-    }
-}
-
 
 /**
  * @title TRC721 Non-Fungible Token Standard basic implementation
  */
-contract TRC721 is Context, TRC165, ITRC721 {
+contract TRC721 is Context,  ITRC721 {
     using SafeMath for uint256;
     using Address for address;
     using Counters for Counters.Counter;
@@ -520,8 +450,8 @@ contract TRC721 is Context, TRC165, ITRC721 {
     bytes4 private constant _INTERFACE_ID_TRC721 = 0x80ac58cd;
 
     constructor ()  {
-        // register the supported interfaces to conform to TRC721 via TRC165
-        _registerInterface(_INTERFACE_ID_TRC721);
+        // register the supported interfaces to conform to TRC721 via  
+//        _registerInterface(_INTERFACE_ID_TRC721);
     }
 
     /**
@@ -663,7 +593,7 @@ contract TRC721 is Context, TRC165, ITRC721 {
      */
     function _safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data)  internal {
         _transferFrom(from, to, tokenId);
-        require(_checkOnTRC721Received(from, to, tokenId, _data), "TRC721: transfer to non TRC721Receiver implementer");
+//        require(_checkOnTRC721Received(from, to, tokenId, _data), "TRC721: transfer to non TRC721Receiver implementer");
     }
 
     /**
@@ -716,7 +646,7 @@ contract TRC721 is Context, TRC165, ITRC721 {
      */
     function _safeMint(address to, uint256 tokenId, bytes memory _data) internal {
         _mint(to, tokenId);
-        require(_checkOnTRC721Received(address(0), to, tokenId, _data), "TRC721: transfer to non TRC721Receiver implementer");
+//        require(_checkOnTRC721Received(address(0), to, tokenId, _data), "TRC721: transfer to non TRC721Receiver implementer");
     }
 
     /**
@@ -794,35 +724,6 @@ contract TRC721 is Context, TRC165, ITRC721 {
      * @param _data bytes optional data to send along with the call
      * @return bool whether the call correctly returned the expected magic value
      */
-    function _checkOnTRC721Received(address from, address to, uint256 tokenId, bytes memory _data)
-        internal returns (bool)
-    {
-        if (!to.isContract) {
-            return true;
-        }
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = to.call(abi.encodeWithSelector(
-            ITRC721Receiver(to).onTRC721Received.selector,
-            _msgSender(),
-            from,
-            tokenId,
-            _data
-        ));
-        if (!success) {
-            if (returndata.length > 0) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    let returndata_size := mload(returndata)
-                    revert(add(32, returndata), returndata_size)
-                }
-            } else {
-                revert("TRC721: transfer to non TRC721Receiver implementer");
-            }
-        } else {
-            bytes4 retval = abi.decode(returndata, (bytes4));
-            return (retval == _TRC721_RECEIVED);
-        }
-    }
 
     /**
      * @dev Private function to clear current approval of a given token ID.
@@ -836,7 +737,7 @@ contract TRC721 is Context, TRC165, ITRC721 {
 }
 
 
-contract TRC721Metadata is Context, TRC165, TRC721, ITRC721Metadata {
+contract TRC721Metadata is Context,  TRC721, ITRC721Metadata {
     // Token name
     string private _name;
 
@@ -865,8 +766,8 @@ contract TRC721Metadata is Context, TRC165, TRC721, ITRC721Metadata {
         _name = name;
         _symbol = symbol;
 
-        // register the supported interfaces to conform to TRC721 via TRC165
-        _registerInterface(_INTERFACE_ID_TRC721_METADATA);
+        // register the supported interfaces to conform to TRC721 via  
+        //_registerInterface(_INTERFACE_ID_TRC721_METADATA);
     }
 
     /**
@@ -1029,7 +930,7 @@ contract TRC721Mintable is TRC721, MinterRole {
 
 // "bitcoin prime x4","bitcoin3","ipfs://QmVK3Cnfpuou3rg71kgBFxqo1rSmsBvCFCw9upHntbQhU6/"
 
- contract TRC721Token is TRC721MetadataMintable {
+ contract BitcoinPrime is TRC721MetadataMintable {
     
     constructor(string memory name,string memory symbol,string memory _baseURI) public TRC721Metadata(name, symbol) {
        _setBaseURI(_baseURI);
