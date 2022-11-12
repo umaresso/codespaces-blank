@@ -14,6 +14,7 @@ import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import {
+  getBlockchainSpecificNFTFactory,
   getBlockchainSpecificNFTTracker,
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
@@ -45,39 +46,37 @@ function ExploreNfts(props) {
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
   let connectedAddress = selectedBlockchainInformation.address;
-  console.log("exploreNFT:the blockchain is ", selectedBlockchainInformation);
   const [currentMenu, setCurrentMenu] = useState("all");
-  const [walletAddress, setWalletAddress] = useState(null);
+  const [walletAddress, setWalletAddress] = useState(connectedAddress);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NFTs, setNFTs] = useState([]);
   const [Blockchain, setBlockchain] = useState(null);
-  const [NetworkChain,setNetworkChain]=useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
   let filteredNfts = [];
   let web3ModalRef = useRef();
   async function connectWallet() {
     let _user = await getCurrentConnectedOwner(
-      Blockchain,
-      NetworkChain,
+      _Blockchain,
+      _NetworkChain,
       web3ModalRef
     );
     setWalletAddress(_user);
-  //  console.log("user from connectwallet", _user);
+    //  console.log("user from connectwallet", _user);
   }
   function RefreshToNewBlockchain() {
-    setLoading(true)
-    setNetworkChain(_NetworkChain)
+    setLoading(true);
+    setNetworkChain(_NetworkChain);
     setBlockchain(_Blockchain);
     setNFTs([]);
     console.log("calling init");
     init();
-    
-  
   }
 
   async function init() {
-    await connectWallet();
+    console.log("calling init");
+    console.log("connected address is ", walletAddress);
     if (!walletAddress) return;
     let allNFTs = [];
     //console.log({ Blockchain, NetworkChain, web3ModalRef });
@@ -87,23 +86,27 @@ function ExploreNfts(props) {
       web3ModalRef
     );
 
-//    console.log("Tracker contract is ", trackerContract);
+    console.log("Tracker contract is ", trackerContract);
     let contractsArray = await getAllContractAddressess(
       trackerContract,
       null,
       _Blockchain,
       _NetworkChain
     );
-    // console.log("Contracts to read from", contractsArray);
+    console.log("Contracts to read from", contractsArray);
     if (!contractsArray || contractsArray.length == 0) {
       setLoading(false);
       return 0;
     }
-    let allContractsTokens = await getAllContractTokens(trackerContract);
+    let allContractsTokens = await getAllContractTokens(
+      trackerContract,
+      null,
+      _Blockchain
+    );
     // console.log("All contract tokens are ", allContractsTokens);
 
     let indexer = 0;
-    if (contractsArray.length == 0) {
+    if (!contractsArray || contractsArray.length == 0) {
       setLoading(false);
       return 0;
     }
@@ -111,26 +114,46 @@ function ExploreNfts(props) {
       let thisContractTokens = allContractsTokens[contractAddress];
       let rentableContractAddress = await getRentableContract(
         trackerContract,
-        contractAddress
+        contractAddress,
+        null,
+        _Blockchain
       );
-      let rentableContractInstance = await getCustomNetworkNFTFactoryContract(
+      if (!rentableContractAddress) {
+        console.log("no rentable contract ");
+        return null;
+      }
+      console.log("getting rentable contract from ", {
+        Blockchain,
+        _NetworkChain,
+        web3ModalRef,
+        rentableContractAddress,
+      });
+      let rentableContractInstance = await getBlockchainSpecificNFTFactory(
+        Blockchain,
         _NetworkChain,
         web3ModalRef,
         rentableContractAddress
       );
+
       thisContractTokens?.map(async (token, tokenIndexer) => {
-        console.log("Token is ", token);
-        let currentUser = await getNftUser(rentableContractInstance, token.id);
+        let currentUser = await getNftUser(
+          rentableContractInstance,
+          token.id,
+          _Blockchain
+        );
         let rentPrice = await getNftPrice(
           trackerContract,
           rentableContractAddress,
-          token.id
+          token.id,
+          _Blockchain
         );
         let rented = await isRented(
           trackerContract,
           rentableContractAddress,
-          token.id
+          token.id,
+          _Blockchain
         );
+
         if (!rented) {
           currentUser = null;
         }

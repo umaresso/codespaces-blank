@@ -25,6 +25,10 @@ function Navbar() {
   const dispatch = useDispatch();
   let Blockchain = selectedBlockchain;
   let NetworkChain = NetworkChains[selectedBlockchain];
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+console.log(selectedBlockchainInformation)
   const web3ModalRef = useRef();
   let connectionCheckerId = 0;
   // theme
@@ -40,7 +44,7 @@ function Navbar() {
   // for intra and inter-Blockchain connection
 
   async function updateReducerWithUser(user_) {
-    if (!user_) {
+    if (user_) {
       dispatch({
         name: Blockchain,
         network: NetworkChain,
@@ -57,10 +61,10 @@ function Navbar() {
     );
   }
   useEffect(() => {
-    if (!walletAddress) {
-      Connect();
-    }
-    
+    // if (!walletAddress) {
+    //   Connect();
+    // }
+
   }, []);
 
   function getMinimalAddress(_adr) {
@@ -73,6 +77,7 @@ function Navbar() {
       alert("We are working to enable polygon soon..");
       return null;
     }
+    console.log(newBlockchain)
     await getCurrentConnectedOwner(
       newBlockchain,
       NetworkChains[newBlockchain],

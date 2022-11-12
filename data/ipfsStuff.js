@@ -38,7 +38,7 @@ export const getTokenMetadata = async (tokenUriHash) => {
   let tokenUri = embedGateway(tokenUriHash);
   const response = await axios.get(tokenUri);
   let metadata = response.data;
-  // console.log("metadata inside ipfs fetch is ", metadata);
+  console.log("metadata inside ipfs fetch is ", metadata);
   return metadata;
 };
 
@@ -142,9 +142,12 @@ export const getAllContractAddressess = async (
   }
 };
 
-export const getAllContractTokens = async (contract, setter) => {
+export const getAllContractTokens = async (contract, setter, Blockchain) => {
   try {
-    let currentIPFSLink = await contract.contractTokensIpfsLink();
+    let currentIPFSLink =
+      Blockchain == "tron"
+        ? await contract.contractTokensIpfsLink().call()
+        : await contract.contractTokensIpfsLink();
     // console.log("ipfs link for contractsTokens is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {

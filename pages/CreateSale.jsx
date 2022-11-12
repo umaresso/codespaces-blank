@@ -37,11 +37,10 @@ import {
   deploy_tron_contract,
   tronConnect,
 } from "../data/TronAccountsManagement";
+import { useSelector } from "react-redux";
 
 // let NetworkChain = "goerli";
 // let Blockchain = "ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
 
 function CreateSale() {
   /**
@@ -70,6 +69,13 @@ function CreateSale() {
   const [saleContract, setSaleContract] = useState(null);
   const [whitelistFactory, setWhitelistFactory] = useState(null);
   const [fetching, setFetching] = useState(false);
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress=selectedBlockchainInformation.address;
+
   function setStatus(message) {
     let ele = document.getElementById("creationStatus");
     var p_tag = document.createElement("p");

@@ -288,12 +288,13 @@ function CreateDapp(props) {
 
   useEffect(() => {
     init(); 
-    if(!owner){
-      console.log("setting owner")
-      setOwner(connectedAddress)
-    }
 
   }, [owner]);
+  if(owner!=connectedAddress){
+    console.log("setting owner")
+    setOwner(connectedAddress)
+  }
+
   console.log("owner is ",owner)
 
   return (
@@ -420,7 +421,7 @@ function CreateDapp(props) {
                     setOwner(res);
                   }}
                   variant="outline"
-                  defaultValue={connectedAddress}
+                  value={owner}
                 />
               </NamedInput>
             </VStack>
