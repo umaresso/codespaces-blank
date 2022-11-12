@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.7;
 
 import "./IERC4907.sol";
 contract NftRentingTracker{
 /*
     Use Cases
+
 -> Use in Games (axie infinity ,gods unchained , crypto kitties)
 -> Attend the Event
 -> Host an Event
@@ -47,13 +48,13 @@ platformOwner=msg.sender;
 // user can claim his 50% money in case of fraud before 50% of time is spent to be fair to both
 // owner can claim there half of rent immediately and half after the renting is finished
 // owner can stop renting..
-modifier ifOwnerOrApproved(address contractAddress,uint tokenId,address sender){
+modifier ifOwnerOrApproved(address contractAddress,uint tokenId){
     IERC4907 _contract =IERC4907(contractAddress);
-    require( _contract.isApprovedOrOwner(sender,tokenId),"Caller is neither owner nor approved !");
+    require( _contract.isApprovedOrOwner(msg.sender,tokenId),"Caller is neither owner nor approved !");
     _;
 
 }
-function uploadNftForRent(address erc721Address,address contractAddress,uint tokenId,uint price,string memory newContractAddressesIPFSLink,string memory newContractTokensIPFSLink,address sender)public ifOwnerOrApproved(contractAddress,tokenId,sender){
+function uploadNftForRent(address erc721Address,address contractAddress,uint tokenId,uint price,string memory newContractAddressesIPFSLink,string memory newContractTokensIPFSLink)public ifOwnerOrApproved(contractAddress,tokenId){
     require(!tokensAvailable[contractAddress][tokenId],"Token is Already present on Platform");
     tokensAvailable[contractAddress][tokenId]=true;
     rentPrices[contractAddress][tokenId]=price;
@@ -137,7 +138,7 @@ function getUserNftByIndex(uint index)public view returns(address,uint,uint){
     return (contractAddress,tokenId,_timestamp);
 }
 
-function setTokenRentPrice(address contractAddress,uint tokenId,uint price,address sender)public ifOwnerOrApproved(contractAddress,tokenId,sender){
+function setTokenRentPrice(address contractAddress,uint tokenId,uint price)public ifOwnerOrApproved(contractAddress,tokenId){
  rentPrices[contractAddress][tokenId]=price;
    
 }
