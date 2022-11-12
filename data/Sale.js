@@ -1,6 +1,6 @@
 import { parseEther } from "ethers/lib/utils";
 import { getProviderOrSigner } from "./accountsConnection";
-import {getNetworkTronweb } from "./TronAccountsManagement";
+import { getNetworkTronweb } from "./TronAccountsManagement";
 import {
   getCustomNetworkWebsiteRentContract,
   getTronWebsiteRentContract,
@@ -862,7 +862,6 @@ export const fetchSales = async (
   arraySetter,
   Blockchain
 ) => {
-  // console.log("obtaining Sales for ", owner);
   let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
     Blockchain,
     NetworkChain,
@@ -882,19 +881,28 @@ export const fetchSales = async (
       Blockchain
     ).then(async (Sales) => {
       let allSales = [];
-      // console.log("Sales obtained are ", Sales);
       // console.log('iterating over')
-      Sales?.map(async (_Sale, index) => {
+      let totalSales = Sales.length;
+ 
+      if(totalSales==0) return 0;
+      console.log(websiteRentContract)
+      Sales.map(async (_Sale, index) => {
         let hostedWebsite;
         let rentTime;
         if (Blockchain == "tron") {
           hostedWebsite = await websiteRentContract
             .deploymentToWebsite(_Sale)
             .call();
+          
           rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
+
         } else if (!Blockchain || Blockchain == "ethereum") {
-          rentTime = await websiteRentContract.rentTime(hostedWebsite);
           hostedWebsite = await websiteRentContract.deploymentToWebsite(_Sale);
+          rentTime = await websiteRentContract.rentTime(hostedWebsite);
+
+          console.log({
+            rentTime,hostedWebsite
+          })
         } else if (Blockchain == "polygon") {
           // polygon pull
         } else {
@@ -936,7 +944,7 @@ export const fetchSales = async (
           symbol,
           baseURI,
           address: _Sale,
-          website: hostedWebsite === "" ? null : hostedWebsite,
+          website: !hostedWebsite||hostedWebsite === "" ? null : hostedWebsite,
           startTime,
           endTime,
           owner,
@@ -944,12 +952,14 @@ export const fetchSales = async (
         };
         // console.log("Sale instance", SaleInstance);
         allSales.push(SaleInstance);
-        if (index + 1 == Sales.length) {
-          if (arraySetter != undefined) {
+        if (index + 1 == totalSales) {
+          if (arraySetter) {
             arraySetter(allSales);
           }
+          return allSales;
+        
         }
-        return allSales;
+        
       });
     });
   } catch (e) {

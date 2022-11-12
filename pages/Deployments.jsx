@@ -20,6 +20,7 @@ function Deployments() {
   );
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
 
   const [loading, setLoading] = useState("");
 
@@ -83,13 +84,14 @@ function Deployments() {
       setWhitelistDeployments,
       _Blockchain
     );
-    await fetchSales(
+    let sales_ = await fetchSales(
       _NetworkChain,
       Web3ModalRef,
-      _owner,
+      connectedAddress,
       setSaleDeployments,
       _Blockchain
     );
+    console.log("sales are ",sales_);
 
     setLoading(false);
   }

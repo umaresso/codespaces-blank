@@ -128,25 +128,22 @@ function CreateSale() {
       });
   }
   async function deploySale(saleobj) {
-    let blockchain = saleobj?.blockchain;
-    if (!blockchain || !saleobj) {
+    
+    if (!Blockchain || !saleobj) {
       console.log("No Blockchain...");
     }
-    blockchain = blockchain?.toString().toLowerCase();
     let sale = { ...saleobj };
-    if (blockchain == "ethereum") {
+    if (Blockchain == "ethereum") {
       setFormStep((prev) => prev + 1);
       setLoader((prev) => prev !== true && true);
-
       setStatus("Creating Ethereum whitelist..");
-      deployEthWhitelist(sale);
-    } else if (blockchain == "tron") {
+    } else if (Blockchain == "tron") {
       setFormStep((prev) => prev + 1);
       setLoader((prev) => prev !== true && true);
       let connectedUser = await tronConnect();
       console.log("connected address is ", connectedUser);
       setStatus("Creating Tron whitelist..");
-    } else if (blockchain == "polygon") {
+    } else if (Blockchain == "polygon") {
       setFormStep((prev) => prev + 1);
       setLoader((prev) => prev !== true && true);
       setStatus("Creatibg Polygon whitelist..");
@@ -205,8 +202,9 @@ function CreateSale() {
           // "uar",100,owner,baseURI,1665317824956,1665317824956
 
           let tx = await contract.deployed();
+          console.log(tx)
           setStatus("It's taking longer but bear with us :/ ");
-          await tx.wait();
+          // await tx.wait();
           setStatus(`Deployment successful 🎉 `);
           setStatus(`Contract Address:`);
 
@@ -255,6 +253,9 @@ function CreateSale() {
     } else if (Blockchain == "ethereum") {
       let contract = saleTrackerContract;
       try {
+        setStatus("Keeping its track for Future!");
+        setStatus("Storing on Blockchain..");
+  
         let tx = await contract.addUserSale(owner, contractAddress);
         setStatus("Waiting for Transaction Completion ");
 
