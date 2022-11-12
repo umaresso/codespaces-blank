@@ -86,7 +86,16 @@ export async function deploy_tron_contract(
     // console.log("tronweb inside deploy ", tronWeb);
     statusUpdater("Creting contract instance..");
     statusUpdater("Deploying your smart contract");
-    console.log("paramters received ", parameters);
+    console.log("paramters received ", {
+      abi: abi,
+      bytecode: bytecode.object,
+      feeLimit: 1000000000,
+      callValue: 0,
+      userFeePercentage: 1,
+      originEnergyLimit: 10000000,
+      parameters: parameters,
+      shouldPollResponse: true,
+    });
     let contract_instance = await tronWeb.contract().new({
       abi: abi,
       bytecode: bytecode.object,
@@ -101,7 +110,8 @@ export async function deploy_tron_contract(
     statusUpdater("Deployed Successfully 🥳 ");
     let contract = await tronWeb.contract().at(scAddress);
     let currentConnectedUser = await tronConnect();
-    SuccessFallback(scAddress, currentConnectedUser);
+    if(SuccessFallback)
+      SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
     if (e.message.toString().includes('insufficient')) {
@@ -109,6 +119,7 @@ export async function deploy_tron_contract(
       
     } else alert("Whitelist Creation Unsuccessful");
     console.log("error : ", e);
+    return null;
   }
 }
 

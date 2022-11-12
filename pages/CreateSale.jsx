@@ -74,7 +74,7 @@ function CreateSale() {
   );
   let Blockchain = selectedBlockchainInformation.name;
   let NetworkChain = selectedBlockchainInformation.network;
-  let connectedAddress=selectedBlockchainInformation.address;
+  let connectedAddress = selectedBlockchainInformation.address;
 
   function setStatus(message) {
     let ele = document.getElementById("creationStatus");
@@ -108,7 +108,6 @@ function CreateSale() {
           setSymbol(_symbol);
           _baseURI = await contract.baseURI().call();
           setBaseURI(_baseURI);
-          
         } else if (Blockchain == "ethereum") {
           _name = await contract.name();
           setName(_name);
@@ -116,7 +115,6 @@ function CreateSale() {
           setSymbol(_symbol);
           _baseURI = await contract.baseURI();
           setBaseURI(_baseURI);
-          
         } else if (Blockchain == "polygon") {
         } else {
           // no support yet
@@ -128,7 +126,6 @@ function CreateSale() {
       });
   }
   async function deploySale(saleobj) {
-    
     if (!Blockchain || !saleobj) {
       console.log("No Blockchain...");
     }
@@ -184,6 +181,10 @@ function CreateSale() {
             paramters,
             setStatus
           );
+          if (deploymentAddress == null) {
+            setDeployedAddress("none");
+            return ;
+          }
           await trackSaleDeployment(deploymentAddress);
         } else if (Blockchain == "ethereum") {
           const contract = await factory.deploy(
@@ -202,7 +203,7 @@ function CreateSale() {
           // "uar",100,owner,baseURI,1665317824956,1665317824956
 
           let tx = await contract.deployed();
-          console.log(tx)
+          console.log(tx);
           setStatus("It's taking longer but bear with us :/ ");
           // await tx.wait();
           setStatus(`Deployment successful 🎉 `);
@@ -234,7 +235,7 @@ function CreateSale() {
         setStatus("Let's wait for Confirmation");
       }, 2000);
       try {
-         await contract.addUserSale(owner, contractAddress).send({
+        await contract.addUserSale(owner, contractAddress).send({
           feeLimit: 100000000,
           callValue: 0,
           tokenId: "",
@@ -249,13 +250,12 @@ function CreateSale() {
       setStatus("Storage Successful 🎉");
 
       setDeployedAddress(contractAddress);
-
     } else if (Blockchain == "ethereum") {
       let contract = saleTrackerContract;
       try {
         setStatus("Keeping its track for Future!");
         setStatus("Storing on Blockchain..");
-  
+
         let tx = await contract.addUserSale(owner, contractAddress);
         setStatus("Waiting for Transaction Completion ");
 
@@ -434,6 +434,7 @@ function CreateSale() {
         <SuccessfulDeployment
           network={NetworkChain}
           address={deployedAddress}
+          successful={deployedAddress.toString() == "none" ? false : true}
         />
       )}
     </>
