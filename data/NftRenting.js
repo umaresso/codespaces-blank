@@ -1,7 +1,8 @@
 import { getProviderOrSigner } from "./accountsConnection";
 import { ethers } from "ethers";
+const { toHex, fromHex } = require("tron-format-address");
 import { parseEther } from "ethers/lib/utils";
-import { ChainMismatchError } from "wagmi";
+import { getNetworkTronweb } from "./TronAccountsManagement";
 const NftContractABI = [
   {
     inputs: [
@@ -1072,11 +1073,11 @@ export const NftRentingTrackerABI = [
 // Ethereum
 const NftRentingTrackerAddress = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 // Tron
-const NftRentingTrackerAddressNile = "TNzA8RCgWGykhAStQSCirGvK61MJ6893Cj";
-const NftRentingTrackerAddressShasta = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
+const NftRentingTrackerAddressNile = "TV1HGUTk53cFfFQbWUBoiW6AyfrQbKjict";
+const NftRentingTrackerAddressShasta =
+  "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 
 // Polygon
-
 
 export const getCustomNetworkNFTFactoryContract = async (
   network,
@@ -1084,6 +1085,8 @@ export const getCustomNetworkNFTFactoryContract = async (
   contractAddress
 ) => {
   let signer = await getProviderOrSigner(network, web3modalRef);
+  if(!signer) return null;
+  console.log("signer is ",signer)
   let nftFactory = new ethers.ContractFactory(
     NftRentingFactoryABI,
     NftRentingFactoryBytecode.object,
@@ -1098,40 +1101,75 @@ export const getCustomNetworkNFTFactoryContract = async (
   }
   return nftFactory;
 };
-async function getTronNetworkNFTTracker(network){
-	let contractAddress=null;
-	if(network=="nile"){	
-		contractAddress=NftRentingTrackerAddressNile;
- 	}
-	// let tronWeb =await getNetworkTronweb(network);
-	let tronWeb=await window.tronLink.tronWeb;
 
-	let contract = await tronWeb.contract().at(contractAddress);
-
-	return contract;
-
-}
-
-export async function getBlockchainSpecificNFTTracker(Blockchain,NetworkChain,web3ModalRef){
-if(Blockchain=="tron"){
-  let contract = await getTronNetworkNFTTracker(NetworkChain);
+async function getTronNetworkNFTTracker(network) {
+  let contractAddress = null;
+  if (network == "nile") {
+    contractAddress = NftRentingTrackerAddressNile;
+  }
+  let tronWeb = await getNetworkTronweb(network);
+  // let tronWeb = await window.tronLink.tronWeb;
+  let contract = await tronWeb.contract().at(contractAddress);
   return contract;
 }
-else if(Blockchain=="ethereum"){
-let contract =await getCustomNetworkNFTTrackerContract(NetworkChain,web3ModalRef);
-return contract;
-}
-else if(Blockchain=="polygon"){
 
+export const getTronNFTFactory = async (network, contractAddress) => {
+  let tronWeb = await getNetworkTronweb(network);
+  // let tronWeb = await window.tronLink.tronWeb;
+
+  let contract = await tronWeb.contract().at(contractAddress);
+  return contract;
+};
+
+export async function getBlockchainSpecificNFTTracker(
+  Blockchain,
+  NetworkChain,
+  web3ModalRef
+) {
+  if (Blockchain == "tron") {
+    let contract = await getTronNetworkNFTTracker(NetworkChain);
+    return contract;
+  } else if (Blockchain == "ethereum") {
+    let contract = await getCustomNetworkNFTTrackerContract(
+      NetworkChain,
+      web3ModalRef
+    );
+    return contract;
+  } else if (Blockchain == "polygon") {
+  } else {
+    // no support
+    return null;
+  }
 }
-else{
-  // no support 
-  return null;
+
+export async function getBlockchainSpecificNFTFactory(
+  Blockchain,
+  NetworkChain,
+  web3ModalRef,
+  contractAddress
+) {
+  if (Blockchain == "tron") {
+    console.log("inside tron");
+    let contract = await getTronNFTFactory(NetworkChain, contractAddress);
+    return contract;
+  } else if (Blockchain == "ethereum") {
+    let contract = await getCustomNetworkNFTFactoryContract(
+      NetworkChain,
+      web3ModalRef,
+      contractAddress
+    );
+    return contract;
+  } else if (Blockchain == "polygon") {
+  } else {
+    // no support
+    return null;
+  }
 }
-}
+
 export const getCustomNetworkNFTTrackerContract = async (
   network,
-  web3modalRef,Blockchain
+  web3modalRef,
+  Blockchain
 ) => {
   let signer = await getProviderOrSigner(network, web3modalRef, true);
   let nftTracker = new ethers.Contract(
@@ -1146,45 +1184,83 @@ export const getCustomNetworkNFTTrackerContract = async (
 export const getRentableContract = async (
   contract,
   ercContractAddress,
-  setter
+  setter,
+  Blockchain
 ) => {
   if (!contract) return null;
-  let rentable = await contract.erc721ToRentableContract(ercContractAddress);
+  let rentable =
+    Blockchain == "tron"
+      ? await contract.erc721ToRentableContract(ercContractAddress).call()
+      : await contract.erc721ToRentableContract(ercContractAddress);
   if (setter) {
     setter(rentable);
+  }
+  if (rentable.toString().includes("00000000")) {
+    return null;
   }
   return rentable;
 };
 export const getNftPrice = async (
   TrackerContract,
   contractAddress,
-  tokenId
+  tokenId,
+  Blockchain
 ) => {
   try {
     //    console.log("Tracker",TrackerContract,"\ncontract",contractAddress,"\ntoken",tokenId)
-    let price = await TrackerContract.getTokenRentPrice(
-      contractAddress,
-      tokenId
-    );
+    let price =
+      Blockchain == "tron"
+        ? await TrackerContract.getTokenRentPrice(
+            fromHex(contractAddress.toString()),
+            tokenId
+          ).call()
+        : await TrackerContract.getTokenRentPrice(contractAddress, tokenId);
     price = parseInt(price) / 10 ** 18;
     return price;
   } catch (e) {
     console.log("Error in fetching price", e);
   }
 };
-export const getNftUser = async (rentableContract, tokenId) => {
+export const getNftUser = async (rentableContract, tokenId, Blockchain) => {
   try {
-    //    console.log("Tracker",TrackerContract,"\ncontract",contractAddress,"\ntoken",tokenId)
-    let _user = await rentableContract.userOf(tokenId);
+    let _user =
+      Blockchain == "tron"
+        ? await rentableContract.userOf(tokenId).call()
+        : await rentableContract.userOf(tokenId);
+    console.log("user is ", _user);
     return _user;
   } catch (e) {
     console.log("Error in fetching current User", e);
   }
 };
 
-export const isRented = async (TrackerContract, contractAddress, tokenId) => {
-  let rentStatus = await TrackerContract.isRented(contractAddress, tokenId);
-  return rentStatus;
+export const isRented = async (
+  TrackerContract,
+  _contractAddress,
+  tokenId,
+  Blockchain
+) => {
+  // console.log(TrackerContract)
+  let rentStatus;
+
+  if (Blockchain == "tron") {
+    // console.log("tron ");
+    let adr;
+    try {
+      adr = fromHex(_contractAddress.toString());
+    } catch (e) {
+      console.log("error in conversion");
+      console.log(e);
+    }
+    rentStatus = await TrackerContract.isRented(adr, tokenId).call();
+    return rentStatus;
+  } else {
+    console.log("eth ");
+    rentStatus = await TrackerContract.isRented(_contractAddress, tokenId);
+    console.log("rent status is ", rentStatus);
+
+    return rentStatus;
+  }
 };
 
 export const getNftUserAddress = async (
@@ -1206,7 +1282,8 @@ export const getNftUserAddress = async (
   return user;
 };
 
-export const rentNFT = async (
+export const rentNft = async (
+  Blockchain,
   Trackercontract,
   contractAddress,
   tokenId,
@@ -1216,24 +1293,51 @@ export const rentNFT = async (
   successFunction,
   successParams
 ) => {
+  console.log({});
   try {
-    let tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
-      value: parseEther(price.toString()),
-    });
+    statusUpdater("Renting Started 🌟");
+
+    statusUpdater("Please approve Transactoin");
+
+    let tx;
+
+    if (Blockchain == "tron") {
+      console.log({
+        contractAddress,
+        tokenId,
+        days,
+        callValue: price * 10 ** 6,
+      });
+
+      await Trackercontract.rentNFT(contractAddress, tokenId, days).send({
+        feeLimit: 100000000,
+        callValue: price * 10 ** 6,
+        tokenId: "",
+        tokenValue: "",
+        shouldPollResponse: true,
+      });
+    } else {
+      tx = await Trackercontract.rentNFT(contractAddress, tokenId, days, {
+        value: parseEther(price.toString()),
+      });
+    }
     statusUpdater("Wating for Transaction Completion");
-    await tx.wait();
+    if (Blockchain != "tron") await tx.wait();
+
     statusUpdater("Successfully Rented NFT 🥳");
-    setTimeout(() => {
-      successFunction(successParams);
-    }, 2000);
+    successFunction(successParams);
+
     alert("NFT Rented Successfully !");
   } catch (e) {
+    alert("Unable to Rent NFT!");
     if (e.toString().includes("user rejected transaction")) {
       statusUpdater("You Rejected Transaction ");
       console.log(e);
     } else if (e.toString().includes("insufficient funds for gas")) {
       statusUpdater("You have Insufficient funds for paying Transaction gas ");
       statusUpdater("We Want you to come again after deposit !");
+    } else {
+      console.log(e);
     }
   }
 };

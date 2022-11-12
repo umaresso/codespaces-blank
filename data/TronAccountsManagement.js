@@ -2,7 +2,7 @@ import TronWeb from "tronweb";
 import { getMinimalAddress } from "../Utilities";
 import { getCurrentConnectedOwner } from "./blockchainSpecificExports";
 const tronPrivateKey =
-  "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
+  "88cd69e757d4ce34abbd4b6693b40a6417e20da9e28bf8955f3d76302f9b440c";
 
 export const tronConnect = async () => {
   try {
@@ -44,9 +44,7 @@ export function getNileTronWeb() {
   const fullNode = new HttpProvider("https://api.nileex.io/");
   const solidityNode = new HttpProvider("https://api.nileex.io/");
   const eventServer = new HttpProvider("https://event.nileex.io/");
-  const privateKey =
-    "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
-  let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+  let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
   // console.log("returning tron nile web", tronWeb);
   return tronWeb;
 }
@@ -79,6 +77,7 @@ export async function deploy_tron_contract(
   SuccessFallback
 ) {
   try {
+    
     let tronWeb = await getNetworkTronweb(network);
     // console.log("tronweb inside deploy ", tronWeb);
     statusUpdater("Creting contract instance..");
@@ -97,15 +96,19 @@ export async function deploy_tron_contract(
     let scAddress = contract_instance.address;
     statusUpdater("Deployed Successfully 🥳 ");
     let contract = await tronWeb.contract().at(scAddress);
-    console.log(contract);
-    let name = await contract.name().call();
-    statusUpdater(
-      name + " is deployed to address := " + getMinimalAddress(scAddress)
-    );
     let currentConnectedUser = await tronConnect();
     SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
     console.log("error : ", e);
   }
+}
+
+
+export const getCurrentUserTronWeb=async ()=>{
+  let tronlink = await window.tronLink;
+  await tronlink.request({ method: "tron_requestAccounts" });
+  let tronWeb = await tronlink?.tronWeb;
+  return tronWeb;
+
 }

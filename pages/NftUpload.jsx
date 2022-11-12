@@ -18,6 +18,7 @@ import LinkButton from "./components/LinkButton/LinkButton";
 import NamedInput from "./components/NamedInput";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import {
+  getBlockchainSpecificERC721Contract,
   getCustomNetworkERC721Contract,
   getPureTokenUri,
   getTokenOwner,
@@ -28,6 +29,7 @@ import {
   getTokenMetadata,
 } from "../data/ipfsStuff";
 import {
+  getBlockchainSpecificNFTTracker,
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
   getRentableContract,
@@ -37,6 +39,7 @@ import {
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { deploy_tron_contract } from "../data/TronAccountsManagement";
 import { useSelector } from "react-redux";
+import { isGetAccessor } from "typescript";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -51,7 +54,7 @@ function NftUpload(props) {
   );
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
-  let connectedAddress=selectedBlockchainInformation.address;
+  let connectedAddress = selectedBlockchainInformation.address;
   let bg = "black";
   let textColor = "white";
   /**
@@ -143,48 +146,74 @@ function NftUpload(props) {
     return true;
   }
   async function GatherTokenInformation() {
-    let erc721Contract = await getCustomNetworkERC721Contract(
+    let erc721Contract = await getBlockchainSpecificERC721Contract(
+      _Blockchain,
       _NetworkChain,
       web3ModelRef,
       contractAddress
     );
+
     try {
-      let _owner = await getTokenOwner(erc721Contract, tokenId);
-      let tokenCid = await getPureTokenUri(erc721Contract, tokenId);
+      let _owner =
+        _Blockchain == "tron"
+          ? await erc721Contract.ownerOf(tokenId).call()
+          : await erc721Contract.ownerOf(tokenId);
+      let tokenCid = await getPureTokenUri(
+        erc721Contract,
+        tokenId,
+        _Blockchain
+      );
       console.log("Token Cid is ", tokenCid);
       if (tokenCid == "") {
         alert("Unable to read token metadata");
+        return null;
       }
       let tokenData = await getTokenMetadata(tokenCid);
-      ///console.log("Token Metadata is ",tokenData);
-      let rentableContractAddress = await getRentableContract(
-        NftRentingTracker,
-        contractAddress
+      console.log("Token Metadata is ", tokenData);
+      let _NftRentingTracker = await getBlockchainSpecificNFTTracker(
+        _Blockchain,
+        _NetworkChain,
+        web3ModelRef
       );
-      //console.log("Rentable version for token is ",rentableContractAddress);
+
+      let rentableContractAddress = await getRentableContract(
+        _NftRentingTracker,
+        contractAddress,
+        null,
+        _Blockchain
+      );
+      console.log("Rentable version for token is ", rentableContractAddress);
       let rentableContract = await getCustomNetworkNFTFactoryContract(
         _NetworkChain,
         web3ModelRef,
         rentableContractAddress
       );
-      //console.log("Rentable contract is ",rentableContract);
+      console.log("Rentable contract is ", rentableContract);
+
       let token = { ...tokenData };
-      if (!_owner.toString().includes("0x000")) {
+      if (_owner && !_owner.toString().includes("00000000")) {
         token.owner = _owner;
       }
 
-      if (!rentableContractAddress.toString().includes("0x000")) {
+      if (
+        rentableContractAddress &&
+        !rentableContractAddress.toString().includes("00000000")
+      ) {
         token.rentableContractAddress = rentableContractAddress;
       }
       token.erc721ContractAddress = contractAddress;
       token.id = tokenId;
       console.log("token is ", token);
       tokenDeploymentInstance.current = token;
+
       return token;
     } catch (e) {
       if (e.toString().includes("invalid token ID")) {
         alert("Invalid TokenID");
-      } else alert("Error occured in Token ID fetching ..");
+      } else {
+        alert("Unable to Fetch Token Information ..Do you own the Token?");
+        console.log(e);
+      }
       return null;
     }
   }
@@ -197,13 +226,10 @@ function NftUpload(props) {
   }
 
   async function init() {
-
     if (!walletAddress) return;
-    await getCustomNetworkNFTFactoryContract(_NetworkChain, web3ModelRef).then(
-      (factory) => {
-        setFactoryContract(factory);
-      }
-    );
+    let fact = await getCustomNetworkNFTFactoryContract(_NetworkChain, web3ModelRef);
+    console.log("factory obtained  ",fact);
+    setFactoryContract(fact)
     await getCustomNetworkNFTTrackerContract(_NetworkChain, web3ModelRef).then(
       (contract) => {
         getAllContractTokens(contract).then((_contractTokens) => {
@@ -232,7 +258,6 @@ function NftUpload(props) {
   async function NFT_Upload() {
     async function deploy() {
       try {
-        let factory = factoryContract;
         setStatus("Seems we did not have this awesome collection before");
         setStatus("Creating Rentable Version of your collection ");
         if (_Blockchain == "tron") {
@@ -248,7 +273,10 @@ function NftUpload(props) {
             trackNFTUpload
           );
         } else if (_Blockchain == "ethereum") {
-          const contract = await factory.deploy(contractAddress);
+          console.log("factory contract is",factoryContract)
+          let _factory = factoryContract;
+
+          const contract = await _factory.deploy(contractAddress);
           await contract.deployed();
           await trackNFTUpload(contract.address);
           return contract.address;
@@ -270,11 +298,9 @@ function NftUpload(props) {
       // Deploy the contract to Ethereum test network - Goerli
     }
     setStatus("Checking if Rentable Version Already exists !");
-    let response = await NftRentingTracker.erc721ToRentableContract(
-      contractAddress
-    );
+    let response = tokenDeploymentInstance.rentableContractAddress;
     console.log("rentable version :", response);
-    if (!response.toString().includes("0x000")) {
+    if (response != undefined && !response.toString().includes("000000")) {
       setStatus("Wow ! The Rentable contract already Exists !");
       setStatus("Let's Update available contracts on IPFS ");
       StoreUpdatedcontractsOnIpfs(contractAddresses);
@@ -287,7 +313,11 @@ function NftUpload(props) {
   }
 
   async function trackNFTUpload(deployedContractAddress, tokenInstance) {
-    let contract = NftRentingTracker;
+    let contract = await getBlockchainSpecificNFTTracker(
+      _Blockchain,
+      _NetworkChain,
+      web3ModelRef
+    );
     // console.log("uploading", {
     //   contractAddress,
     //   deployedContractAddress,
@@ -314,22 +344,43 @@ function NftUpload(props) {
             setStatus("Successfully stored on IPFS 🥳");
             setStatus("Time to Store on Blockchain");
 
-            setStatus("Approve Transaction");
+            setStatus("Approving Transaction");
             let options = {
               gasLimit: 300000,
             };
 
-            let tx = await contract.uploadNftForRent(
-              contractAddress,
-              deployedContractAddress,
-              tokenId,
-              ethers.utils.parseEther(pricePerDay.toString()),
-              contracts_file_cid,
-              contractTokens_Cid,
-              options
-            );
+            let tx =
+              _Blockchain == "tron"
+                ? await contract
+                    .uploadNftForRent(
+                      contractAddress,
+                      deployedContractAddress,
+                      tokenId,
+                      (pricePerDay * 1000000).toString(),
+                      contracts_file_cid,
+                      contractTokens_Cid
+                    )
+                    .send({
+                      feeLimit: 100000000,
+                      callValue: 0,
+                      tokenId: "",
+                      tokenValue: "",
+                      shouldPollResponse: true,
+                    })
+                : await contract.uploadNftForRent(
+                    contractAddress,
+                    deployedContractAddress,
+                    tokenId,
+                    ethers.utils.parseEther(pricePerDay.toString()),
+                    contracts_file_cid,
+                    contractTokens_Cid,
+                    options
+                  );
+
             setStatus("Waiting for Transaction Completion..");
-            await tx.wait();
+            if (_Blockchain !== "tron") {
+              await tx.wait();
+            }
             setNftUploaded(true);
 
             setFormStep((prev) => prev + 1);
@@ -463,11 +514,12 @@ function NftUpload(props) {
   }
 
   useEffect(() => {
-    if(!walletAddress){
-      setWalletAddress(connectedAddress)
-    }
-    
     init();
+
+    if (!walletAddress) {
+      setWalletAddress(connectedAddress);
+    }
+
     
   }, [walletAddress]);
 
@@ -475,7 +527,24 @@ function NftUpload(props) {
     <>
       {!walletAddress && (
         <Card height={"100vh"}>
-          <Button onClick={init} colorScheme={"blue"} variant={"solid"}>
+          <Button
+            onClick={async () => {
+              if (connectedAddress) {
+                setWalletAddress(connectedAddress);
+                return 0;
+              }
+
+              let user = await getCurrentConnectedOwner(
+                _Blockchain,
+                _NetworkChain,
+                web3ModelRef
+              );
+              setWalletAddress(user);
+              return 0;
+            }}
+            colorScheme={"blue"}
+            variant={"solid"}
+          >
             Connect Wallet
           </Button>
         </Card>

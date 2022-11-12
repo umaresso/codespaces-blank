@@ -15,32 +15,33 @@ import NamedInput from "./NamedInput";
 import LinkButton from "./LinkButton/LinkButton";
 import { getMinimalAddress } from "../../Utilities";
 import {
+  getBlockchainSpecificNFTTracker,
   getCustomNetworkNFTTrackerContract,
   getRentableContract,
-  rentNFT,
+  rentNft,
 } from "../../data/NftRenting";
 import { useRef } from "react";
 import { getIpfsImageLink } from "../../data/ipfsStuff";
 import { getProviderOrSigner } from "../../data/accountsConnection";
 import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
+import { toHex, fromHex } from "tron-format-address";
+import { getCurrentConnectedOwner } from "../../data/blockchainSpecificExports";
 
 const ethers = require("ethers");
-let NetworkChain = "goerli";
 let bg = "black";
 let textColor = "white";
-let CurrentBlockchain = "Ethereum";
-function getCurrency() {
-  switch (CurrentBlockchain) {
-    case "Ethereum" || "ethereum":
-      return "Eth";
 
-    default:
-      break;
-  }
-}
 function NftInformationPopup(props) {
-  let NFT=props.NFT;
-  let displayToggle=props.displayToggle;
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
+
+  let NFT = props.NFT;
+  let displayToggle = props.displayToggle;
   let Nft = NFT;
   const router = useRouter();
   const [rentWill, setrentWill] = useState(false);
@@ -50,9 +51,10 @@ function NftInformationPopup(props) {
   const [rentDays, setRentDays] = useState(1);
   const [walletAddress, setWalletAddress] = useState(null);
   const [reload, setReload] = useState(false);
-  // console.log("NFT received", NFT);
+
   let ErcContractAddress = Nft?.erc721ContractAddress;
   let owner = Nft?.owner;
+  if (owner) owner = fromHex(owner);
   let DisplayToggle = displayToggle;
 
   let web3ModalRef = useRef();
@@ -63,13 +65,22 @@ function NftInformationPopup(props) {
     p_tag.textContent = "-> " + message;
     ele.append(p_tag);
   }
+  function getCurrency() {
+    switch (Blockchain) {
+      case "Ethereum" || "ethereum":
+        return "Eth";
+      case "tron" || "Tron":
+        return "TRX";
+      default:
+        break;
+    }
+  }
 
-  async function rentNft() {
-    let totalPrice = rentPrice * rentDays;
-    setStatus("Renting Started 🌟");
-    setStatus("Approve Transaction");
-
-    await rentNFT(
+  async function rentNFT() {
+    let totalPrice = rentPrice * rentDays;    
+    console.log("");
+    await rentNft(
+      Blockchain,
       nftTrackerContract,
       rentableContract,
       Nft?.id,
@@ -81,31 +92,41 @@ function NftInformationPopup(props) {
     );
   }
   async function connectWallet() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (signer && !walletAddress) {
-        signer.getAddress().then((user) => {
-          setWalletAddress(user);
-        });
-      }
-    });
+    if (connectedAddress) {
+      setWalletAddress(connectedAddress);
+      return null;
+    }
+
+    let user = await getCurrentConnectedOwner(
+      Blockchain,
+      NetworkChain,
+      web3ModalRef
+    );
+    setWalletAddress(user);
   }
 
   async function init() {
     !walletAddress && connectWallet();
 
-    getCustomNetworkNFTTrackerContract(NetworkChain, web3ModalRef).then(
-      async (TrackerContract) => {
-        if (!Nft?.rentableContract) {
-          getRentableContract(TrackerContract, Nft?.erc721ContractAddress).then(
-            (rentableSmartContractInstance) => {
-              setRentableContract(rentableSmartContractInstance);
-            }
-          );
-        }
-
-        setNftTrackerContract(TrackerContract);
+    getBlockchainSpecificNFTTracker(
+      Blockchain,
+      NetworkChain,
+      web3ModalRef
+    ).then(async (TrackerContract) => {
+      if (!Nft?.rentableContract) {
+        getRentableContract(
+          TrackerContract,
+          Nft?.erc721ContractAddress,
+          null,
+          Blockchain
+        ).then((rentableSmartContractAddress) => {
+          setRentableContract(rentableSmartContractAddress);
+        });
       }
-    );
+
+      setNftTrackerContract(TrackerContract);
+      
+    });
   }
 
   useEffect(() => {
@@ -233,7 +254,6 @@ function NftInformationPopup(props) {
               />
             </NamedInput>
             <HStack width={"50vw"} justify={"space-between"}>
-             
               <LinkButton
                 onClick={() => {
                   DisplayToggle(null);
@@ -242,13 +262,12 @@ function NftInformationPopup(props) {
                 color={"white"}
                 variant={"outline"}
               />
-               <LinkButton
+              <LinkButton
                 title={"Rent Now"}
                 id={"rent-btn"}
                 color={"green"}
-                href={"/Explore"}
                 onClick={async () => {
-                  await rentNft();
+                  await rentNFT();
                 }}
               />
             </HStack>

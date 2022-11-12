@@ -13,8 +13,8 @@ export const blockchainSlice = createSlice({
   name: 'blockchainUpdater',
   initialState,
   reducers: {
-    updateBlockchain: (state, action: PayloadAction<Object>) => {
-      state.value = action.payload
+    updateBlockchain: (state, value) => {
+      state.value = value.payload;
     },
   },
 })

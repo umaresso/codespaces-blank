@@ -45,15 +45,16 @@ export async function getCurrentConnectedOwner(
   } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
     let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
     if (!signer) {
-      setter(null);
+      if (setter) {
+        setter(null);
+      }
       return null;
     }
-    
+
     if (setter) {
       setter(user);
     }
-      user = await signer?.getAddress();
+    user = await signer?.getAddress();
     return user;
   }
-  
 }

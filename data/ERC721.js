@@ -1,4 +1,5 @@
 import { getProviderOrSigner } from "./accountsConnection";
+import { getNetworkTronweb } from "./TronAccountsManagement";
 
 export const erc721Abi = [
   {
@@ -367,6 +368,32 @@ export const erc721Abi = [
   },
 ];
 
+
+export async function getBlockchainSpecificERC721Contract(
+  Blockchain,
+  NetworkChain,
+  web3modalRef,
+  contractAddress
+) {
+  let contract = null;
+  if (Blockchain == "tron") {
+    contract = await getTronERC721Factory(NetworkChain, contractAddress);
+    return contract;
+  } else if (!Blockchain || Blockchain == "ethereum") {
+    contract = await getCustomNetworkERC721Contract(
+      NetworkChain,
+      web3modalRef,
+      contractAddress
+    );
+    return contract;
+  } else if (Blockchain == "polygon") {
+    //to be implemented yet
+    return contract;
+  } else {
+    return null;
+  }
+}
+
 export const getCustomNetworkERC721Contract = async (
   NetworkChain,
   web3ModalRef,
@@ -388,11 +415,12 @@ function embedGateway(hash) {
   return "https://ipfs.io" + hash;
 }
 
-export const getPureTokenUri = async (contract, tokenId) => {
-  let tokenUri;
+export const getPureTokenUri = async (contract, tokenId,Blockchain) => {
+  let tokenUri='';
   try{
-    tokenUri = await contract.tokenURI(tokenId);
-    
+    console.log("contract is ",{...contract})
+    tokenUri =Blockchain=="tron"? await contract.tokenURI(tokenId).call():await contract.tokenURI(tokenId);
+    console.log("token uri is _"+tokenUri+'_');
     if (tokenUri == "") {
       return "";
     } else if (tokenUri.toString().startsWith("/ipfs/")) {
@@ -413,6 +441,11 @@ export const getPureTokenUri = async (contract, tokenId) => {
     }
   }
   
+};
+export const getTronERC721Factory = async (network, contractAddress) => {
+  let tronWeb = await getNetworkTronweb(network);
+  let contract = await tronWeb.contract().at(contractAddress);
+  return contract;
 };
 
 export async function getContractName(NetworkChain, web3ModalRef, contractAddress) {
