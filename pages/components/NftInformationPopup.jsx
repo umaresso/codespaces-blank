@@ -233,15 +233,7 @@ function NftInformationPopup(props) {
               />
             </NamedInput>
             <HStack width={"50vw"} justify={"space-between"}>
-              <LinkButton
-                title={"Rent Now"}
-                id={"rent-btn"}
-                color={"green"}
-                href={"/Explore"}
-                onClick={async () => {
-                  await rentNft();
-                }}
-              />
+             
               <LinkButton
                 onClick={() => {
                   DisplayToggle(null);
@@ -249,6 +241,15 @@ function NftInformationPopup(props) {
                 title={`Close`}
                 color={"white"}
                 variant={"outline"}
+              />
+               <LinkButton
+                title={"Rent Now"}
+                id={"rent-btn"}
+                color={"green"}
+                href={"/Explore"}
+                onClick={async () => {
+                  await rentNft();
+                }}
               />
             </HStack>
           </VStack>

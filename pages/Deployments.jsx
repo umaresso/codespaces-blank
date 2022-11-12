@@ -57,18 +57,17 @@ function Deployments() {
       setOwner(ownerAddress);
     } else if (_Blockchain == "polygon") {
     } else {
-      alert("Invalid Blockchain" + Blockchain);
+      //      alert("Invalid Blockchain" + Blockchain);
     }
   }
 
   function RefreshToNewBlockchain() {
-    setLoading(true)
+    setLoading(true);
     init();
-    
+
     setNetworkChain(_NetworkChain);
     setBlockchain(_Blockchain);
     // console.log("calling init");
-    
   }
 
   useEffect(() => {
@@ -85,7 +84,7 @@ function Deployments() {
       _Blockchain
     );
     await fetchSales(
-      +NetworkChain,
+      _NetworkChain,
       Web3ModalRef,
       _owner,
       setSaleDeployments,
@@ -122,7 +121,7 @@ function Deployments() {
                       <WrapItem key={"wrapWhitelist" + item.name + index}>
                         <DeploymentCard
                           item={item}
-                          key={"whitelist" + item.id+item.id}
+                          key={"whitelist" + item.id + item.id}
                           type={"whitelist"}
                           showIntegratePopup={() =>
                             setSelectedDeployment({
@@ -152,7 +151,7 @@ function Deployments() {
                 <Wrap justify={"center"} spacing={10}>
                   {saleDeployments.map((item, index) => {
                     return (
-                      <WrapItem key={"wrapSale" + item.name+item.id + index}>
+                      <WrapItem key={"wrapSale" + item.name + item.id + index}>
                         <DeploymentCard
                           item={item}
                           key={"sale" + item.name}

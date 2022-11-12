@@ -72,6 +72,7 @@ function ExploreNfts(props) {
     setNFTs([]);
     console.log("calling init");
     init();
+    
   
   }
 
@@ -95,6 +96,7 @@ function ExploreNfts(props) {
     );
     // console.log("Contracts to read from", contractsArray);
     if (!contractsArray || contractsArray.length == 0) {
+      setLoading(false);
       return 0;
     }
     let allContractsTokens = await getAllContractTokens(trackerContract);

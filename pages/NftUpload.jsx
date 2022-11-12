@@ -38,7 +38,6 @@ import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { deploy_tron_contract } from "../data/TronAccountsManagement";
 import { useSelector } from "react-redux";
 
-
 export async function getStaticProps(context) {
   require("dotenv").config();
   return {
@@ -50,9 +49,9 @@ function NftUpload(props) {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
-  let Blockchain = selectedBlockchainInformation.name;
-  let NetworkChain = selectedBlockchainInformation.network;
-
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress=selectedBlockchainInformation.address;
   let bg = "black";
   let textColor = "white";
   /**
@@ -69,7 +68,7 @@ function NftUpload(props) {
   const [contractAddress, setContractAddress] = useState(null);
   const [tokenId, setTokenId] = useState(null);
   const [pricePerDay, setPricePerDay] = useState(null);
-  const [blockchain, setBlockchain] = useState(null);
+  const [Blockchain, setBlockchain] = useState(null);
 
   const [factoryContract, setFactoryContract] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
@@ -94,8 +93,8 @@ function NftUpload(props) {
   }
 
   function isValidBlockchain() {
-    if (!blockchain) return false;
-    let blockchainPlatform = blockchain.toString().toLowerCase();
+    if (!_Blockchain) return false;
+    let blockchainPlatform = _Blockchain.toString().toLowerCase();
     if (
       blockchainPlatform == "ethereum" ||
       blockchainPlatform == "eth" ||
@@ -145,7 +144,7 @@ function NftUpload(props) {
   }
   async function GatherTokenInformation() {
     let erc721Contract = await getCustomNetworkERC721Contract(
-      NetworkChain,
+      _NetworkChain,
       web3ModelRef,
       contractAddress
     );
@@ -164,7 +163,7 @@ function NftUpload(props) {
       );
       //console.log("Rentable version for token is ",rentableContractAddress);
       let rentableContract = await getCustomNetworkNFTFactoryContract(
-        NetworkChain,
+        _NetworkChain,
         web3ModelRef,
         rentableContractAddress
       );
@@ -198,20 +197,14 @@ function NftUpload(props) {
   }
 
   async function init() {
-    await getCurrentConnectedOwner(
-      Blockchain,
-      NetworkChain,
-      web3ModelRef,
-      setWalletAddress
-    );
 
     if (!walletAddress) return;
-    await getCustomNetworkNFTFactoryContract(NetworkChain, web3ModelRef).then(
+    await getCustomNetworkNFTFactoryContract(_NetworkChain, web3ModelRef).then(
       (factory) => {
         setFactoryContract(factory);
       }
     );
-    await getCustomNetworkNFTTrackerContract(NetworkChain, web3ModelRef).then(
+    await getCustomNetworkNFTTrackerContract(_NetworkChain, web3ModelRef).then(
       (contract) => {
         getAllContractTokens(contract).then((_contractTokens) => {
           console.log("The all contrac tokens are", _contractTokens);
@@ -232,7 +225,7 @@ function NftUpload(props) {
 
   async function deployNftUpload() {
     setFormStep((prev) => prev + 1);
-    setStatus("Making " + Blockchain + "NftUpload..");
+    setStatus("Making " + _Blockchain + "NftUpload..");
     NFT_Upload();
   }
 
@@ -242,24 +235,24 @@ function NftUpload(props) {
         let factory = factoryContract;
         setStatus("Seems we did not have this awesome collection before");
         setStatus("Creating Rentable Version of your collection ");
-        if (Blockchain == "tron") {
+        if (_Blockchain == "tron") {
           let abi = NftRentingFactoryABI;
           let bytecode = NftRentingFactoryBytecode;
           let parameters = [contractAddress];
           await deploy_tron_contract(
-            NetworkChain,
+            _NetworkChain,
             abi,
             bytecode,
             parameters,
             setStatus,
             trackNFTUpload
           );
-        } else if (Blockchain == "ethereum") {
+        } else if (_Blockchain == "ethereum") {
           const contract = await factory.deploy(contractAddress);
           await contract.deployed();
           await trackNFTUpload(contract.address);
           return contract.address;
-        } else if (Blockchain == "polygon") {
+        } else if (_Blockchain == "polygon") {
           //
         } else {
           // we dont support this blockchain yet
@@ -470,7 +463,12 @@ function NftUpload(props) {
   }
 
   useEffect(() => {
+    if(!walletAddress){
+      setWalletAddress(connectedAddress)
+    }
+    
     init();
+    
   }, [walletAddress]);
 
   return (
@@ -539,8 +537,11 @@ function NftUpload(props) {
                 <Box>
                   <NamedInput title={"Blockchain"}>
                     <Input
-                      onChange={(e) => setBlockchain(e.target.value)}
+                      textTransform={"capitalize"}
+                      //                      onChange={(e) => setBlockchain(e.target.value)}
+                      disabled={true}
                       placeholder="Ethereum,Tron,polygon"
+                      value={_Blockchain}
                     />
                   </NamedInput>
                   <Box id="blockchainValidation"></Box>
