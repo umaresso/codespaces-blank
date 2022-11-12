@@ -36,10 +36,8 @@ import {
 } from "../data/NftRenting";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { deploy_tron_contract } from "../data/TronAccountsManagement";
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
+import { useSelector } from "react-redux";
+
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -49,6 +47,12 @@ export async function getStaticProps(context) {
 }
 
 function NftUpload(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+
   let bg = "black";
   let textColor = "white";
   /**

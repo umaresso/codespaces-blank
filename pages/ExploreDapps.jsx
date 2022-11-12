@@ -21,11 +21,8 @@ import { fetchDappsContent, getAllDappsUris } from "../data/ipfsStuff";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { useRef } from "react";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
-
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
+import { useSelector } from "react-redux";
+import { set } from "lodash";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -35,6 +32,12 @@ export async function getStaticProps(context) {
 }
 
 function ExploreDapps(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+
   const [currentMenu, setCurrentMenu] = useState("all");
   const [selectedDapp, setSelectedDapp] = useState(null);
   const [allDapps, setAllDapps] = useState([]);
@@ -44,6 +47,9 @@ function ExploreDapps(props) {
   const [saleDeployments, setSaleDeployments] = useState([]);
   const [owner, setOwner] = useState();
   const [websiteRentContract, setWebsiteRentContract] = useState(null);
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
+
   let web3ModalRef = useRef();
 
   async function fetchUserDeployments(Owner) {
@@ -65,14 +71,6 @@ function ExploreDapps(props) {
     setLoader(false);
   }
 
-  let filteredDapps = [];
-
-  allDapps.map((item) => {
-    if (item.type == currentMenu || currentMenu == "all") {
-      filteredDapps.push(item);
-    }
-  });
-
   /**
    *
    * IPFS
@@ -88,9 +86,11 @@ function ExploreDapps(props) {
 
   /**      */
   async function init() {
+    setDappCids([]);
+
     await getCurrentConnectedOwner(
-      Blockchain,
-      NetworkChain,
+      _Blockchain,
+      _NetworkChain,
       web3ModalRef,
       setOwner
     );
@@ -99,21 +99,21 @@ function ExploreDapps(props) {
     await fetchUserDeployments(owner);
 
     let contract = await getBlockchainSpecificWebsiteRentContract(
-      Blockchain,
-      NetworkChain,
+      _Blockchain,
+      _NetworkChain,
       web3ModalRef
     );
 
-    let cids = await getAllDappsUris(contract, setDappCids, Blockchain);
+    let cids = await getAllDappsUris(contract, setDappCids, _Blockchain);
     if (cids.length == 0) {
       setLoader(false);
     } else {
       await fetchDappsContent(
         cids,
         setAllDapps,
-        NetworkChain,
+        _NetworkChain,
         web3ModalRef,
-        Blockchain
+        _Blockchain
       );
       setLoader(false);
     }
@@ -124,16 +124,35 @@ function ExploreDapps(props) {
   useEffect(() => {
     init();
   }, [owner]);
-  // console.log("Deployments");
-  // console.log("Sales ", saleDeployments);
-  // console.log("whitelists", whitelistDeployments);
-  // console.log("Filtered Dapps are ", filteredDapps);
-  // console.log("loader is ", loader);
-  // console.log("cids ", dappCids.length);
+  if (_Blockchain != Blockchain) {
+    RefreshToNewBlockchain();
+  }
+
+  function RefreshToNewBlockchain() {
+    setAllDapps([]);
+    setLoader(true);
+    
+    init();
+    
+    setNetworkChain(_NetworkChain);
+    setBlockchain(_Blockchain);
+    // console.log("calling init");
+    
+  }
+
+  let filteredDapps = [];
+
+  allDapps.map((item) => {
+    if (item.type == currentMenu || currentMenu == "all") {
+      filteredDapps.push(item);
+    }
+  });
+
+//  console.log("Filtered Dapps are ", filteredDapps);
 
   return (
     <>
-      <VStack height={"fit-content"} bg="black" textColor={"white"}>
+      <VStack height={"fit-content"} minH={"100vh"} bg="black" textColor={"white"}>
         <Center>
           <VStack>
             <Heading paddingTop={"10vh"} fontSize={"4.5em"} width={"60vw"}>

@@ -37,16 +37,23 @@ export async function getCurrentConnectedOwner(
   let user = null;
   if (Blockchain == "tron") {
     user = await tronConnect();
+    if (setter) {
+      setter(user);
+    }
+  
+    return user;
   } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
     let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
     if (!signer) {
       setter(null);
       return null;
     }
-    user = await signer?.getAddress();
+    
+    if (setter) {
+      setter(user);
+    }
+      user = await signer?.getAddress();
+    return user;
   }
-  if (setter) {
-    setter(user);
-  }
-  return user;
+  
 }

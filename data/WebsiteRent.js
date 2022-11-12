@@ -256,10 +256,10 @@ export const WebsiteRentBytecode = {
 }
 // Ethereum 
 // Goerli Network Deployed Address
-export const WebsiteRentAddress = "0xe266CDb9F138d2cbC010225aC66AdCAae61761A2"; 
+export const WebsiteRentAddress = "0x5ff709DF67141512784BdD91F747F531149DE284"; 
 // Tron 
 // Nile
-export const WebsiteRentNileAddress="THqVq3fk34mqskuXG8tqTuB8tovG1g7ehr";
+export const WebsiteRentNileAddress="TH8Ta1VMokE1GRtYHCv2E14QfHfipbcFwh";
 // Shasta
 export const WebsiteRentShastaAddress=null;
 //
@@ -284,7 +284,9 @@ const provider = ethers.providers.getDefaultProvider(
 //   PlatformWallet
 // );
 export const getCustomNetworkWebsiteRentContract=async (network,web3modalRef,contractSetter)=>{
-let signer = await getProviderOrSigner(network,web3modalRef,true);
+try{
+	// console.log("connection for ",{network,web3modalRef})
+	let signer = await getProviderOrSigner(network,web3modalRef,true);
 const websiteRentContract = new ethers.Contract(
 	WebsiteRentAddress,
 	WebsiteRentABI,
@@ -296,6 +298,11 @@ const websiteRentContract = new ethers.Contract(
 return websiteRentContract;
 
 }
+catch(e){
+	alert("Make sure your wallet is connected !");
+	return null;
+}
+}
 
 export const getTronWebsiteRentContract=async (network)=>{
 	let contractAddress=null;
@@ -303,7 +310,7 @@ export const getTronWebsiteRentContract=async (network)=>{
 		contractAddress=WebsiteRentNileAddress;
 	}
 	// let tronWeb =await getNetworkTronweb(network);
-	console.log("tronlink is ",  window.tronLink)
+	// console.log("tronlink is ",  window.tronLink)
 	let tronWeb=await window.tronLink.tronWeb;
 
 	let contract = await tronWeb.contract().at(contractAddress);

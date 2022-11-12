@@ -1101,13 +1101,13 @@ export const getCustomNetworkNFTFactoryContract = async (
 async function getTronNetworkNFTTracker(network){
 	let contractAddress=null;
 	if(network=="nile"){	
-		contractAddress=nftnile;
-	}
+		contractAddress=NftRentingTrackerAddressNile;
+ 	}
 	// let tronWeb =await getNetworkTronweb(network);
-	console.log("tronlink is ",  window.tronLink)
 	let tronWeb=await window.tronLink.tronWeb;
 
 	let contract = await tronWeb.contract().at(contractAddress);
+
 	return contract;
 
 }

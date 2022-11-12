@@ -13,13 +13,16 @@ import {
 import LinkButton from "./LinkButton/LinkButton";
 import IntegrateFrontend from "./IntegrateFrontend";
 import e from "cors";
+import { useSelector } from "react-redux";
 const ethers = require("ethers");
-// let NetworkChain="goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
 
 function DappInformationPopup(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+
   let dapp = props?.dapp;
   let displayToggle = props?.displayToggle;
   let sales = props?.sales;

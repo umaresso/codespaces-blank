@@ -11,13 +11,16 @@ import { getMinimalAddress } from "../../Utilities";
 import Link from "next/link";
 import { getBlockchainSpecificWebsiteRentContract } from "../../data/Whitelist";
 import { addScaleCorrector } from "framer-motion";
+import { useSelector } from "react-redux";
 
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
 
 function IntegrateFrontend(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+
   let showToggle = props.showToggle;
   let _deployments = props.deployments;
   let _selectedOption = props.selected;

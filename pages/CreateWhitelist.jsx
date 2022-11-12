@@ -23,15 +23,24 @@ import {
 const ethers = require("ethers");
 
 // let NetworkChain = "goerli";  // Eth
-let NetworkChain = "nile";
-let Blockchain = "tron";
+// let NetworkChain = "nile";
+// let Blockchain = "tron";
 function CreateWhitelist(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+
   const [deployedAddress, setDeployedAddress] = useState(null);
   const [loader, setLoader] = useState(false);
   const [formStage, setFormStage] = useState(1);
   const [whitelistFactoryContract, setWhitelistFactoryContract] =
     useState(null);
   const [whitelistTracker, setWhitelistTracker] = useState(null);
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
+
   const Web3ModalRef = useRef();
 
   /**  */

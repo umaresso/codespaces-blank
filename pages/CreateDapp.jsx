@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { getBlockchainSpecificWebsiteRentContract } from "../data/Whitelist";
+import { useSelector } from "react-redux";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -32,17 +33,19 @@ export async function getStaticProps(context) {
   };
 }
 
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
 
 function CreateDapp(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress=selectedBlockchainInformation.address;
   const [name, setName] = useState("");
   const [url, setUrl] = useState("https://");
   const [price, setPrice] = useState("");
-  const [owner, setOwner] = useState("");
-  const [blockchain, setBlockchain] = useState("ethereum");
+  const [owner, setOwner] = useState(null);
+  const [blockchain, setBlockchain] = useState(null);
   const [dappImage, setDappImage] = useState(null);
   const [allDapps, setAllDapps] = useState([]);
   const [loader, setLoader] = useState(false);
@@ -268,26 +271,31 @@ function CreateDapp(props) {
     }
   }
 
-  async function getUserInfo() {
-    getProviderOrSigner(NetworkChain, Web3ModalRef, true).then((signer) => {
-      signer.getAddress().then(setOwner).catch(console.log);
-    });
-  }
   async function init() {
-    getCurrentConnectedOwner(Blockchain, NetworkChain, Web3ModalRef, setOwner);
+    //await getCurrentConnectedOwner(Blockchain, NetworkChain, Web3ModalRef, setOwner);
     if (!owner) return null;
     let contract = await getBlockchainSpecificWebsiteRentContract(
       Blockchain,
-      NetworkChain,
-      websiteRentContract
+      NetworkChain,Web3ModalRef
     );
-
+    // console.log("website rent contract is",contract)
+    if(!contract){
+      return null;
+    }
     await getAllDappsUris(contract, setAllDapps, Blockchain);
     setWebsiteRentContract(contract);
   }
+
   useEffect(() => {
-    init();
+    init(); 
+    if(!owner){
+      console.log("setting owner")
+      setOwner(connectedAddress)
+    }
+
   }, [owner]);
+  console.log("owner is ",owner)
+
   return (
     <Center
       bg="black"
@@ -412,7 +420,7 @@ function CreateDapp(props) {
                     setOwner(res);
                   }}
                   variant="outline"
-                  defaultValue={owner}
+                  defaultValue={connectedAddress}
                 />
               </NamedInput>
             </VStack>

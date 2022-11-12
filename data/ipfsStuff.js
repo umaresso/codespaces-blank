@@ -80,8 +80,8 @@ export const fetchDappsContent = async (
       if (Blockchain == "tron") {
         renttime = await websiteRentContract.rentTime(dapp.url).call();
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url).call();
-        dapp.rentPrice = parseFloat(parseInt(rentPrice)/10**6);
-        console.log("rent price is ",dapp.rentPrice )
+        dapp.rentPrice = parseFloat(parseInt(rentPrice) / 10 ** 6);
+        console.log("rent price is ", dapp.rentPrice);
       } else if (Blockchain == "ethereum") {
         renttime = await websiteRentContract.rentTime(dapp.url);
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
@@ -111,10 +111,19 @@ export function getImageLinkFromIPFS(cid) {
   return link;
 }
 
-export const getAllContractAddressess = async (contract, setter) => {
+export const getAllContractAddressess = async (
+  contract,
+  setter,
+  Blockchain,
+  NetworkChain
+) => {
   try {
-    let currentIPFSLink = await contract.contractAddressesIpfsLink();
-    // console.log("ipfs link for contracts is ", currentIPFSLink);
+    let currentIPFSLink =
+      Blockchain == "tron"
+        ? await contract.contractAddressesIpfsLink().call()
+        : await contract.contractAddressesIpfsLink();
+
+    console.log("ipfs link for contracts is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {
         setter([]);
