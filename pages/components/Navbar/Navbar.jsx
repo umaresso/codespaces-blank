@@ -10,14 +10,21 @@ import Web3Modal from "web3modal";
 import { connect } from "formik";
 import { tronConnect } from "../../../data/TronAccountsManagement";
 import { getCurrentConnectedOwner } from "../../../data/blockchainSpecificExports";
+import { useSelector, useDispatch } from "react-redux";
+import { updateBlockchain } from "../../../Reducers/index";
+import DropDownMenu from "../DropDownMenu";
 
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum"
-let NetworkChain = "nile";
-let Blockchain = "tron";
-
+let NetworkChains = {
+  ethereum: "goerli",
+  tron: "nile",
+  polygon: "mumbai",
+};
 function Navbar() {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [selectedBlockchain, setSelectedBlockchain] = useState("tron");
+  const dispatch = useDispatch();
+  let Blockchain = selectedBlockchain;
+  let NetworkChain = NetworkChains[selectedBlockchain];
   const web3ModalRef = useRef();
   let connectionCheckerId = 0;
   // theme
@@ -32,13 +39,28 @@ function Navbar() {
 
   // for intra and inter-Blockchain connection
 
+  async function updateReducerWithUser(user_) {
+    if (!user_) {
+      dispatch({
+        name: Blockchain,
+        network: NetworkChain,
+        address: user_,
+      });
+    }
+  }
   async function Connect() {
-    getCurrentConnectedOwner(Blockchain,NetworkChain,web3ModalRef,setWalletAddress);
+    await getCurrentConnectedOwner(
+      Blockchain,
+      NetworkChain,
+      web3ModalRef,
+      updateReducerWithUser
+    );
   }
   useEffect(() => {
     if (!walletAddress) {
       Connect();
     }
+    
   }, []);
 
   function getMinimalAddress(_adr) {
@@ -46,7 +68,27 @@ function Navbar() {
     let adr = _adr.toString();
     return adr.slice(0, 6) + ".." + adr.slice(40);
   }
-  console.log(walletAddress);
+  async function changeBlockchain(newBlockchain) {
+    if (newBlockchain == "polygon") {
+      alert("We are working to enable polygon soon..");
+      return null;
+    }
+    await getCurrentConnectedOwner(
+      newBlockchain,
+      NetworkChains[newBlockchain],
+      web3ModalRef
+    ).then((user_) => {
+      dispatch(
+        updateBlockchain({
+          name: newBlockchain,
+          network: NetworkChains[newBlockchain],
+          address: user_,
+        })
+      );
+      setWalletAddress(user_);
+      setSelectedBlockchain(newBlockchain);
+    });
+  }
   return (
     <HStack
       position={"fixed"}
@@ -87,20 +129,28 @@ function Navbar() {
         <Link href="/Deployments">Deployments</Link>
         <Link href="/About">About</Link>
       </HStack>
-
-      <Button
-        colorScheme={"green"}
-        _hover={{
-          cursor: "pointer",
-        }}
-        variant={walletAddress ? "solid" : "outline"}
-        onClick={Connect}
-        as="h5"
-        fontSize={"18px"}
-        width={"max-content"}
-      >
-        {walletAddress ? getMinimalAddress(walletAddress) : "Connect"}
-      </Button>
+      <HStack spacing={2}>
+        <DropDownMenu
+          title={"Select Blockchain"}
+          options={["tron", "ethereum", "polygon"]}
+          selector={changeBlockchain}
+          selected={selectedBlockchain}
+          textMenu={true}
+        />{" "}
+        <Button
+          colorScheme={"green"}
+          _hover={{
+            cursor: "pointer",
+          }}
+          variant={walletAddress ? "solid" : "outline"}
+          onClick={Connect}
+          as="h5"
+          fontSize={"18px"}
+          width={"max-content"}
+        >
+          {walletAddress ? getMinimalAddress(walletAddress) : "Connect"}
+        </Button>
+      </HStack>
     </HStack>
   );
 }

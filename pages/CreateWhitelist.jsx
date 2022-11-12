@@ -4,6 +4,7 @@ import { Center, Box, HStack, VStack, Heading, Text } from "@chakra-ui/react";
 import {
   getBlockchainSpecificWebsiteRentContract,
   getBlockchainSpecificWhitelistFactoryContract,
+  getBlockchainSpecificWhitelistTrackerContract,
   getCustomNetworkWhitelistContract,
   getCustomNetworkWhitelistTrackerContract,
   whitelistABI,
@@ -19,19 +20,27 @@ import {
   deploy_tron_contract,
   tronConnect,
 } from "../data/TronAccountsManagement";
+import { useSelector } from "react-redux";
 
 const ethers = require("ethers");
 
-// let NetworkChain = "goerli";  // Eth
-let NetworkChain = "nile";
-let Blockchain = "tron";
 function CreateWhitelist(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
+
   const [deployedAddress, setDeployedAddress] = useState(null);
   const [loader, setLoader] = useState(false);
   const [formStage, setFormStage] = useState(1);
   const [whitelistFactoryContract, setWhitelistFactoryContract] =
     useState(null);
   const [whitelistTracker, setWhitelistTracker] = useState(null);
+
   const Web3ModalRef = useRef();
 
   /**  */
@@ -44,20 +53,20 @@ function CreateWhitelist(props) {
   }
 
   async function deployWhitelist(sale) {
-    let blockchain = sale?.blockchain;
-    blockchain = blockchain.toString().toLowerCase();
-    if (blockchain == "ethereum") {
+    let _Blockchain = sale?._Blockchain;
+    _Blockchain = _Blockchain.toString().toLowerCase();
+    if (_Blockchain == "ethereum") {
       setFormStage((prev) => prev + 1);
       setStatus("Creating Ethereum whitelist..");
       deployEthWhitelist(sale);
-    } else if (blockchain == "tron") {
+    } else if (_Blockchain == "tron") {
       let connectedUser = await tronConnect();
       console.log("connected address is ", connectedUser);
 
       setFormStage((prev) => prev + 1);
       setStatus("Creating Tron whitelist..");
       deployTronWhitelist(sale, connectedUser);
-    } else if (blockchain == "polygon") {
+    } else if (_Blockchain == "polygon") {
       setFormStage((prev) => prev + 1);
       setStatus("Creatibg Polygon whitelist..");
     }
@@ -78,22 +87,22 @@ function CreateWhitelist(props) {
     console.log("calling tron deployer");
     setStatus("Starting tron Deployment..");
     let deployedAddress = await deploy_tron_contract(
-      NetworkChain,
+      _NetworkChain,
       abi,
       bytecode,
       paramters,
-      setStatus,successFallback
+      setStatus,
+      successFallback
     );
-    async function successFallback(deployedAddress,owner){
+    async function successFallback(deployedAddress, owner) {
       console.log("deployed address is ", deployedAddress);
       await trackTronWhitelistDeployment(deployedAddress, owner);
     }
-    
   }
   async function trackTronWhitelistDeployment(contractAddress, owner) {
     let trackerAddress = null;
     console.log("tracker is ", trackerAddress);
-    if (NetworkChain == "nile") {
+    if (_NetworkChain == "nile") {
       trackerAddress = whitelistTrackerTronNileAddress;
     }
     console.log("tracker is ", trackerAddress);
@@ -119,13 +128,12 @@ function CreateWhitelist(props) {
 
   function deployEthWhitelist(Sale) {
     async function deploy(sale) {
-      let factory = getBlockchainSpecificWhitelistFactoryContract(
-        Blockchain,
-        NetworkChain,
+      let factory = await getBlockchainSpecificWhitelistFactoryContract(
+        _Blockchain,
+        _NetworkChain,
         Web3ModalRef
       );
-      console.log("factory", factory);
-      console.log("creating instance");
+      
       const contract = await factory.deploy(
         sale.name,
         sale.symbol,
@@ -157,14 +165,15 @@ function CreateWhitelist(props) {
   }
 
   async function trackEthWhitelistDeployment(contractAddress, owner) {
-    let contract = await getBlockchainSpecificWebsiteRentContract(
-      Blockchain,
-      NetworkChain,
+    let contract = await getBlockchainSpecificWhitelistTrackerContract(
+      _Blockchain,
+      _NetworkChain,
       Web3ModalRef
     );
     console.log("Calling add user on on", {
       owner,
       contractAddress,
+      contract,
     });
     let tx = await contract.addUserWhitelist(owner, contractAddress);
     setStatus("Waiting for Transaction Completion..");
@@ -180,22 +189,19 @@ function CreateWhitelist(props) {
   }
 
   async function init() {
-    getCustomNetworkWhitelistContract(NetworkChain, Web3ModalRef)
-      .then(async (contract) => {
-        console.log("factory is ", contract);
-        setWhitelistFactoryContract(contract);
-      })
-      .catch((e) => {
-        console.log("error  in obtaining the contract ");
-      });
-    getCustomNetworkWhitelistTrackerContract(NetworkChain, Web3ModalRef)
-      .then(async (contract) => {
-        console.log("tracker is ", contract);
-        setWhitelistTracker(contract);
-      })
-      .catch((e) => {
-        console.log("error  in obtaining the contract ");
-      });
+    // for ethereum
+      
+  }
+  function RefreshToNewBlockchain() {
+    setNetworkChain(_NetworkChain);
+    setBlockchain(_Blockchain);
+    
+    init();
+
+    // console.log("calling init");
+  }
+  if (_Blockchain != Blockchain) {
+    RefreshToNewBlockchain();
   }
 
   useEffect(() => {
@@ -207,7 +213,7 @@ function CreateWhitelist(props) {
       {formStage == 1 && (
         <HStack height={"100%"}>
           <Sale
-            _blockchain={Blockchain}
+            _blockchain={_Blockchain}
             saleType={"whitelist"}
             deploySale={deployWhitelist}
           />
@@ -229,7 +235,7 @@ function CreateWhitelist(props) {
           <VStack
             spacing={2}
             style={{
-              width: "40vw",
+              width: "30vw",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -246,7 +252,7 @@ function CreateWhitelist(props) {
       }
       {deployedAddress !== null && (
         <SuccessfulDeployment
-          network={NetworkChain}
+          network={_NetworkChain}
           address={deployedAddress}
         />
       )}

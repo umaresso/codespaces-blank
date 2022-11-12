@@ -14,6 +14,7 @@ import FilterMenuItem from "./components/FilterMenuItem";
 import { useRef } from "react";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import {
+  getBlockchainSpecificNFTTracker,
   getCustomNetworkNFTFactoryContract,
   getCustomNetworkNFTTrackerContract,
   getNftPrice,
@@ -28,11 +29,7 @@ import {
 import NftInformationPopup from "./components/NftInformationPopup";
 import NftDetails from "./components/NftDetails";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
-
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain = "tron";
+import { useSelector } from "react-redux";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -42,41 +39,64 @@ export async function getStaticProps(context) {
 }
 
 function ExploreNfts(props) {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
+  console.log("exploreNFT:the blockchain is ", selectedBlockchainInformation);
   const [currentMenu, setCurrentMenu] = useState("all");
   const [walletAddress, setWalletAddress] = useState(null);
   const [selectedNft, setSelectedNft] = useState(null);
   const [NftRentingTracker, setNftRentingTracker] = useState(null);
   const [loading, setLoading] = useState(false);
   const [NFTs, setNFTs] = useState([]);
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain,setNetworkChain]=useState(null);
   let filteredNfts = [];
   let web3ModalRef = useRef();
   async function connectWallet() {
-    getProviderOrSigner(NetworkChain, web3ModalRef, true).then((signer) => {
-      if (signer) {
-        signer.getAddress().then((user) => {
-          setWalletAddress(user);
-        });
-      }
-    });
-  }
-  async function init() {
     let _user = await getCurrentConnectedOwner(
       Blockchain,
       NetworkChain,
-      web3ModalRef,
-      setWalletAddress
-    );
-
-    if (!walletAddress) return;
-    let allNFTs = [];
-    let trackerContract = await getCustomNetworkNFTTrackerContract(
-      NetworkChain,
       web3ModalRef
     );
-    
-    //  console.log("Tracker contract is ",trackerContract);
-    let contractsArray = await getAllContractAddressess(trackerContract);
+    setWalletAddress(_user);
+  //  console.log("user from connectwallet", _user);
+  }
+  function RefreshToNewBlockchain() {
+    setLoading(true)
+    setNetworkChain(_NetworkChain)
+    setBlockchain(_Blockchain);
+    setNFTs([]);
+    console.log("calling init");
+    init();
+  
+  }
+
+  async function init() {
+    await connectWallet();
+    if (!walletAddress) return;
+    let allNFTs = [];
+    //console.log({ Blockchain, NetworkChain, web3ModalRef });
+    let trackerContract = await getBlockchainSpecificNFTTracker(
+      _Blockchain,
+      _NetworkChain,
+      web3ModalRef
+    );
+
+//    console.log("Tracker contract is ", trackerContract);
+    let contractsArray = await getAllContractAddressess(
+      trackerContract,
+      null,
+      _Blockchain,
+      _NetworkChain
+    );
     // console.log("Contracts to read from", contractsArray);
+    if (!contractsArray || contractsArray.length == 0) {
+      return 0;
+    }
     let allContractsTokens = await getAllContractTokens(trackerContract);
     // console.log("All contract tokens are ", allContractsTokens);
 
@@ -92,7 +112,7 @@ function ExploreNfts(props) {
         contractAddress
       );
       let rentableContractInstance = await getCustomNetworkNFTFactoryContract(
-        NetworkChain,
+        _NetworkChain,
         web3ModalRef,
         rentableContractAddress
       );
@@ -150,7 +170,9 @@ function ExploreNfts(props) {
   useEffect(() => {
     init();
   }, [walletAddress]);
-
+  if (_Blockchain != Blockchain) {
+    RefreshToNewBlockchain();
+  }
   // console.log("NFTs are", NFTs);
   let filtered = [];
   filteredNfts = [];
@@ -169,7 +191,7 @@ function ExploreNfts(props) {
     filteredNfts = [...NFTs];
   }
 
-  console.log("filtered NFT are", filteredNfts);
+  //  console.log("filtered NFT are", filteredNfts);
 
   return (
     <>

@@ -22,6 +22,7 @@ export const tronConnect = async () => {
   } catch (err) {
     console.log("Error: ", err);
     alert("Error: TronLink extension is not installed");
+    return null;
   }
 };
 
@@ -46,7 +47,7 @@ export function getNileTronWeb() {
   const privateKey =
     "9c0bebe2250a767277e0cd5d849d9de28e7bf6353c45b198af6174f355a80ca6";
   let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-  console.log("returning tron nile web", tronWeb);
+  // console.log("returning tron nile web", tronWeb);
   return tronWeb;
 }
 
@@ -59,7 +60,7 @@ export async function getNetworkTronweb(network) {
       return getTronwebShasta();
     case "nile":
       let trwb = await getNileTronWeb();
-      console.log("Network returns ", trwb);
+      // console.log("Network returns ", trwb);
       return trwb;
     case "mainnet":
       return getTronwebMainnet();
@@ -79,7 +80,7 @@ export async function deploy_tron_contract(
 ) {
   try {
     let tronWeb = await getNetworkTronweb(network);
-    console.log("tronweb inside deploy ", tronWeb);
+    // console.log("tronweb inside deploy ", tronWeb);
     statusUpdater("Creting contract instance..");
     statusUpdater("Deploying your smart contract");
     console.log("paramters received ", parameters);

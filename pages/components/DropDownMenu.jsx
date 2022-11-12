@@ -1,5 +1,12 @@
 import React, { useEffect } from "react";
-import { Menu, MenuItem, MenuButton, MenuList, Button } from "@chakra-ui/react";
+import {
+  Menu,
+  MenuItem,
+  MenuButton,
+  MenuList,
+  Button,
+  color,
+} from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { useState } from "react";
 
@@ -7,7 +14,13 @@ function DropDownMenu(props) {
   let title = props.title;
   let options = props.options;
   let selector = props.selector;
-  let theme = { background: "white", textColor: "black" };
+  let textMenu = props.textMenu;
+  let theme = props.theme;
+  if (!theme) theme = { background: "white", textColor: "black" };
+  let _hoverTheme = {
+    background: theme.textColor,
+    textColor: theme.background,
+  };
   let selected = props.selected;
   function getMinimalAddress() {
     let adr = props.selected;
@@ -16,30 +29,37 @@ function DropDownMenu(props) {
   }
 
   useEffect(() => {
-  selector(selected);
-    
-  }, [])
-  
+    selector(selected);
+  }, []);
+
   return (
-    <Menu colorScheme={"green"}>
+    <Menu  colorScheme={textMenu?"blue":"green"} >
       <MenuButton
+        textTransform={textMenu ? "capitalize" : "none"}
         {...theme}
-        width={"100%"}
-        _hover={theme}
-        _active={theme}
+        width={textMenu ? "fit-content" : "100%"}
+        _hover={_hoverTheme}
         as={Button}
+        _active={theme} _focus={theme}
         rightIcon={<ChevronDownIcon />}
       >
-        { getMinimalAddress()}
+        {textMenu ? selected : getMinimalAddress()}
       </MenuButton>
       {options !== undefined && (
         <MenuList {...theme}>
           {options?.map((option, index) => {
             return (
               <MenuItem
+                fontWeight={textMenu?"500":"normal"}
                 key={"menu_" + option + index}
-                _hover={theme}
-                _active={theme}
+                textTransform={textMenu ? "capitalize" : "none"}
+                _hover={{
+                  background: "black",
+                  color: "white",
+                }}
+                _active={{
+                  background: "transparent",
+                }}
                 _selected={selected == option}
                 onClick={() => selector(option)}
               >

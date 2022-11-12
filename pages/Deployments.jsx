@@ -12,18 +12,15 @@ import { fetchSales } from "../data/Sale";
 import DeploymentCard from "./components/DeploymentCard";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { tronConnect } from "../data/TronAccountsManagement";
-/**
- *
- * Blockchain Things
- */
-
-//  let NetworkChain = "goerli";
-// let Blockchain="ethereum"
-
-let NetworkChain = "nile";
-let Blockchain = "tron";
+import { useSelector } from "react-redux";
 
 function Deployments() {
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+
   const [loading, setLoading] = useState("");
 
   const [whitelistDeployments, setWhitelistDeployments] = useState([]);
@@ -32,12 +29,18 @@ function Deployments() {
   const [totalSaleCount, setTotalSaleCount] = useState(0);
   const [selectedDeployment, setSelectedDeployment] = useState(null);
   const [owner, setOwner] = useState(null);
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
+
   const Web3ModalRef = useRef();
 
   async function init() {
-    if (Blockchain == "ethreum") {
+    setWhitelistDeployments([]);
+    setSaleDeployments([]);
+
+    if (_Blockchain == "ethereum") {
       console.log("Ethereum Fetch...");
-      getProviderOrSigner(NetworkChain, Web3ModalRef, true).then((signer) => {
+      getProviderOrSigner(_NetworkChain, Web3ModalRef, true).then((signer) => {
         signer
           ?.getAddress()
           .then(async (user) => {
@@ -46,17 +49,28 @@ function Deployments() {
           })
           .catch(console.log);
       });
-    } else if (Blockchain == "tron") {
+    } else if (_Blockchain == "tron") {
       console.log("Tron Fetch...");
       let ownerAddress = await tronConnect();
       console.log("Tron connected with address :", ownerAddress);
       fetchUserDeployments(ownerAddress);
       setOwner(ownerAddress);
-    } else if (Blockchain == "polygon") {
+    } else if (_Blockchain == "polygon") {
     } else {
       alert("Invalid Blockchain" + Blockchain);
     }
   }
+
+  function RefreshToNewBlockchain() {
+    setLoading(true)
+    init();
+    
+    setNetworkChain(_NetworkChain);
+    setBlockchain(_Blockchain);
+    // console.log("calling init");
+    
+  }
+
   useEffect(() => {
     init();
   }, []);
@@ -64,21 +78,24 @@ function Deployments() {
   async function fetchUserDeployments(_owner) {
     setLoading(true);
     await fetchWhitelists(
-      NetworkChain,
+      _NetworkChain,
       Web3ModalRef,
       _owner,
       setWhitelistDeployments,
-      Blockchain
+      _Blockchain
     );
     await fetchSales(
-      NetworkChain,
+      +NetworkChain,
       Web3ModalRef,
       _owner,
       setSaleDeployments,
-      Blockchain
+      _Blockchain
     );
 
     setLoading(false);
+  }
+  if (_Blockchain != Blockchain) {
+    RefreshToNewBlockchain();
   }
 
   return (

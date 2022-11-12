@@ -6,13 +6,14 @@ import { Grid } from "@chakra-ui/react";
 import { VStack, Stack } from "@chakra-ui/react";
 import { getProviderOrSigner } from "../../../data/accountsConnection";
 import { getCurrentConnectedOwner } from "../../../data/blockchainSpecificExports";
-// let NetworkChain = "goerli";
-// let Blockchain="ethereum";
-let NetworkChain = "nile";
-let Blockchain="tron";
+import { useSelector } from "react-redux";
 
 function Introduction() {
-  // theme
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
 
   let bg = "black";
   let textColor = "white";
