@@ -22,8 +22,11 @@ function Sale(props) {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
-  let Blockchain = selectedBlockchainInformation.name;
-  let NetworkChain = selectedBlockchainInformation.network;
+  let _Blockchain = selectedBlockchainInformation.name;
+  let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
+  const [Blockchain, setBlockchain] = useState(null);
+  const [NetworkChain, setNetworkChain] = useState(null);
 
   let bg = "black";
   let textColor = "white";
@@ -36,7 +39,6 @@ function Sale(props) {
   const [owner, setOwner] = useState(null);
   const [baseURI, setBaseURI] = useState(props._baseURI);
   const [maxWhitelists, setMaxWhitelists] = useState(null);
-  const [blockchain, setBlockchain] = useState(props._blockchain);
   const [metadataContract, setMetadataContract] = useState(null);
   const router = useRouter();
   let Web3ModalRef = useRef();
@@ -51,9 +53,9 @@ function Sale(props) {
       symbol,
       saleSupply,
       maxWhitelists,
-      owner,
+      owner:connectedAddress,
       baseURI,
-      blockchain,
+      _Blockchain,
       startTime: parseInt(startTime / 1000),
       endTime: parseInt(endTime / 1000),
     };
@@ -62,9 +64,26 @@ function Sale(props) {
   }
 
   useEffect(() => {
-    getCurrentConnectedOwner(Blockchain, NetworkChain, Web3ModalRef, setOwner);
+    getCurrentConnectedOwner(_Blockchain, NetworkChain, Web3ModalRef, setOwner);
   }, []);
+  async function RefreshToNewBlockchain() {
+    setBlockchain(_Blockchain);
+    setNetworkChain(_NetworkChain);
 
+    if (!connectedAddress) {
+      let user = await getCurrentConnectedOwner(
+        _Blockchain,
+        _NetworkChain,
+        Web3ModalRef
+      );
+      setOwner(user);
+    } else setOwner(connectedAddress);
+
+    // console.log("calling init");
+  }
+  if (_Blockchain != Blockchain) {
+    RefreshToNewBlockchain();
+  }
   return (
     <Card>
       <Box
@@ -164,8 +183,8 @@ function Sale(props) {
               variant="outline"
               // defaultValue={""}
               // placeholder={"Ethereum , Tron or Polygon"}
-              value={blockchain ? blockchain : null}
-              disabled={blockchain ? true : false}
+              value={Blockchain ? Blockchain : null}
+              disabled={Blockchain ? true : false}
             />
           </NamedInput>
 

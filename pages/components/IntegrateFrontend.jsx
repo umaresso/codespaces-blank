@@ -13,7 +13,6 @@ import { getBlockchainSpecificWebsiteRentContract } from "../../data/Whitelist";
 import { addScaleCorrector } from "framer-motion";
 import { useSelector } from "react-redux";
 
-
 function IntegrateFrontend(props) {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
@@ -65,16 +64,8 @@ function IntegrateFrontend(props) {
       }
       setStatus("Making Dapp Rent Transaction");
       setStatus("Approve Transaction !");
-      var options = {
-        gasLimit: 3000000,
-      };
-      console.log("renting with ", {
-        websiteURL,
-        selectedDeployment,
-        days,
-      });
       if (Blockchain == "tron") {
-        console.log("Transaction in progress..")
+        setStatus("Transaction in progress..");
         let tx = await websiteRentContract
           .rentDapp(websiteURL, selectedDeployment, days)
           .send({
@@ -87,6 +78,10 @@ function IntegrateFrontend(props) {
         setStatus("SuccessFully Rented 🥳");
       } else if (Blockchain == "ethereum") {
         setStatus("Waiting for Transaction Completion");
+        let options = {
+          gasLimit: 3000000,
+          value: parseEther(price.toString()) ,
+        };
 
         let tx = await websiteRentContract.rentDapp(
           websiteURL,
@@ -97,13 +92,14 @@ function IntegrateFrontend(props) {
         setStatus("Tx Hash is " + getMinimalAddress(tx.hash.toString()));
         await tx.wait();
         setStatus("FrontEnd is Integrated🎉");
+
       } else if (Blockchain == "polygon") {
         // yet to implement
       } else {
         return null;
       }
     } catch (e) {
-      alert("Dapp renting failed , console for erros");
+      alert("Dapp renting failed , console for errors");
       console.log("Dapp rent failed ", e);
     }
   }

@@ -37,6 +37,7 @@ function ExploreDapps(props) {
   );
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
 
   const [currentMenu, setCurrentMenu] = useState("all");
   const [selectedDapp, setSelectedDapp] = useState(null);
@@ -52,21 +53,21 @@ function ExploreDapps(props) {
 
   let web3ModalRef = useRef();
 
-  async function fetchUserDeployments(Owner) {
+  async function fetchUserDeployments() {
     setLoader(true);
-    await fetchWhitelists(
-      NetworkChain,
+    let wh = await fetchWhitelists(
+      _NetworkChain,
       web3ModalRef,
-      Owner,
+      connectedAddress,
       setWhitelistDeployments,
-      Blockchain
+      _Blockchain
     );
     await fetchSales(
-      NetworkChain,
+      _NetworkChain,
       web3ModalRef,
-      Owner,
+      connectedAddress,
       setSaleDeployments,
-      Blockchain
+      _Blockchain
     );
     setLoader(false);
   }
@@ -87,7 +88,7 @@ function ExploreDapps(props) {
   /**      */
   async function init() {
     setDappCids([]);
-
+    setAllDapps([]);
     await getCurrentConnectedOwner(
       _Blockchain,
       _NetworkChain,
@@ -95,8 +96,8 @@ function ExploreDapps(props) {
       setOwner
     );
 
-    if (!owner) return null;
-    await fetchUserDeployments(owner);
+    if (!owner && !connectedAddress) return null;
+    await fetchUserDeployments(connectedAddress);
 
     let contract = await getBlockchainSpecificWebsiteRentContract(
       _Blockchain,
@@ -129,15 +130,13 @@ function ExploreDapps(props) {
   }
 
   function RefreshToNewBlockchain() {
-    setAllDapps([]);
     setLoader(true);
-    
+    setOwner(connectedAddress);
     init();
-    
+
     setNetworkChain(_NetworkChain);
     setBlockchain(_Blockchain);
     // console.log("calling init");
-    
   }
 
   let filteredDapps = [];
@@ -148,11 +147,16 @@ function ExploreDapps(props) {
     }
   });
 
-//  console.log("Filtered Dapps are ", filteredDapps);
+  //  console.log("Filtered Dapps are ", filteredDapps);
 
   return (
     <>
-      <VStack height={"fit-content"} minH={"100vh"} bg="black" textColor={"white"}>
+      <VStack
+        height={"fit-content"}
+        minH={"100vh"}
+        bg="black"
+        textColor={"white"}
+      >
         <Center>
           <VStack>
             <Heading paddingTop={"10vh"} fontSize={"4.5em"} width={"60vw"}>

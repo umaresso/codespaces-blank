@@ -256,7 +256,7 @@ export const WebsiteRentBytecode = {
 }
 // Ethereum 
 // Goerli Network Deployed Address
-export const WebsiteRentAddress = "0x5ff709DF67141512784BdD91F747F531149DE284"; 
+export const WebsiteRentAddress = "0x70f980ceaC3EF0b4aeA1F10AFAb9dbAF37103Da1"; 
 // Tron 
 // Nile
 export const WebsiteRentNileAddress="TH8Ta1VMokE1GRtYHCv2E14QfHfipbcFwh";
@@ -287,7 +287,8 @@ export const getCustomNetworkWebsiteRentContract=async (network,web3modalRef,con
 try{
 	// console.log("connection for ",{network,web3modalRef})
 	let signer = await getProviderOrSigner(network,web3modalRef,true);
-const websiteRentContract = new ethers.Contract(
+	if(!signer) return null;
+	const websiteRentContract = new ethers.Contract(
 	WebsiteRentAddress,
 	WebsiteRentABI,
 	signer

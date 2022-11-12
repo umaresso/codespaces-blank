@@ -500,7 +500,7 @@ export const fetchWhitelists = async (
     arraySetter,
     Blockchain
   );
-  // console.log("all whitelists are ", whitelists);
+  console.log("all whitelists are ", whitelists);
   let allWhitelists = [];
   // console.log("iterating over");
   whitelists.map(async (_whitelist, index) => {
@@ -514,11 +514,11 @@ export const fetchWhitelists = async (
     let hostedWebsite;
     let rentTime;
     if (Blockchain == "tron") {
-      // console.log("checking website for ", _whitelist);
+      console.log("checking website for ", _whitelist);
       hostedWebsite = await websiteRentContract
         .deploymentToWebsite(_whitelist)
         .call();
-      // console.log("hosted website", hostedWebsite);
+      console.log("hosted website", hostedWebsite);
 
       rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
     } else if (!Blockchain || Blockchain == "ethereum") {
