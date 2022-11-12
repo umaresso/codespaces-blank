@@ -124,6 +124,7 @@ function CreateWhitelist(props) {
     setStatus("Transaction Completed ✅");
 
     setDeployedAddress(contractAddress);
+    
   }
 
   function deployEthWhitelist(Sale) {

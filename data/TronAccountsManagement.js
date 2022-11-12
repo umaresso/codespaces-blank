@@ -44,7 +44,12 @@ export function getNileTronWeb() {
   const fullNode = new HttpProvider("https://api.nileex.io/");
   const solidityNode = new HttpProvider("https://api.nileex.io/");
   const eventServer = new HttpProvider("https://event.nileex.io/");
-  let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
+  let tronWeb = new TronWeb(
+    fullNode,
+    solidityNode,
+    eventServer,
+    tronPrivateKey
+  );
   // console.log("returning tron nile web", tronWeb);
   return tronWeb;
 }
@@ -77,7 +82,6 @@ export async function deploy_tron_contract(
   SuccessFallback
 ) {
   try {
-    
     let tronWeb = await getNetworkTronweb(network);
     // console.log("tronweb inside deploy ", tronWeb);
     statusUpdater("Creting contract instance..");
@@ -100,15 +104,17 @@ export async function deploy_tron_contract(
     SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
+    if (e.message.toString().includes('insufficient')) {
+      alert("You do not have enough bandwidth and energy to deploy whitelist");
+      
+    } else alert("Whitelist Creation Unsuccessful");
     console.log("error : ", e);
   }
 }
 
-
-export const getCurrentUserTronWeb=async ()=>{
+export const getCurrentUserTronWeb = async () => {
   let tronlink = await window.tronLink;
   await tronlink.request({ method: "tron_requestAccounts" });
   let tronWeb = await tronlink?.tronWeb;
   return tronWeb;
-
-}
+};
