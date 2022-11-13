@@ -210,7 +210,10 @@ function ExploreDapps(props) {
             padding={"10px"}
             transition={"display 900ms ease-in-out"}
             spacing={10}
-            align={"center"}
+            justify={"center"}
+            width={"100vw"}
+
+            
           >
             {filteredDapps?.map((item, index) => {
               return (
