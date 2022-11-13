@@ -50,11 +50,12 @@ function ExploreDapps(props) {
   const [websiteRentContract, setWebsiteRentContract] = useState(null);
   const [Blockchain, setBlockchain] = useState(null);
   const [NetworkChain, setNetworkChain] = useState(null);
-
+  const [noDapps, setNoDapps] = useState(false);
   let web3ModalRef = useRef();
 
   async function fetchUserDeployments() {
-    setLoader(true);
+    setLoader((prev) => prev != true && true);
+
     let wh = await fetchWhitelists(
       _NetworkChain,
       web3ModalRef,
@@ -69,7 +70,7 @@ function ExploreDapps(props) {
       setSaleDeployments,
       _Blockchain
     );
-    setLoader(false);
+    setLoader((prev) => prev != false && false);
   }
 
   /**
@@ -107,7 +108,11 @@ function ExploreDapps(props) {
 
     let cids = await getAllDappsUris(contract, setDappCids, _Blockchain);
     if (cids.length == 0) {
-      setLoader(false);
+      setAllDapps([]);
+      setDappCids([]);
+      setLoader((prev) => prev != false && false);
+      setNoDapps(true);
+      return null;
     } else {
       await fetchDappsContent(
         cids,
@@ -115,8 +120,9 @@ function ExploreDapps(props) {
         _NetworkChain,
         web3ModalRef,
         _Blockchain
-      );
-      setLoader(false);
+      ).then((res) => {
+        setLoader((prev) => prev != false && false);
+      });
     }
 
     setWebsiteRentContract(contract);
@@ -124,16 +130,15 @@ function ExploreDapps(props) {
 
   useEffect(() => {
     init();
-  }, [owner]);
+  }, []);
   if (_Blockchain != Blockchain) {
     RefreshToNewBlockchain();
   }
 
   function RefreshToNewBlockchain() {
-    setLoader(true);
+    setLoader((prev) => prev != true && true);
     setOwner(connectedAddress);
     init();
-
     setNetworkChain(_NetworkChain);
     setBlockchain(_Blockchain);
     // console.log("calling init");
@@ -141,7 +146,7 @@ function ExploreDapps(props) {
 
   let filteredDapps = [];
 
-  allDapps.map((item) => {
+  allDapps?.map((item) => {
     if (item.type == currentMenu || currentMenu == "all") {
       filteredDapps.push(item);
     }
@@ -194,7 +199,7 @@ function ExploreDapps(props) {
             isClicked={currentMenu === "sale"}
           />
         </HStack>
-        {filteredDapps?.length > 0 ? (
+        {!loader && filteredDapps?.length > 0 ? (
           <Wrap
             padding={"10px"}
             transition={"display 900ms ease-in-out"}
@@ -250,8 +255,8 @@ function ExploreDapps(props) {
           </Wrap>
         ) : (
           <Heading fontSize={"24px"} height={"50vh"}>
-            {loader && "Loading Available Dapps"}
-            {!loader && dappCids.length == 0 && "No Dapps Available"}
+            {loader && !noDapps && "Loading Available Dapps"}
+            {!loader && noDapps && "No Available Dapps"}
           </Heading>
         )}
       </VStack>
