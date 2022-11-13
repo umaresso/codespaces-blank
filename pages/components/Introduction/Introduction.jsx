@@ -21,8 +21,7 @@ function Introduction() {
   let web3ModalRef = useRef();
 
   async function Connect() {
-    getCurrentConnectedOwner(Blockchain,NetworkChain,web3ModalRef);
-
+    await getCurrentConnectedOwner(Blockchain, NetworkChain, web3ModalRef);
   }
 
   return (
@@ -34,8 +33,10 @@ function Introduction() {
       paddingBottom={10}
       paddingTop={10}
     >
-      <Stack           spacing={[50,30,30,10]}
- direction={["column", "column", "column", "row"]}>
+      <Stack
+        spacing={[50, 30, 30, 10]}
+        direction={["column", "column", "column", "row"]}
+      >
         <VStack
           align={"left"}
           padding={20}
@@ -43,7 +44,7 @@ function Introduction() {
           spacing={5}
           width={["100%", "100%", "100%", "60%"]}
           // paddingTop={["40vh", "40vh", "0vh"]}
-        paddingTop={"15vh"}
+          paddingTop={"15vh"}
         >
           <Heading
             fontSize={["2em", "4em", "5em"]}
@@ -85,9 +86,14 @@ function Introduction() {
           </HStack>
         </VStack>
 
-        <VStack paddingTop={["5vh","2vh","2vh","0"]} bg={"black"} justifyContent={"center"} height={"100vh"}>
+        <VStack
+          paddingTop={["5vh", "2vh", "2vh", "0"]}
+          bg={"black"}
+          justifyContent={"center"}
+          height={"100vh"}
+        >
           <Img
-            height={["90vh","80vh","fit-content"]}
+            height={["90vh", "80vh", "fit-content"]}
             width={"90%"}
             border={"10px solid black"}
             borderRadius={"40px"}

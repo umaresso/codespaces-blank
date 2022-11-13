@@ -28,6 +28,7 @@ function Navbar() {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
+  const connectedAddress=selectedBlockchainInformation.address;
   // console.log(selectedBlockchainInformation)
   const web3ModalRef = useRef();
   let connectionCheckerId = 0;
@@ -67,7 +68,8 @@ function Navbar() {
     // if (!walletAddress) {
     //   Connect();
     // }
-    changeBlockchain(selectedBlockchain)
+    
+    Connect();
   }, []);
 
   function getMinimalAddress(_adr) {

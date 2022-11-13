@@ -13,6 +13,7 @@ import DeploymentCard from "./components/DeploymentCard";
 import { getProviderOrSigner } from "../data/accountsConnection";
 import { tronConnect } from "../data/TronAccountsManagement";
 import { useSelector } from "react-redux";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 
 function Deployments() {
   const selectedBlockchainInformation = useSelector(
@@ -35,6 +36,7 @@ function Deployments() {
   const Web3ModalRef = useRef();
 
   async function init() {
+    await getCurrentConnectedOwner(_Blockchain, _NetworkChain, Web3ModalRef);
     whitelistDeployments.length != 0 && setWhitelistDeployments([]);
     saleDeployments.length != 0 && setSaleDeployments([]);
     if (!connectedAddress) return null;
@@ -42,7 +44,7 @@ function Deployments() {
   }
 
   function RefreshToNewBlockchain() {
-    loading!=true && setLoading(true);
+    loading != true && setLoading(true);
     whitelistDeployments.length != 0 && setWhitelistDeployments([]);
     saleDeployments.length != 0 && setSaleDeployments([]);
 
@@ -73,8 +75,9 @@ function Deployments() {
       Web3ModalRef,
       connectedAddress,
       setSaleDeployments,
-      _Blockchain,()=>{
-        setLoading(false)
+      _Blockchain,
+      () => {
+        setLoading(false);
       }
     );
   }
