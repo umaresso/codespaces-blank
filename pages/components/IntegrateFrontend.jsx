@@ -44,7 +44,7 @@ function IntegrateFrontend(props) {
 
   async function integrate() {
     setFormStep((prev) => prev + 1);
-    setStatus("Renting Statrted ✔ ");
+    setStatus("Renting Started ✔ ");
     setStatus("Assembling arguments for upload ..");
     // need metamask sign on transaction
     let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
@@ -67,6 +67,7 @@ function IntegrateFrontend(props) {
       setStatus("Approve Transaction !");
       if (Blockchain == "tron") {
         setStatus("Transaction in progress..");
+        console.log({websiteURL, selectedDeployment, days})
         let tx = await websiteRentContract
           .rentDapp(websiteURL, selectedDeployment, days)
           .send({

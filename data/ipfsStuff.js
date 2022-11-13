@@ -39,7 +39,7 @@ export const getTokenMetadata = async (tokenUriHash) => {
   let tokenUri = embedGateway(tokenUriHash);
   const response = await axios.get(tokenUri);
   let metadata = response.data;
-// console.log("metadata inside ipfs fetch is ", metadata);
+  // console.log("metadata inside ipfs fetch is ", metadata);
   return metadata;
 };
 
@@ -76,6 +76,7 @@ export const fetchDappsContent = async (
     const response = await axios.get(_link);
     let dapp = response.data;
     dapp.image = getImageLinkFromIPFS(dapp.image);
+    // console.log("dapp is ", dapp);
     if (dapp.url) {
       let renttime, rentPrice;
       if (Blockchain == "tron") {
@@ -100,8 +101,8 @@ export const fetchDappsContent = async (
     // console.log("dapp is ", dapp);
     dappArray.push(dapp);
 
-    if (setter != undefined && index + 1 == Cids.length) {
-      setter(dappArray);
+    if (index + 1 == Cids.length) {
+      if (setter) setter(dappArray);
       return dappArray;
     }
   });

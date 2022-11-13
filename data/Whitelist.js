@@ -410,7 +410,7 @@ export async function getBlockchainSpecificWebsiteRentContract(
   let websiteRentContract = null;
   if (Blockchain == "tron") {
     websiteRentContract = await getTronWebsiteRentContract(NetworkChain);
-    console.log({websiteRentContract})
+    console.log({ websiteRentContract });
     return websiteRentContract;
   } else if (!Blockchain || Blockchain == "ethereum") {
     websiteRentContract = await getCustomNetworkWebsiteRentContract(
@@ -501,7 +501,7 @@ export const fetchWhitelists = async (
     arraySetter,
     Blockchain
   );
-  console.log("all whitelists are ", whitelists);
+  // console.log("all whitelists are ", whitelists);
   let allWhitelists = [];
   // console.log("iterating over");
   whitelists.map(async (_whitelist, index) => {
@@ -512,19 +512,35 @@ export const fetchWhitelists = async (
       _whitelist
     );
 
-    let hostedWebsite;
-    let rentTime;
+    let hostedWebsite = "";
+    let rentTime = 0;
     if (Blockchain == "tron") {
       // console.log("checking website for ", _whitelist);
       hostedWebsite = await websiteRentContract
         .deploymentToWebsite(_whitelist)
         .call();
-      // console.log("hosted website", hostedWebsite);
-
-      rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
+      if (hostedWebsite != "") {
+        let deployment = await websiteRentContract
+          .websiteToDeployment(hostedWebsite)
+          .call();
+        if (deployment.toString() !== _whitelist.toString()) {
+          hostedWebsite = "";
+        } else {
+          rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
+        }
+      }
     } else if (!Blockchain || Blockchain == "ethereum") {
       hostedWebsite = await websiteRentContract.deploymentToWebsite(_whitelist);
-      rentTime = await websiteRentContract.rentTime(hostedWebsite);
+      if (hostedWebsite != "") {
+        let deployment = await websiteRentContract.websiteToDeployment(
+          hostedWebsite
+        );
+        if (deployment.toString() !== _whitelist.toString()) {
+          hostedWebsite = "";
+        } else {
+          rentTime = await websiteRentContract.rentTime(hostedWebsite);
+        }
+      }
     } else if (Blockchain == "polygon") {
       // polygon pull
     } else {
@@ -558,7 +574,7 @@ export const fetchWhitelists = async (
       symbol,
       baseURI,
       address: _whitelist,
-      website: hostedWebsite === "" ? null : hostedWebsite,
+      website: hostedWebsite,
       users: whitelistedCount,
       startTime,
       endTime,
@@ -569,7 +585,6 @@ export const fetchWhitelists = async (
     allWhitelists.push(whitelistInstance);
     if (index + 1 == whitelists.length) {
       if (arraySetter != undefined) {
-        
         arraySetter(allWhitelists);
       }
     }
