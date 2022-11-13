@@ -347,7 +347,7 @@ export const whitelistTrackerByteCode = {
 // Ethereum
 // Goerli Network Deployed Address
 export const whitelistTrackerAddress =
-  "0x023C4FA23c25d3Ec5227E64593E65297F8eF8141";
+  "0x91c027c2d98d1292B7788A0b6962B8251bdF5724";
 
 // Tron
 // Nile
