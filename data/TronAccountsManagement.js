@@ -2,7 +2,7 @@ import TronWeb from "tronweb";
 import { getMinimalAddress } from "../Utilities";
 import { getCurrentConnectedOwner } from "./blockchainSpecificExports";
 const tronPrivateKey =
-  "88cd69e757d4ce34abbd4b6693b40a6417e20da9e28bf8955f3d76302f9b440c";
+  "70af1c481e52e89ae3bfb5c7a7b3b7a70b29897f558a30c3500099673c0b7277";
 
 export const tronConnect = async () => {
   try {
@@ -44,7 +44,12 @@ export function getNileTronWeb() {
   const fullNode = new HttpProvider("https://api.nileex.io/");
   const solidityNode = new HttpProvider("https://api.nileex.io/");
   const eventServer = new HttpProvider("https://event.nileex.io/");
-  let tronWeb = new TronWeb(fullNode, solidityNode, eventServer, tronPrivateKey);
+  let tronWeb = new TronWeb(
+    fullNode,
+    solidityNode,
+    eventServer,
+    tronPrivateKey
+  );
   // console.log("returning tron nile web", tronWeb);
   return tronWeb;
 }
@@ -77,12 +82,20 @@ export async function deploy_tron_contract(
   SuccessFallback
 ) {
   try {
-    
     let tronWeb = await getNetworkTronweb(network);
     // console.log("tronweb inside deploy ", tronWeb);
     statusUpdater("Creting contract instance..");
     statusUpdater("Deploying your smart contract");
-    console.log("paramters received ", parameters);
+    console.log("paramters received ", {
+      abi: abi,
+      bytecode: bytecode.object,
+      feeLimit: 1000000000,
+      callValue: 0,
+      userFeePercentage: 1,
+      originEnergyLimit: 10000000,
+      parameters: parameters,
+      shouldPollResponse: true,
+    });
     let contract_instance = await tronWeb.contract().new({
       abi: abi,
       bytecode: bytecode.object,
@@ -95,20 +108,23 @@ export async function deploy_tron_contract(
     });
     let scAddress = contract_instance.address;
     statusUpdater("Deployed Successfully 🥳 ");
-    let contract = await tronWeb.contract().at(scAddress);
     let currentConnectedUser = await tronConnect();
-    SuccessFallback(scAddress, currentConnectedUser);
+    if(SuccessFallback)
+      SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
+    if (e?.message?.toString().includes('insufficient')) {
+      alert("Platform does not have enough Energy to deploy contract");
+      
+    } else alert("Contract Creation Unsuccessful");
     console.log("error : ", e);
+    return null;
   }
 }
 
-
-export const getCurrentUserTronWeb=async ()=>{
+export const getCurrentUserTronWeb = async () => {
   let tronlink = await window.tronLink;
   await tronlink.request({ method: "tron_requestAccounts" });
   let tronWeb = await tronlink?.tronWeb;
   return tronWeb;
-
-}
+};

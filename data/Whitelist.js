@@ -347,7 +347,7 @@ export const whitelistTrackerByteCode = {
 // Ethereum
 // Goerli Network Deployed Address
 export const whitelistTrackerAddress =
-  "0x023C4FA23c25d3Ec5227E64593E65297F8eF8141";
+  "0x91c027c2d98d1292B7788A0b6962B8251bdF5724";
 
 // Tron
 // Nile
@@ -410,6 +410,7 @@ export async function getBlockchainSpecificWebsiteRentContract(
   let websiteRentContract = null;
   if (Blockchain == "tron") {
     websiteRentContract = await getTronWebsiteRentContract(NetworkChain);
+    console.log({websiteRentContract})
     return websiteRentContract;
   } else if (!Blockchain || Blockchain == "ethereum") {
     websiteRentContract = await getCustomNetworkWebsiteRentContract(
@@ -514,11 +515,11 @@ export const fetchWhitelists = async (
     let hostedWebsite;
     let rentTime;
     if (Blockchain == "tron") {
-      console.log("checking website for ", _whitelist);
+      // console.log("checking website for ", _whitelist);
       hostedWebsite = await websiteRentContract
         .deploymentToWebsite(_whitelist)
         .call();
-      console.log("hosted website", hostedWebsite);
+      // console.log("hosted website", hostedWebsite);
 
       rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
     } else if (!Blockchain || Blockchain == "ethereum") {
@@ -568,6 +569,7 @@ export const fetchWhitelists = async (
     allWhitelists.push(whitelistInstance);
     if (index + 1 == whitelists.length) {
       if (arraySetter != undefined) {
+        
         arraySetter(allWhitelists);
       }
     }

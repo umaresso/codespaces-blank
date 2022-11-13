@@ -76,7 +76,7 @@ function CreateWhitelist(props) {
       sale.name,
       sale.symbol,
       sale.maxWhitelists,
-      sale.owner,
+      connectedAddress,
       sale.baseURI,
       sale.saleSupply,
       sale.startTime,
@@ -124,6 +124,7 @@ function CreateWhitelist(props) {
     setStatus("Transaction Completed ✅");
 
     setDeployedAddress(contractAddress);
+    
   }
 
   function deployEthWhitelist(Sale) {
@@ -254,6 +255,7 @@ function CreateWhitelist(props) {
         <SuccessfulDeployment
           network={_NetworkChain}
           address={deployedAddress}
+          
         />
       )}
     </>

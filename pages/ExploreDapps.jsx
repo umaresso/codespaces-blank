@@ -8,6 +8,7 @@ import {
   Wrap,
   Center,
   WrapItem,
+  Button,
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import DappInformationPopup from "./components/DappInformationPopup";
@@ -23,6 +24,7 @@ import { useRef } from "react";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { useSelector } from "react-redux";
 import { set } from "lodash";
+import LinkButton from "./components/LinkButton/LinkButton";
 
 export async function getStaticProps(context) {
   require("dotenv").config();
@@ -38,24 +40,24 @@ function ExploreDapps(props) {
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
   let connectedAddress = selectedBlockchainInformation.address;
-
+  console.log(selectedBlockchainInformation);
   const [currentMenu, setCurrentMenu] = useState("all");
   const [selectedDapp, setSelectedDapp] = useState(null);
   const [allDapps, setAllDapps] = useState([]);
   const [dappCids, setDappCids] = useState([]);
   const [loader, setLoader] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState(null);
   const [whitelistDeployments, setWhitelistDeployments] = useState([]);
   const [saleDeployments, setSaleDeployments] = useState([]);
   const [owner, setOwner] = useState();
   const [websiteRentContract, setWebsiteRentContract] = useState(null);
   const [Blockchain, setBlockchain] = useState(null);
   const [NetworkChain, setNetworkChain] = useState(null);
-
+  const [noDapps, setNoDapps] = useState(false);
   let web3ModalRef = useRef();
 
   async function fetchUserDeployments() {
-    setLoader(true);
-    let wh = await fetchWhitelists(
+    await fetchWhitelists(
       _NetworkChain,
       web3ModalRef,
       connectedAddress,
@@ -87,61 +89,71 @@ function ExploreDapps(props) {
 
   /**      */
   async function init() {
-    setDappCids([]);
-    setAllDapps([]);
-    await getCurrentConnectedOwner(
-      _Blockchain,
-      _NetworkChain,
-      web3ModalRef,
-      setOwner
-    );
+    dappCids.length !== 0 && setDappCids([]);
+    allDapps.length !== 0 && setAllDapps([]);
+    loader != true && setLoader(true);
 
-    if (!owner && !connectedAddress) return null;
-    await fetchUserDeployments(connectedAddress);
+    if (!connectedAddress) {
+      console.log("returning ");
+      return null;
+    }
 
     let contract = await getBlockchainSpecificWebsiteRentContract(
       _Blockchain,
       _NetworkChain,
       web3ModalRef
     );
+    console.log("fetching user deployments");
+    await fetchUserDeployments(connectedAddress);
 
-    let cids = await getAllDappsUris(contract, setDappCids, _Blockchain);
-    if (cids.length == 0) {
-      setLoader(false);
-    } else {
-      await fetchDappsContent(
-        cids,
-        setAllDapps,
-        _NetworkChain,
-        web3ModalRef,
-        _Blockchain
-      );
-      setLoader(false);
-    }
+    console.log("fetching dapps ");
 
-    setWebsiteRentContract(contract);
+    await getAllDappsUris(contract, setDappCids, _Blockchain).then(
+      async (cids) => {
+        if (cids.length == 0) {
+          setLoadingMessage(null);
+          allDapps.length !== 0 && setAllDapps([]);
+          dappCids.length !== 0 && setDappCids([]);
+          loader != false && setLoader(false);
+
+          setNoDapps(true);
+          return null;
+        } else {
+          setLoadingMessage("Time to fetch Available Dapps");
+          await fetchDappsContent(
+            cids,
+            setAllDapps,
+            _NetworkChain,
+            web3ModalRef,
+            _Blockchain
+          );
+        }
+
+        setWebsiteRentContract(contract);
+      }
+    );
   }
 
   useEffect(() => {
     init();
-  }, [owner]);
-  if (_Blockchain != Blockchain) {
-    RefreshToNewBlockchain();
-  }
+  }, [_Blockchain]);
 
-  function RefreshToNewBlockchain() {
-    setLoader(true);
-    setOwner(connectedAddress);
-    init();
+  // if (_Blockchain != Blockchain) {
+  //   RefreshToNewBlockchain();
+  // }
 
-    setNetworkChain(_NetworkChain);
-    setBlockchain(_Blockchain);
-    // console.log("calling init");
-  }
+  // function RefreshToNewBlockchain() {
+  //   loader!=true && setLoader(true)
+  //   setOwner(connectedAddress);
+  //   init();
+  //   setNetworkChain(_NetworkChain);
+  //   setBlockchain(_Blockchain);
+  //   // console.log("calling init");
+  // }
 
   let filteredDapps = [];
 
-  allDapps.map((item) => {
+  allDapps?.map((item) => {
     if (item.type == currentMenu || currentMenu == "all") {
       filteredDapps.push(item);
     }
@@ -159,20 +171,19 @@ function ExploreDapps(props) {
       >
         <Center>
           <VStack>
-            <Heading paddingTop={"10vh"} fontSize={"4.5em"} width={"60vw"}>
-              Rent Awesome Dapps like You
+            <Heading paddingTop={"15vh"} fontSize={"4.5em"} width={"45vw"}>
+              Rent Best Dapps
             </Heading>
             <Text
               fontFamily={"sans-serif"}
               textColor={"grey"}
               fontSize={"18px"}
-              width={"60vw"}
+              width={"45vw"}
             >
               RentWeb3 provides you bunch of Dapps to rent for your NFT
-              Collection. Lorem ipsum dolor sit amet consectetur adipisicing
-              elit. Temporibus quas nulla consequatur fugiat ducimus ullam,
-              laboriosam mollitia adipisci asperiores nisi tempore. Beatae,
-              exercitationem rem? Minus nobis eaque iure temporibus quos.
+              Collection. Time to rent the most luxurative design wesbites for
+              showcasing your NFT collection. As a matter of fact , top designs
+              at low prices.So grab one.
             </Text>
           </VStack>
         </Center>
@@ -194,11 +205,12 @@ function ExploreDapps(props) {
             isClicked={currentMenu === "sale"}
           />
         </HStack>
-        {filteredDapps?.length > 0 ? (
+        {!loader && filteredDapps?.length > 0 ? (
           <Wrap
             padding={"10px"}
             transition={"display 900ms ease-in-out"}
             spacing={10}
+            align={"center"}
           >
             {filteredDapps?.map((item, index) => {
               return (
@@ -216,6 +228,7 @@ function ExploreDapps(props) {
                   <VStack key={"item" + item.name}>
                     <Img
                       width={["70vw", "60vw", "40vw"]}
+                      height={"30vh"}
                       objectFit={"contain"}
                       src={item.image}
                       borderRadius={"20px"}
@@ -224,23 +237,18 @@ function ExploreDapps(props) {
                       {" "}
                       <Text fontSize={"20px"}>{item.name}</Text>
                       {item.rented ? (
-                        <Text
-                          colorScheme={"white"}
+                        <LinkButton
+                          color={"blue"}
                           variant={"solid"}
                           disabled
-                          padding={"10px"}
-                        >
-                          Rented
-                        </Text>
+                          title={"Rented"}
+                        />
                       ) : (
-                        <Text
-                          padding={"10px"}
-                          colorScheme={"aqua"}
+                        <LinkButton
+                          color={"green"}
                           variant={"solid"}
-                          disabled
-                        >
-                          Available
-                        </Text>
+                          title={"Available"}
+                        />
                       )}
                     </HStack>
                   </VStack>
@@ -250,8 +258,11 @@ function ExploreDapps(props) {
           </Wrap>
         ) : (
           <Heading fontSize={"24px"} height={"50vh"}>
-            {loader && "Loading Available Dapps"}
-            {!loader && dappCids.length == 0 && "No Dapps Available"}
+            {loader && dappCids.length > 0
+              ? "Fetching your deployments.."
+              : loader && !noDapps && "Loading Available Dapps.."}
+
+            {!loader && noDapps && "No Available Dapps"}
           </Heading>
         )}
       </VStack>

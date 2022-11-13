@@ -28,7 +28,7 @@ function Navbar() {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
-console.log(selectedBlockchainInformation)
+// console.log(selectedBlockchainInformation)
   const web3ModalRef = useRef();
   let connectionCheckerId = 0;
   // theme
@@ -77,7 +77,7 @@ console.log(selectedBlockchainInformation)
       alert("We are working to enable polygon soon..");
       return null;
     }
-    console.log(newBlockchain)
+    // console.log(newBlockchain)
     await getCurrentConnectedOwner(
       newBlockchain,
       NetworkChains[newBlockchain],

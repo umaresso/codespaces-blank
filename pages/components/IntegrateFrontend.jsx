@@ -60,6 +60,7 @@ function IntegrateFrontend(props) {
     try {
       if (!selectedDeployment) {
         alert("select a deployment address first");
+        showToggle(false)
         return;
       }
       setStatus("Making Dapp Rent Transaction");
@@ -178,6 +179,7 @@ function IntegrateFrontend(props) {
                   color={"green"}
                   variant={"solid"}
                   href={"/Deployments"}
+                  
                 />
               </HStack>
             </VStack>
