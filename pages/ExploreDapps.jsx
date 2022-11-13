@@ -40,7 +40,7 @@ function ExploreDapps(props) {
   let _Blockchain = selectedBlockchainInformation.name;
   let _NetworkChain = selectedBlockchainInformation.network;
   let connectedAddress = selectedBlockchainInformation.address;
-  console.log(selectedBlockchainInformation);
+  // console.log(selectedBlockchainInformation);
   const [currentMenu, setCurrentMenu] = useState("all");
   const [selectedDapp, setSelectedDapp] = useState(null);
   const [allDapps, setAllDapps] = useState([]);

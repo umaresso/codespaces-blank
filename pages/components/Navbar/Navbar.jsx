@@ -57,19 +57,14 @@ function Navbar() {
     }
   }
   async function Connect() {
-    await getCurrentConnectedOwner(
-      Blockchain,
-      NetworkChain,
-      web3ModalRef,
-      updateReducerWithUser
-    );
+    changeBlockchain(selectedBlockchain)
   }
   useEffect(() => {
     // if (!walletAddress) {
     //   Connect();
     // }
     
-    Connect();
+    changeBlockchain(selectedBlockchain)
   }, []);
 
   function getMinimalAddress(_adr) {
