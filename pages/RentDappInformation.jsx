@@ -36,7 +36,7 @@ function RentDappInformation() {
           Collection but do you have a whitelist or sale contract that is
           compatible with all the dapps available on RentWeb3? No worries if you
           do not. You can create whitelist and sale contracts and then rent the
-          dapp with nearly NO CODE. So, Let's start the process
+          dapp with nearly NO CODE. So, Let&apos;s start the process
         </Text>
         <Wrap width={"48vw"} spacing={10}>
           <WrapItem>
