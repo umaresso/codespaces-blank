@@ -28,7 +28,7 @@ function Navbar() {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
-// console.log(selectedBlockchainInformation)
+  // console.log(selectedBlockchainInformation)
   const web3ModalRef = useRef();
   let connectionCheckerId = 0;
   // theme
@@ -44,12 +44,15 @@ function Navbar() {
   // for intra and inter-Blockchain connection
 
   async function updateReducerWithUser(user_) {
+    if (walletAddress == user_) return null;
     if (user_) {
-      dispatch({
-        name: Blockchain,
-        network: NetworkChain,
-        address: user_,
-      });
+      dispatch(
+        updateBlockchain({
+          name: selectedBlockchain,
+          network: NetworkChains[selectedBlockchain],
+          address: user_,
+        })
+      );
     }
   }
   async function Connect() {
@@ -64,7 +67,7 @@ function Navbar() {
     // if (!walletAddress) {
     //   Connect();
     // }
-
+    changeBlockchain(selectedBlockchain)
   }, []);
 
   function getMinimalAddress(_adr) {
