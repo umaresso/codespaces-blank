@@ -8,6 +8,7 @@ import {
   Wrap,
   Center,
   WrapItem,
+  Button,
 } from "@chakra-ui/react";
 import FilterMenuItem from "./components/FilterMenuItem";
 import DappInformationPopup from "./components/DappInformationPopup";
@@ -221,6 +222,7 @@ function ExploreDapps(props) {
                   <VStack key={"item" + item.name}>
                     <Img
                       width={["70vw", "60vw", "40vw"]}
+                      height={"30vh"}
                       objectFit={"contain"}
                       src={item.image}
                       borderRadius={"20px"}
@@ -229,23 +231,23 @@ function ExploreDapps(props) {
                       {" "}
                       <Text fontSize={"20px"}>{item.name}</Text>
                       {item.rented ? (
-                        <Text
-                          colorScheme={"white"}
+                        <Button
+                          background={"blue"}                          
                           variant={"solid"}
                           disabled
                           padding={"10px"}
                         >
                           Rented
-                        </Text>
+                        </Button>
                       ) : (
-                        <Text
-                          padding={"10px"}
-                          colorScheme={"aqua"}
+                        <Button
+                          background={"green"}                          
                           variant={"solid"}
                           disabled
+                          padding={"10px"}
                         >
                           Available
-                        </Text>
+                        </Button>
                       )}
                     </HStack>
                   </VStack>

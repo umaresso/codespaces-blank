@@ -13,7 +13,7 @@ function DeploymentCard(props) {
   let item = props.item
   let endTime = item?.endTime * 1000
   let type = props.type
-
+let Key=props.Key;
   function navigateToExplore() {
     router.push('/Explore')
   }
@@ -47,7 +47,7 @@ function DeploymentCard(props) {
   return (
     <>
       <VStack
-        key={'deployment' + item?.name}
+        key={'deployment' + item?.name+Key}
         border={'1px solid grey'}
         borderRadius={'20px'}
         padding={['10px', '20px', '20px']}

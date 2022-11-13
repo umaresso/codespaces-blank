@@ -70,10 +70,11 @@ function Deployments() {
       Web3ModalRef,
       connectedAddress,
       setSaleDeployments,
-      _Blockchain
-    ).then(() => {
-      setLoading((prev) => prev != false && false);
-    });
+      _Blockchain,
+      () => {
+        setLoading((prev) => prev != false && false);
+      }
+    );
   }
   if (_Blockchain != Blockchain) {
     RefreshToNewBlockchain();
@@ -94,27 +95,28 @@ function Deployments() {
           </Heading>
 
           {!loading && whitelistDeployments.length > 0 ? (
-            <Center>
+            <Center key={"whitelist container"}>
               <VStack spacing={10}>
                 <Heading>Whitelist Deployments</Heading>
                 <Wrap justify={"center"} spacing={10}>
-                  {whitelistDeployments.map((item, index) => {
-                    return (
-                      <WrapItem key={"wrapWhitelist" + item.name + index}>
-                        <DeploymentCard
-                          item={item}
-                          key={"whitelist" + item.id + item.id}
-                          type={"whitelist"}
-                          showIntegratePopup={() =>
-                            setSelectedDeployment({
-                              ...item,
-                              type: "whitelist",
-                            })
-                          }
-                        />
-                      </WrapItem>
-                    );
-                  })}
+                  {!loading &&
+                    whitelistDeployments.map((item, index) => {
+                      return (
+                        <WrapItem key={"wrapWhitelist" + item.name + index}>
+                          <DeploymentCard
+                            item={item}
+                            Key={"whitelist" + item.id + item.id}
+                            type={"whitelist"}
+                            showIntegratePopup={() =>
+                              setSelectedDeployment({
+                                ...item,
+                                type: "whitelist",
+                              })
+                            }
+                          />
+                        </WrapItem>
+                      );
+                    })}
                 </Wrap>
               </VStack>
             </Center>
@@ -126,7 +128,7 @@ function Deployments() {
             </Text>
           )}
 
-          <Center padding={"10px"}>
+          <Center key={"sale container"} padding={"10px"}>
             {!loading && saleDeployments.length > 0 ? (
               <VStack spacing={10}>
                 <Heading>Sale Deployments</Heading>
@@ -138,7 +140,7 @@ function Deployments() {
                       >
                         <DeploymentCard
                           item={item}
-                          key={
+                          Key={
                             "saleDeployment" + item.address + item.id + index
                           }
                           type={"sale"}

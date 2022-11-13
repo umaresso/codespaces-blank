@@ -899,7 +899,7 @@ export const fetchSales = async (
   web3modalRef,
   owner,
   arraySetter,
-  Blockchain
+  Blockchain,finisher
 ) => {
   let websiteRentContract = await getBlockchainSpecificWebsiteRentContract(
     Blockchain,
@@ -997,6 +997,9 @@ export const fetchSales = async (
           if (arraySetter) {
             arraySetter(allSales);
           }
+		  if(finisher){
+			finisher();
+		  }
           return allSales;
         }
       });
