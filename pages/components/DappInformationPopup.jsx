@@ -93,6 +93,15 @@ function DappInformationPopup(props) {
               <HStack paddingTop={"5vh"} spacing={20}>
                 <LinkButton
                   onClick={() => {
+                    displayToggle(false);
+                  }}
+                  title={`Close`}
+                  color={"white"}
+                  variant={"outline"}
+                />
+
+                <LinkButton
+                  onClick={() => {
                     if (dapp?.rented) {
                       alert(
                         "Dapp is already Rented ! \nCome again another time"
@@ -106,14 +115,6 @@ function DappInformationPopup(props) {
                   loadingMessage={`Purchasing..`}
                   color={"green"}
                   variant={"solid"}
-                />
-                <LinkButton
-                  onClick={() => {
-                    displayToggle(false);
-                  }}
-                  title={`Close`}
-                  color={"white"}
-                  variant={"outline"}
                 />
               </HStack>
             </VStack>
