@@ -25,6 +25,7 @@ export const getAllDappsUris = async (contract, setter, Blockchain) => {
   if (setter) {
     setter(response.data.dapps);
   }
+  // console.log("response is ", response.data.dapps);
   return response.data.dapps;
 };
 function embedGateway(hash) {
@@ -38,7 +39,7 @@ export const getTokenMetadata = async (tokenUriHash) => {
   let tokenUri = embedGateway(tokenUriHash);
   const response = await axios.get(tokenUri);
   let metadata = response.data;
-  console.log("metadata inside ipfs fetch is ", metadata);
+// console.log("metadata inside ipfs fetch is ", metadata);
   return metadata;
 };
 
@@ -81,7 +82,7 @@ export const fetchDappsContent = async (
         renttime = await websiteRentContract.rentTime(dapp.url).call();
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url).call();
         dapp.rentPrice = parseFloat(parseInt(rentPrice) / 10 ** 6);
-        console.log("rent price is ", dapp.rentPrice);
+        // console.log("rent price is ", dapp.rentPrice);
       } else if (Blockchain == "ethereum") {
         renttime = await websiteRentContract.rentTime(dapp.url);
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
@@ -92,11 +93,11 @@ export const fetchDappsContent = async (
         // console.log("rented already !");
         dapp.rented = true;
       } else {
-        console.log("Not rented !");
+        // console.log("Not rented !");
         dapp.rented = false;
       }
     }
-    console.log("dapp is ", dapp);
+    // console.log("dapp is ", dapp);
     dappArray.push(dapp);
 
     if (setter != undefined && index + 1 == Cids.length) {
@@ -123,7 +124,7 @@ export const getAllContractAddressess = async (
         ? await contract.contractAddressesIpfsLink().call()
         : await contract.contractAddressesIpfsLink();
 
-    console.log("ipfs link for contracts is ", currentIPFSLink);
+    // console.log("ipfs link for contracts is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {
         setter([]);

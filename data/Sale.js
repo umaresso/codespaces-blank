@@ -853,7 +853,7 @@ export const fetchSaleAddresses = async (
     // console.log("getting sales for", owner, "in", TrackerContract);
 
     if (Blockchain == "tron") {
-      console.log({ contract, owner, setter, Blockchain });
+      // console.log({ contract, owner, setter, Blockchain });
       let numSales = await TrackerContract.userNumberOfSales(owner).call();
       let allSales = [];
     //   console.log("Owner has ", numSales, " Sales");
@@ -912,7 +912,7 @@ export const fetchSales = async (
     web3modalRef
   );
   try {
-    // console.log("fetching array of sales");
+    console.log("fetching array of sales");
     await fetchSaleAddresses(
       TrackerContract,
       owner,
@@ -923,8 +923,11 @@ export const fetchSales = async (
 
       // console.log('iterating over')
       let totalSales = Sales.length;
+      console.log("total sales are ",totalSales)
     //   console.log("Salesin sale.js");
-      if (totalSales == 0) return 0;
+      if (totalSales == 0) {
+        finisher();
+      };
     //   console.log(websiteRentContract);
       Sales.map(async (_Sale, index) => {
         let hostedWebsite;
@@ -939,10 +942,11 @@ export const fetchSales = async (
           hostedWebsite = await websiteRentContract.deploymentToWebsite(_Sale);
           rentTime = await websiteRentContract.rentTime(hostedWebsite);
 
-          console.log({
-            rentTime,
-            hostedWebsite,
-          });
+          // console.log({
+          //   rentTime,
+          //   hostedWebsite,
+          // });
+
         } else if (Blockchain == "polygon") {
           // polygon pull
         } else {

@@ -256,7 +256,7 @@ export const WebsiteRentBytecode = {
 }
 // Ethereum 
 // Goerli Network Deployed Address
-export const WebsiteRentAddress = "0x452C05Fb2E8D225Bf779176F889fD1e7B6F11f07"; 
+export const WebsiteRentAddress = "0xe8d824f76D2714ADD94d0ecE2406F69BA210BB4C"; 
 // Tron 
 // Nile
 export const WebsiteRentNileAddress="TH8Ta1VMokE1GRtYHCv2E14QfHfipbcFwh";
@@ -310,11 +310,9 @@ export const getTronWebsiteRentContract=async (network)=>{
 	if(network=="nile"){	
 		contractAddress=WebsiteRentNileAddress;
 	}
-	// let tronWeb =await getNetworkTronweb(network);
-	// console.log("tronlink is ",  window.tronLink)
-	let tronWeb=await window.tronLink.tronWeb;
-
+	let tronWeb =await getNetworkTronweb(network);
 	let contract = await tronWeb.contract().at(contractAddress);
+	// console.log({contract})
 	return contract;
 	
 }

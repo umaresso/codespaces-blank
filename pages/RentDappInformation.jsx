@@ -28,16 +28,17 @@ function RentDappInformation() {
         paddingTop={["25vh", "20vh", "5vh"]}
         spacing={10}
       >
-        <Heading width={"40vw"} fontSize={["3em", "3.5em", "4em"]}>
+        <Heading width={"48vw"} fontSize={["3em", "3.5em", "4em"]}>
           Dapp Rent Portal
         </Heading>
-        <Text width={"40vw"} fontSize={"20px"}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia fuga
-          eaque ratione molestias quod quisquam atque debitis, enim commodi
-          neque harum optio asperiores voluptatem consequatur blanditiis nemo
-          explicabo facere soluta!
+        <Text color={"grey"} width={"46vw"} fontSize={"20px"}>
+          So you want to rent a dapp for whitelisting and sale of your
+          Collection but do you have a whitelist or sale contract that is
+          compatible with all the dapps available on RentWeb3? No worries if you
+          do not. You can create whitelist and sale contracts and then rent the
+          dapp with nearly NO CODE. So, Let's start the process
         </Text>
-        <Wrap width={"40vw"} spacing={5}>
+        <Wrap width={"48vw"} spacing={10}>
           <WrapItem>
             <LinkButton
               title={"Create Whitelist"}

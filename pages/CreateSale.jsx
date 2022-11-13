@@ -198,8 +198,8 @@ function CreateSale() {
             sale.baseURI,
             sale.startTime,
             sale.endTime,
-            parseEther(presaleMintRate),
-            parseEther(publicMintRate),
+            parseEther(presaleMintRate.toString()),
+            parseEther(publicMintRate.toString()),
             sale.saleSupply
           );
 

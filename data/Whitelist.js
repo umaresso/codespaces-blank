@@ -410,6 +410,7 @@ export async function getBlockchainSpecificWebsiteRentContract(
   let websiteRentContract = null;
   if (Blockchain == "tron") {
     websiteRentContract = await getTronWebsiteRentContract(NetworkChain);
+    console.log({websiteRentContract})
     return websiteRentContract;
   } else if (!Blockchain || Blockchain == "ethereum") {
     websiteRentContract = await getCustomNetworkWebsiteRentContract(
@@ -500,7 +501,7 @@ export const fetchWhitelists = async (
     arraySetter,
     Blockchain
   );
-  // console.log("all whitelists are ", whitelists);
+  console.log("all whitelists are ", whitelists);
   let allWhitelists = [];
   // console.log("iterating over");
   whitelists.map(async (_whitelist, index) => {
@@ -568,6 +569,7 @@ export const fetchWhitelists = async (
     allWhitelists.push(whitelistInstance);
     if (index + 1 == whitelists.length) {
       if (arraySetter != undefined) {
+        
         arraySetter(allWhitelists);
       }
     }

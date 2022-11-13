@@ -35,28 +35,31 @@ function Deployments() {
   const Web3ModalRef = useRef();
 
   async function init() {
-    setWhitelistDeployments([]);
-    setSaleDeployments([]);
+    whitelistDeployments.length != 0 && setWhitelistDeployments([]);
+    saleDeployments.length != 0 && setSaleDeployments([]);
     if (!connectedAddress) return null;
     fetchUserDeployments(connectedAddress);
   }
 
   function RefreshToNewBlockchain() {
-    setLoading((prev) => prev != true && true);
+    loading!=true && setLoading(true);
+    whitelistDeployments.length != 0 && setWhitelistDeployments([]);
+    saleDeployments.length != 0 && setSaleDeployments([]);
 
     init();
 
-    setNetworkChain(_NetworkChain);
-    setBlockchain(_Blockchain);
+    // setNetworkChain(_NetworkChain);
+    // setBlockchain(_Blockchain);
+
     // console.log("calling init");
   }
 
   useEffect(() => {
     init();
-  }, []);
+  }, [_Blockchain]);
 
   async function fetchUserDeployments(_owner) {
-    setLoading((prev) => prev != true && true);
+    loading != true && setLoading(true);
 
     await fetchWhitelists(
       _NetworkChain,
@@ -70,15 +73,14 @@ function Deployments() {
       Web3ModalRef,
       connectedAddress,
       setSaleDeployments,
-      _Blockchain,
-      () => {
-        setLoading((prev) => prev != false && false);
+      _Blockchain,()=>{
+        setLoading(false)
       }
     );
   }
-  if (_Blockchain != Blockchain) {
-    RefreshToNewBlockchain();
-  }
+  // if (Blockchain != _Blockchain) {
+  //   RefreshToNewBlockchain();
+  // }
 
   return (
     <>
@@ -94,29 +96,28 @@ function Deployments() {
             My Deployments
           </Heading>
 
-          {!loading && whitelistDeployments.length > 0 ? (
+          {whitelistDeployments.length > 0 ? (
             <Center key={"whitelist container"}>
               <VStack spacing={10}>
                 <Heading>Whitelist Deployments</Heading>
                 <Wrap justify={"center"} spacing={10}>
-                  {!loading &&
-                    whitelistDeployments.map((item, index) => {
-                      return (
-                        <WrapItem key={"wrapWhitelist" + item.name + index}>
-                          <DeploymentCard
-                            item={item}
-                            Key={"whitelist" + item.id + item.id}
-                            type={"whitelist"}
-                            showIntegratePopup={() =>
-                              setSelectedDeployment({
-                                ...item,
-                                type: "whitelist",
-                              })
-                            }
-                          />
-                        </WrapItem>
-                      );
-                    })}
+                  {whitelistDeployments.map((item, index) => {
+                    return (
+                      <WrapItem key={"wrapWhitelist" + index}>
+                        <DeploymentCard
+                          item={item}
+                          Key={"whitelist" + item.id + index}
+                          type={"whitelist"}
+                          showIntegratePopup={() =>
+                            setSelectedDeployment({
+                              ...item,
+                              type: "whitelist",
+                            })
+                          }
+                        />
+                      </WrapItem>
+                    );
+                  })}
                 </Wrap>
               </VStack>
             </Center>
@@ -129,7 +130,7 @@ function Deployments() {
           )}
 
           <Center key={"sale container"} padding={"10px"}>
-            {!loading && saleDeployments.length > 0 ? (
+            {saleDeployments.length > 0 ? (
               <VStack spacing={10}>
                 <Heading>Sale Deployments</Heading>
                 <Wrap justify={"center"} spacing={10}>
