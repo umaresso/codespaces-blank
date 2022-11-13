@@ -22,8 +22,7 @@ function Deployments() {
   let _NetworkChain = selectedBlockchainInformation.network;
   let connectedAddress = selectedBlockchainInformation.address;
 
-  const [loading, setLoading] = useState("");
-
+  const [loading, setLoading] = useState(true);
   const [whitelistDeployments, setWhitelistDeployments] = useState([]);
   const [saleDeployments, setSaleDeployments] = useState([]);
   const [totalWhitelistCount, setTotalWhitelistCount] = useState(0);
@@ -38,32 +37,13 @@ function Deployments() {
   async function init() {
     setWhitelistDeployments([]);
     setSaleDeployments([]);
-
-    if (_Blockchain == "ethereum") {
-      console.log("Ethereum Fetch...");
-      getProviderOrSigner(_NetworkChain, Web3ModalRef, true).then((signer) => {
-        signer
-          ?.getAddress()
-          .then(async (user) => {
-            fetchUserDeployments(user);
-            setOwner(user);
-          })
-          .catch(console.log);
-      });
-    } else if (_Blockchain == "tron") {
-      console.log("Tron Fetch...");
-      let ownerAddress = await tronConnect();
-      console.log("Tron connected with address :", ownerAddress);
-      fetchUserDeployments(ownerAddress);
-      setOwner(ownerAddress);
-    } else if (_Blockchain == "polygon") {
-    } else {
-      //      alert("Invalid Blockchain" + Blockchain);
-    }
+    if (!connectedAddress) return null;
+    fetchUserDeployments(connectedAddress);
   }
 
   function RefreshToNewBlockchain() {
-    setLoading(true);
+    setLoading((prev) => prev != true && true);
+
     init();
 
     setNetworkChain(_NetworkChain);
@@ -76,7 +56,8 @@ function Deployments() {
   }, []);
 
   async function fetchUserDeployments(_owner) {
-    setLoading(true);
+    setLoading((prev) => prev != true && true);
+
     await fetchWhitelists(
       _NetworkChain,
       Web3ModalRef,
@@ -84,16 +65,15 @@ function Deployments() {
       setWhitelistDeployments,
       _Blockchain
     );
-    let sales_ = await fetchSales(
+    await fetchSales(
       _NetworkChain,
       Web3ModalRef,
       connectedAddress,
       setSaleDeployments,
       _Blockchain
-    );
-    console.log("sales are ",sales_);
-
-    setLoading(false);
+    ).then(() => {
+      setLoading((prev) => prev != false && false);
+    });
   }
   if (_Blockchain != Blockchain) {
     RefreshToNewBlockchain();
@@ -113,7 +93,7 @@ function Deployments() {
             My Deployments
           </Heading>
 
-          {whitelistDeployments.length > 0 ? (
+          {!loading && whitelistDeployments.length > 0 ? (
             <Center>
               <VStack spacing={10}>
                 <Heading>Whitelist Deployments</Heading>
@@ -147,16 +127,20 @@ function Deployments() {
           )}
 
           <Center padding={"10px"}>
-            {saleDeployments.length > 0 ? (
+            {!loading && saleDeployments.length > 0 ? (
               <VStack spacing={10}>
                 <Heading>Sale Deployments</Heading>
                 <Wrap justify={"center"} spacing={10}>
                   {saleDeployments.map((item, index) => {
                     return (
-                      <WrapItem key={"wrapSale" + item.name + item.id + index}>
+                      <WrapItem
+                        key={"wrapSale" + item.address + item.id + index}
+                      >
                         <DeploymentCard
                           item={item}
-                          key={"sale" + item.name}
+                          key={
+                            "saleDeployment" + item.address + item.id + index
+                          }
                           type={"sale"}
                         />
                       </WrapItem>

@@ -13,10 +13,12 @@ function SuccessfulDeployment(props) {
     <VStack height={"100vh"} justify={"center"} bg={"black"} color={"white"}>
       <Heading>
         Contract is{" "}
-        {isSuccessful ? "Successfully Deployed 🎉" : "not Deployed ! "}{" "}
+        {isSuccessful == undefined || isSuccessful
+          ? "Successfully Deployed 🎉"
+          : "not Deployed ! "}{" "}
       </Heading>
       <Text fontSize={"16px"} textDecoration={"underline"}>
-        {isSuccessful && (
+        {(isSuccessful == undefined || isSuccessful) && (
           <Link href={blockExplorer + address?.toString()}>
             <a target={"_blank"}>Check Here</a>
           </Link>
@@ -25,7 +27,9 @@ function SuccessfulDeployment(props) {
 
       <LinkButton
         title={
-          isSuccessful ? "Check All Deployments" : "Check Previous Deployments"
+          isSuccessful == undefined || isSuccessful
+            ? "Check All Deployments"
+            : "Check Previous Deployments"
         }
         href="/Deployments"
         color={"White"}

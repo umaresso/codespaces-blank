@@ -76,7 +76,7 @@ function CreateWhitelist(props) {
       sale.name,
       sale.symbol,
       sale.maxWhitelists,
-      sale.owner,
+      connectedAddress,
       sale.baseURI,
       sale.saleSupply,
       sale.startTime,
@@ -255,6 +255,7 @@ function CreateWhitelist(props) {
         <SuccessfulDeployment
           network={_NetworkChain}
           address={deployedAddress}
+          
         />
       )}
     </>

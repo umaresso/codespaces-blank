@@ -38,6 +38,7 @@ import {
   tronConnect,
 } from "../data/TronAccountsManagement";
 import { useSelector } from "react-redux";
+import { parseEther } from "ethers/lib/utils";
 
 // let NetworkChain = "goerli";
 // let Blockchain = "ethereum";
@@ -49,6 +50,13 @@ function CreateSale() {
   let bg = "black";
   let textColor = "white";
   /** */
+  const selectedBlockchainInformation = useSelector(
+    (state) => state.blockchain.value
+  );
+  // console.log(selectedBlockchainInformation)
+  let Blockchain = selectedBlockchainInformation.name;
+  let NetworkChain = selectedBlockchainInformation.network;
+  let connectedAddress = selectedBlockchainInformation.address;
 
   const [formStep, setFormStep] = useState(1);
   const [deployedAddress, setDeployedAddress] = useState(null);
@@ -56,7 +64,7 @@ function CreateSale() {
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [baseURI, setBaseURI] = useState("");
-  const [owner, setOwner] = useState("");
+  const [owner, setOwner] = useState(connectedAddress);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [presaleMintRate, setPresaleMintRate] = useState(1);
@@ -69,16 +77,11 @@ function CreateSale() {
   const [saleContract, setSaleContract] = useState(null);
   const [whitelistFactory, setWhitelistFactory] = useState(null);
   const [fetching, setFetching] = useState(false);
-  const selectedBlockchainInformation = useSelector(
-    (state) => state.blockchain.value
-  );
-  let Blockchain = selectedBlockchainInformation.name;
-  let NetworkChain = selectedBlockchainInformation.network;
-  let connectedAddress = selectedBlockchainInformation.address;
 
   function setStatus(message) {
     let ele = document.getElementById("creationStatus");
     var p_tag = document.createElement("p");
+    if (!ele) return;
     p_tag.key = `message${message}`;
     p_tag.textContent = "-> " + message;
     ele.append(p_tag);
@@ -164,12 +167,12 @@ function CreateSale() {
             whitelistAddress,
             sale.name,
             sale.symbol,
-            sale.owner,
+            connectedAddress,
             sale.baseURI,
             sale.startTime,
             sale.endTime,
-            presaleMintRate,
-            publicMintRate,
+            presaleMintRate * 1000000,
+            publicMintRate * 1000000,
             sale.saleSupply,
           ];
           let saleAbi = SaleABI;
@@ -183,7 +186,7 @@ function CreateSale() {
           );
           if (deploymentAddress == null) {
             setDeployedAddress("none");
-            return ;
+            return;
           }
           await trackSaleDeployment(deploymentAddress);
         } else if (Blockchain == "ethereum") {
@@ -195,8 +198,8 @@ function CreateSale() {
             sale.baseURI,
             sale.startTime,
             sale.endTime,
-            presaleMintRate,
-            publicMintRate,
+            parseEther(presaleMintRate),
+            parseEther(publicMintRate),
             sale.saleSupply
           );
 
@@ -228,20 +231,21 @@ function CreateSale() {
     if (Blockchain == "tron") {
       setStatus("Keeping its track for Future!");
       setStatus("Storing on Blockchain..");
-      console.log("Storing ", contractAddress, " for ", owner);
+      console.log("Storing ", contractAddress, " for ", connectedAddress);
       let contract = await getTronSaleTrackerContract(NetworkChain);
       setTimeout(() => {
         setStatus("For Securing your collection , Let's wait ");
         setStatus("Let's wait for Confirmation");
       }, 2000);
       try {
-        await contract.addUserSale(owner, contractAddress).send({
+        let receipt = await contract.addUserSale(connectedAddress, contractAddress).send({
           feeLimit: 100000000,
           callValue: 0,
           tokenId: "",
           tokenValue: "",
           shouldPollResponse: true,
         });
+        console.log("stored",receipt)
       } catch (e) {
         setStatus("Error: Deployment Unsuccessful");
         console.log("error ", e);
@@ -285,6 +289,8 @@ function CreateSale() {
       user = connectedUser;
     } else if (Blockchain == "polygon") {
       //
+    } else {
+      return null;
     }
     trackerContract = await getBlockchainSpecificWhitelistTrackerContract(
       Blockchain,
@@ -303,31 +309,34 @@ function CreateSale() {
 
   async function init() {
     getUserWhitelists();
-    getCustomNetworkSaleContract(NetworkChain, Web3ModalRef)
-      .then(async (contract) => {
-        setSaleContract(contract);
-      })
-      .catch((e) => {
-        console.log("error  in obtaining the contract ");
-      });
-    getCustomNetworkSaleTrackerContract(NetworkChain, Web3ModalRef)
-      .then(async (contract) => {
-        setSaleTrackerContract(contract);
-      })
-      .catch((e) => {
-        console.log("error  in obtaining the contract ");
-      });
-    getCustomNetworkWhitelistContract(NetworkChain, Web3ModalRef).then(
-      async (contract) => {
-        console.log("contract factory is ", contract);
-        setWhitelistFactory(contract);
-      }
-    );
+    console.log("Blockchain is ", selectedBlockchainInformation);
+    if (Blockchain === "ethereum") {
+      getCustomNetworkSaleContract(NetworkChain, Web3ModalRef)
+        .then(async (contract) => {
+          setSaleContract(contract);
+        })
+        .catch((e) => {
+          console.log("error  in obtaining the contract ");
+        });
+      getCustomNetworkSaleTrackerContract(NetworkChain, Web3ModalRef)
+        .then(async (contract) => {
+          setSaleTrackerContract(contract);
+        })
+        .catch((e) => {
+          console.log("error  in obtaining the contract ");
+        });
+      getCustomNetworkWhitelistContract(NetworkChain, Web3ModalRef).then(
+        async (contract) => {
+          console.log("contract factory is ", contract);
+          setWhitelistFactory(contract);
+        }
+      );
+    }
   }
 
   useEffect(() => {
     init();
-  }, []);
+  }, [Blockchain, owner]);
 
   return (
     <>
@@ -384,7 +393,15 @@ function CreateSale() {
               _baseURI={baseURI}
               _blockchain={Blockchain}
             >
-              <NamedInput title={"Presale Rate (ETH)"}>
+              <NamedInput
+                title={`Presale Rate (${
+                  Blockchain == "tron"
+                    ? "TRX"
+                    : Blockchain == "ethereum"
+                    ? "ETH"
+                    : "MATIC"
+                })`}
+              >
                 <Input
                   key={"presaleRate"}
                   onChange={(e) => {
@@ -393,9 +410,24 @@ function CreateSale() {
                   }}
                   variant="outline"
                   defaultValue={presaleMintRate}
+                  placeholder={`How Many ${
+                    Blockchain == "tron"
+                      ? "TRX"
+                      : Blockchain == "ethereum"
+                      ? "ETH"
+                      : "MATIC"
+                  }`}
                 />
               </NamedInput>
-              <NamedInput title={"PublicMint Rate(ETH)"}>
+              <NamedInput
+                title={`Public Sale Rate (${
+                  Blockchain == "tron"
+                    ? "TRX"
+                    : Blockchain == "ethereum"
+                    ? "ETH"
+                    : "MATIC"
+                })`}
+              >
                 <Input
                   key={"publicMintRate"}
                   onChange={(e) => {
@@ -403,13 +435,13 @@ function CreateSale() {
                     setPublicMintRate(res);
                   }}
                   variant="outline"
-                  placeholder={
-                    Blockchain == "ethereum"
-                      ? "1 Eth = 10^18"
-                      : Blockchain == "Tron"
-                      ? "1 Tron=1000000"
-                      : "1 MATIC=10^18"
-                  }
+                  placeholder={`How Many ${
+                    Blockchain == "tron"
+                      ? "TRX"
+                      : Blockchain == "ethereum"
+                      ? "ETH"
+                      : "MATIC"
+                  }`}
                   defaultValue={publicMintRate}
                 />
               </NamedInput>

@@ -2,7 +2,7 @@ import TronWeb from "tronweb";
 import { getMinimalAddress } from "../Utilities";
 import { getCurrentConnectedOwner } from "./blockchainSpecificExports";
 const tronPrivateKey =
-  "88cd69e757d4ce34abbd4b6693b40a6417e20da9e28bf8955f3d76302f9b440c";
+  "70af1c481e52e89ae3bfb5c7a7b3b7a70b29897f558a30c3500099673c0b7277";
 
 export const tronConnect = async () => {
   try {
@@ -108,16 +108,15 @@ export async function deploy_tron_contract(
     });
     let scAddress = contract_instance.address;
     statusUpdater("Deployed Successfully 🥳 ");
-    let contract = await tronWeb.contract().at(scAddress);
     let currentConnectedUser = await tronConnect();
     if(SuccessFallback)
       SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
-    if (e.message.toString().includes('insufficient')) {
-      alert("You do not have enough bandwidth and energy to deploy whitelist");
+    if (e?.message?.toString().includes('insufficient')) {
+      alert("Platform does not have enough Energy to deploy contract");
       
-    } else alert("Whitelist Creation Unsuccessful");
+    } else alert("Contract Creation Unsuccessful");
     console.log("error : ", e);
     return null;
   }

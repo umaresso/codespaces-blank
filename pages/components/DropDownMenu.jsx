@@ -13,7 +13,7 @@ import { useState } from "react";
 function DropDownMenu(props) {
   let title = props.title;
   let options = props.options;
-  console.log("options recived ",options)
+  // console.log("options recived ",options)
   let selector = props.selector;
   let textMenu = props.textMenu;
   let theme = props.theme;
