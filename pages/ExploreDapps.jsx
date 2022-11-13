@@ -211,7 +211,7 @@ function ExploreDapps(props) {
             transition={"display 900ms ease-in-out"}
             spacing={10}
             justify={"center"}
-            width={"100vw"}
+            width={"100%"}
 
             
           >
