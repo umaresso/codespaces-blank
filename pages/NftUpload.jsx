@@ -219,8 +219,13 @@ function NftUpload(props) {
   }
   async function uploadNFT() {
     if (areValidArguments()) {
+      document.getElementById("upload-btn").textContent="Checking Token..";
+
       let tokenFetchSuccessful = await GatherTokenInformation();
-      if (tokenFetchSuccessful == null) return null;
+      if (tokenFetchSuccessful == null){
+        document.getElementById("upload-btn").textContent="Upload";
+        return null
+      } 
       await deployNftUpload();
     }
   }
@@ -621,6 +626,7 @@ function NftUpload(props) {
                   variant={"solid"}
                   onClick={() => uploadNFT()}
                   title={"Upload NFT"}
+                  id="upload-btn"
                 />
               </VStack>
             </Box>
