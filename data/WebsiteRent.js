@@ -259,7 +259,7 @@ export const WebsiteRentBytecode = {
 export const WebsiteRentAddress = "0xe8d824f76D2714ADD94d0ecE2406F69BA210BB4C"; 
 // Tron 
 // Nile
-export const WebsiteRentNileAddress="TVFHidzGFohfUavtT42Bp9K2rH6dsW8hid";
+export const WebsiteRentNileAddress="TYioZEpXw3gNpWwQMxTzvxJ8KrLVcF27iD";
 // Shasta
 export const WebsiteRentShastaAddress=null;
 //
