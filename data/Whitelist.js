@@ -515,6 +515,7 @@ export const fetchWhitelists = async (
     let hostedWebsite = "";
     let rentTime = 0;
     if (Blockchain == "tron") {
+      console.log("website rent contract is ",websiteRentContract)
       // console.log("checking website for ", _whitelist);
       hostedWebsite = await websiteRentContract
         .deploymentToWebsite(_whitelist)
