@@ -1085,8 +1085,8 @@ export const getCustomNetworkNFTFactoryContract = async (
   contractAddress
 ) => {
   let signer = await getProviderOrSigner(network, web3modalRef);
-  if(!signer) return null;
-  console.log("signer is ",signer)
+  if (!signer) return null;
+  console.log("signer is ", signer);
   let nftFactory = new ethers.ContractFactory(
     NftRentingFactoryABI,
     NftRentingFactoryBytecode.object,
@@ -1118,6 +1118,7 @@ export const getTronNFTFactory = async (network, contractAddress) => {
   // let tronWeb = await window.tronLink.tronWeb;
 
   let contract = await tronWeb.contract().at(contractAddress);
+
   return contract;
 };
 
@@ -1215,7 +1216,11 @@ export const getNftPrice = async (
             tokenId
           ).call()
         : await TrackerContract.getTokenRentPrice(contractAddress, tokenId);
-    price = parseInt(price) / 10 ** 18;
+
+    price =
+      Blockchain !== "tron"
+        ? parseInt(price) / 10 ** 18
+        : parseInt(price) / 1000000;
     return price;
   } catch (e) {
     console.log("Error in fetching price", e);
@@ -1284,6 +1289,7 @@ export const getNftUserAddress = async (
 
 export const rentNft = async (
   Blockchain,
+  NetworkChain,
   Trackercontract,
   contractAddress,
   tokenId,
@@ -1302,14 +1308,16 @@ export const rentNft = async (
     let tx;
 
     if (Blockchain == "tron") {
-      console.log({
-        contractAddress,
-        tokenId,
-        days,
-        callValue: price * 10 ** 6,
-      });
+      let trackercontractAddress = null;
+      if (NetworkChain == "nile") {
+        trackercontractAddress = NftRentingTrackerAddressNile;
+      }
+      let tronWeb = await window.tronLink.tronWeb;
+      let Trackercontract_ = await tronWeb
+        .contract()
+        .at(trackercontractAddress);
 
-      await Trackercontract.rentNFT(contractAddress, tokenId, days).send({
+      await Trackercontract_.rentNFT(contractAddress, tokenId, days).send({
         feeLimit: 100000000,
         callValue: price * 10 ** 6,
         tokenId: "",

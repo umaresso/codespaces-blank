@@ -81,6 +81,7 @@ function NftInformationPopup(props) {
     console.log("");
     await rentNft(
       Blockchain,
+      NetworkChain,
       nftTrackerContract,
       rentableContract,
       Nft?.id,
@@ -90,7 +91,8 @@ function NftInformationPopup(props) {
       router.push,
       "/Explore"
     );
-  }
+  
+    }
   async function connectWallet() {
     if (connectedAddress) {
       setWalletAddress(connectedAddress);
