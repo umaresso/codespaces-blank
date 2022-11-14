@@ -75,8 +75,10 @@ function ExploreNfts(props) {
   }
 
   async function init() {
+    
     setNFTs([]);
     if (!walletAddress) return;
+    setLoading(true)
     let allNFTs = [];
     //console.log({ Blockchain, NetworkChain, web3ModalRef });
     let trackerContract = await getBlockchainSpecificNFTTracker(
