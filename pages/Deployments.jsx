@@ -6,6 +6,7 @@ import {
   Text,
   WrapItem,
   Wrap,
+  Button,
 } from "@chakra-ui/react";
 import { fetchWhitelists } from "../data/Whitelist";
 import { fetchSales } from "../data/Sale";
@@ -32,7 +33,7 @@ function Deployments() {
   const [owner, setOwner] = useState(null);
   const [Blockchain, setBlockchain] = useState(null);
   const [NetworkChain, setNetworkChain] = useState(null);
-
+  const [walletAddress, setWalletAddress] = useState(null);
   const Web3ModalRef = useRef();
 
   async function init() {
@@ -58,6 +59,15 @@ function Deployments() {
 
   useEffect(() => {
     init();
+    if (connectedAddress && !walletAddress) {
+      setWalletAddress(connectedAddress);
+    } else if (
+      connectedAddress &&
+      walletAddress &&
+      connectedAddress != walletAddress
+    ) {
+      setWalletAddress(connectedAddress);
+    }
   }, [_Blockchain]);
 
   async function fetchUserDeployments(_owner) {
@@ -81,13 +91,39 @@ function Deployments() {
       }
     );
   }
+  async function connectWallet() {
+    let usr = await getCurrentConnectedOwner(
+      _Blockchain,
+      _NetworkChain,
+      Web3ModalRef
+    );
+    setWalletAddress(usr);
+  }
   // if (Blockchain != _Blockchain) {
   //   RefreshToNewBlockchain();
   // }
 
   return (
     <>
-      {!selectedDeployment && (
+      {walletAddress == null && (
+        <VStack
+          paddingTop={"20vh"}
+          height={"100vh"}
+          bg="black"
+          textColor={"white"}
+          width={"100%"}
+        >
+          <Button
+            onClick={connectWallet}
+            colorScheme={"blue"}
+            variant={"solid"}
+          >
+            Connect Wallet
+          </Button>
+        </VStack>
+      )}
+
+      {walletAddress && !selectedDeployment && (
         <VStack
           padding={"10px"}
           height={"fit-content"}
