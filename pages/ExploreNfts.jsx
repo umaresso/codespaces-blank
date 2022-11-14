@@ -75,7 +75,7 @@ function ExploreNfts(props) {
   }
 
   async function init() {
-    ;
+    setNFTs([]);
     if (!walletAddress) return;
     let allNFTs = [];
     //console.log({ Blockchain, NetworkChain, web3ModalRef });
@@ -85,14 +85,14 @@ function ExploreNfts(props) {
       web3ModalRef
     );
 
-    console.log("Tracker contract is ", trackerContract);
+    // console.log("Tracker contract is ", trackerContract);
     let contractsArray = await getAllContractAddressess(
       trackerContract,
       null,
       _Blockchain,
       _NetworkChain
     );
-    console.log("Contracts to read from", contractsArray);
+    // console.log("Contracts to read from", contractsArray);
     if (!contractsArray || contractsArray.length == 0) {
       setLoading(false);
       return 0;
@@ -118,15 +118,10 @@ function ExploreNfts(props) {
         _Blockchain
       );
       if (!rentableContractAddress) {
-        console.log("no rentable contract ");
+        // console.log("no rentable contract ");
         return null;
       }
-      console.log("getting rentable contract from ", {
-        _Blockchain,
-        _NetworkChain,
-        web3ModalRef,
-        rentableContractAddress,
-      });
+
       let rentableContractInstance = await getBlockchainSpecificNFTFactory(
         _Blockchain,
         _NetworkChain,
@@ -192,9 +187,8 @@ function ExploreNfts(props) {
   }
 
   useEffect(() => {
-
     init();
-  }, [walletAddress,_Blockchain]);
+  }, [walletAddress, _Blockchain]);
   // if (_Blockchain != Blockchain) {
   //   RefreshToNewBlockchain();
   // }

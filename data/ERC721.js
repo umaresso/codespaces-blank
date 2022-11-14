@@ -418,9 +418,9 @@ function embedGateway(hash) {
 export const getPureTokenUri = async (contract, tokenId,Blockchain) => {
   let tokenUri='';
   try{
-    console.log("contract is ",{...contract})
+    // console.log("contract is ",{...contract})
     tokenUri =Blockchain=="tron"? await contract.tokenURI(tokenId).call():await contract.tokenURI(tokenId);
-    console.log("token uri is _"+tokenUri+'_');
+    // console.log("token uri is _"+tokenUri+'_');
     if (tokenUri == "") {
       return "";
     } else if (tokenUri.toString().startsWith("/ipfs/")) {

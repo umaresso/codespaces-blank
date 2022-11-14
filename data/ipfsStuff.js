@@ -150,7 +150,7 @@ export const getAllContractTokens = async (contract, setter, Blockchain) => {
       Blockchain == "tron"
         ? await contract.contractTokensIpfsLink().call()
         : await contract.contractTokensIpfsLink();
-    // console.log("ipfs link for contractsTokens is ", currentIPFSLink);
+    console.log("ipfs link for contractsTokens is ", currentIPFSLink);
     if (currentIPFSLink == "") {
       if (setter) {
         setter([]);

@@ -1150,7 +1150,7 @@ export async function getBlockchainSpecificNFTFactory(
   contractAddress
 ) {
   if (Blockchain == "tron") {
-    console.log("inside tron");
+    // console.log("inside tron");
     let contract = await getTronNFTFactory(NetworkChain, contractAddress);
     return contract;
   } else if (Blockchain == "ethereum") {
@@ -1232,7 +1232,7 @@ export const getNftUser = async (rentableContract, tokenId, Blockchain) => {
       Blockchain == "tron"
         ? await rentableContract.userOf(tokenId).call()
         : await rentableContract.userOf(tokenId);
-    console.log("user is ", _user);
+    // console.log("user is ", _user);
     return _user;
   } catch (e) {
     console.log("Error in fetching current User", e);
@@ -1260,9 +1260,9 @@ export const isRented = async (
     rentStatus = await TrackerContract.isRented(adr, tokenId).call();
     return rentStatus;
   } else {
-    console.log("eth ");
+    // console.log("eth ");
     rentStatus = await TrackerContract.isRented(_contractAddress, tokenId);
-    console.log("rent status is ", rentStatus);
+    // console.log("rent status is ", rentStatus);
 
     return rentStatus;
   }
