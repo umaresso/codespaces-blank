@@ -87,7 +87,7 @@ function rentNFT(address contractAddress,uint tokenId,uint daysToRentFor)public 
     // calculation of price for owner to pay after deduction in fee
     address _owner=_contract.ownerOf(tokenId);
     uint tokenPrice=rentPrices[contractAddress][tokenId];
-    uint feePrice=(tokenPrice*rentFee)/100;
+    uint feePrice=(priceToPay*rentFee)/100;
     ownerTokensRentToPay[_owner][contractAddress][tokenId]+=(priceToPay-feePrice);
     userRentTime[msg.sender][contractAddress][tokenId]=timeNow;
 
