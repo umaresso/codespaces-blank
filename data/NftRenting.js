@@ -1073,8 +1073,8 @@ export const NftRentingTrackerABI = [
 // Ethereum
 const NftRentingTrackerAddress = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 // Tron
-const NftRentingTrackerAddressNile = "TV1HGUTk53cFfFQbWUBoiW6AyfrQbKjict";
-const NftRentingTrackerAddressShasta =
+const NftRentingTrackerAddressNile = "TY25zmqoQ6Ts8WNJivg6X1AGqfjCwMtTTB";
+const NftRentingTrackerAddressShasta =  
   "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 
 // Polygon

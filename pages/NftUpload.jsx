@@ -82,7 +82,6 @@ function NftUpload(props) {
   const [contractTokens, setContractTokens] = useState(null);
   const [uploadError, setUploadError] = useState(false);
   const [shouldDisabled, setShouldDisabled] = useState(false);
-  let tokenDeploymentInstance = useRef();
 
   let web3ModelRef = useRef();
   function setStatus(message, color) {
@@ -137,7 +136,7 @@ function NftUpload(props) {
     if (!isValidBlockchain()) {
       projectError(
         "blockchainValidation",
-        "Sorry , We do not support " + blockchain + " yet"
+        "Sorry , We do not support " + Blockchain + " yet"
       );
       return false;
     }
@@ -182,13 +181,13 @@ function NftUpload(props) {
         null,
         _Blockchain
       );
-      console.log("Rentable version for token is ", rentableContractAddress);
+      // console.log("Rentable version for token is ", rentableContractAddress);
       let rentableContract = await getCustomNetworkNFTFactoryContract(
         _NetworkChain,
         web3ModelRef,
         rentableContractAddress
       );
-      console.log("Rentable contract is ", rentableContract);
+      // console.log("Rentable contract is ", rentableContract);
 
       let token = { ...tokenData };
       if (_owner && !_owner.toString().includes("00000000")) {
@@ -203,12 +202,12 @@ function NftUpload(props) {
       }
       token.erc721ContractAddress = contractAddress;
       token.id = tokenId;
-      console.log("token is ", token);
+      // console.log("token is ", token);
       tokenDeploymentInstance.current = token;
 
       return token;
     } catch (e) {
-      if (e.toString().includes("invalid token ID")) {
+      if (e?.toString().includes("invalid token ID")) {
         alert("Invalid TokenID");
       } else {
         alert("Unable to Fetch Token Information ..Do you own the Token?");
@@ -219,22 +218,25 @@ function NftUpload(props) {
   }
   async function uploadNFT() {
     if (areValidArguments()) {
-      document.getElementById("upload-btn").textContent="Checking Token..";
+      document.getElementById("upload-btn").textContent = "Checking Token..";
 
-      let tokenFetchSuccessful = await GatherTokenInformation();
-      if (tokenFetchSuccessful == null){
-        document.getElementById("upload-btn").textContent="Upload";
-        return null
-      } 
-      await deployNftUpload();
+      let tokenDeploymentInstance = await GatherTokenInformation();
+      if (tokenDeploymentInstance == null) {
+        document.getElementById("upload-btn").textContent = "Upload";
+        return null;
+      }
+      await deployNftUpload(tokenDeploymentInstance);
     }
   }
 
   async function init() {
     if (!walletAddress) return;
-    let fact = await getCustomNetworkNFTFactoryContract(_NetworkChain, web3ModelRef);
-    console.log("factory obtained  ",fact);
-    setFactoryContract(fact)
+    let fact = await getCustomNetworkNFTFactoryContract(
+      _NetworkChain,
+      web3ModelRef
+    );
+    console.log("factory obtained  ", fact);
+    setFactoryContract(fact);
     await getCustomNetworkNFTTrackerContract(_NetworkChain, web3ModelRef).then(
       (contract) => {
         getAllContractTokens(contract).then((_contractTokens) => {
@@ -254,13 +256,13 @@ function NftUpload(props) {
    *
    */
 
-  async function deployNftUpload() {
+  async function deployNftUpload(tokenDeploymentInstance) {
     setFormStep((prev) => prev + 1);
     setStatus("Making " + _Blockchain + "NftUpload..");
-    NFT_Upload();
+    NFT_Upload(tokenDeploymentInstance);
   }
 
-  async function NFT_Upload() {
+  async function NFT_Upload(tokenDeploymentInstance) {
     async function deploy() {
       try {
         setStatus("Seems we did not have this awesome collection before");
@@ -278,7 +280,7 @@ function NftUpload(props) {
             trackNFTUpload
           );
         } else if (_Blockchain == "ethereum") {
-          console.log("factory contract is",factoryContract)
+          console.log("factory contract is", factoryContract);
           let _factory = factoryContract;
 
           const contract = await _factory.deploy(contractAddress);
@@ -311,9 +313,9 @@ function NftUpload(props) {
       StoreUpdatedcontractsOnIpfs(contractAddresses);
       setStatus("Directly Uploading your NFT for rent");
 
-      trackNFTUpload(response.toString());
+      trackNFTUpload(response.toString(), tokenDeploymentInstance);
     } else {
-      deploy();
+      deploy(tokenDeploymentInstance);
     }
   }
 
@@ -524,8 +526,6 @@ function NftUpload(props) {
     if (!walletAddress) {
       setWalletAddress(connectedAddress);
     }
-
-    
   }, [walletAddress]);
 
   return (

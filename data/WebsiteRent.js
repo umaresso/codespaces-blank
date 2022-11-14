@@ -256,10 +256,10 @@ export const WebsiteRentBytecode = {
 }
 // Ethereum 
 // Goerli Network Deployed Address
-export const WebsiteRentAddress = "0xe8d824f76D2714ADD94d0ecE2406F69BA210BB4C"; 
+export const WebsiteRentAddress = "0x641033186ea3Abb91C0b8EB5b55026457DA804Bd"; 
 // Tron 
 // Nile
-export const WebsiteRentNileAddress="TYioZEpXw3gNpWwQMxTzvxJ8KrLVcF27iD";
+export const WebsiteRentNileAddress="TNK3Uhi6WTrGFFLUUeNJWiG69bAafgNM3q";
 // Shasta
 export const WebsiteRentShastaAddress=null;
 //
