@@ -36,6 +36,7 @@ import {
   getRentableContract,
   NftRentingFactoryABI,
   NftRentingFactoryBytecode,
+  NftRentingTrackerAddressNile,
 } from "../data/NftRenting";
 import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 import { deploy_tron_contract } from "../data/TronAccountsManagement";
@@ -241,18 +242,20 @@ function NftUpload(props) {
       web3ModelRef
     ).then((contract) => {
       // console.log('NFT tracker contract is ',contract);
-      getAllContractTokens(contract,null,_Blockchain).then((_contractTokens) => {
-        if (!_contractTokens) {
-          setContractTokens(null);
-          setContractAddress(null);
-          return 0;
+      getAllContractTokens(contract, null, _Blockchain).then(
+        (_contractTokens) => {
+          if (!_contractTokens) {
+            setContractTokens(null);
+            setContractAddress(null);
+            return 0;
+          }
+          // console.log("The all contrac tokens are", _contractTokens);
+          // console.log("The all addresses are", Object.keys(_contractTokens));
+          let arr = Object.keys(_contractTokens).map((item) => item);
+          setContractTokens(_contractTokens);
+          setContractAddresses(arr);
         }
-        // console.log("The all contrac tokens are", _contractTokens);
-        // console.log("The all addresses are", Object.keys(_contractTokens));
-        let arr = Object.keys(_contractTokens).map((item) => item);
-        setContractTokens(_contractTokens);
-        setContractAddresses(arr);
-      });
+      );
       setNftRentingTracker(contract);
     });
   }
@@ -264,7 +267,7 @@ function NftUpload(props) {
 
   async function deployNftUpload(tokenDeploymentInstance) {
     setFormStep((prev) => prev + 1);
-    setStatus("Making " + _Blockchain + "NftUpload..");
+    setStatus("Making Your NFT Upload..");
     NFT_Upload(tokenDeploymentInstance);
   }
 
@@ -284,6 +287,8 @@ function NftUpload(props) {
             parameters,
             setStatus
           );
+          setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
+
           await trackNFTUpload(adr, tokenDeploymentInstance);
         } else if (_Blockchain == "ethereum") {
           console.log("factory contract is", factoryContract);
@@ -291,6 +296,8 @@ function NftUpload(props) {
 
           const contract = await _factory.deploy(contractAddress);
           await contract.deployed();
+          setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
+
           await trackNFTUpload(contract.address, tokenDeploymentInstance);
           return contract.address;
         } else if (_Blockchain == "polygon") {
@@ -326,18 +333,23 @@ function NftUpload(props) {
   }
 
   async function trackNFTUpload(deployedContractAddress, tokenInstance) {
-    let contract = await getBlockchainSpecificNFTTracker(
-      _Blockchain,
-      _NetworkChain,
-      web3ModelRef
-    );
+    let contract = null;
+    if (_Blockchain == "tron") {
+      let tronWeb = await window.tronLink.tronWeb;
+      contract = await tronWeb.contract().at(NftRentingTrackerAddressNile);
+    } else {
+      contract = await getCustomNetworkNFTTrackerContract(
+        _NetworkChain,
+        web3ModelRef
+      );
+    }
+
     // console.log("uploading", {
     //   contractAddress,
     //   deployedContractAddress,
     //   tokenId,
     //   price: ethers.utils.parseEther(pricePerDay.toString()),
     // });
-    setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
     setStatus("Starting Token Upload");
 
     setStatus("Storing on IPFS ");
@@ -449,9 +461,9 @@ function NftUpload(props) {
     currentContract,
     tokenDeploymentInstance
   ) {
-    console.log("Previous Tokens are ", _contractTokens);
+    // console.log("Previous Tokens are ", _contractTokens);
     let newTokenInstance = tokenDeploymentInstance;
-    console.log("New Token instance is ", newTokenInstance);
+    // console.log("New Token instance is ", newTokenInstance);
     let __contractTokens = _contractTokens ? _contractTokens : [];
     let tokensList = [];
     if (__contractTokens) {
@@ -473,20 +485,15 @@ function NftUpload(props) {
       return null;
     }
     uniqueTokensList.push(newTokenInstance);
-    console.log("\n\n------\n Tokens to upload", " \n---");
-    console.log(uniqueTokensList);
-    console.log("\n\n\n");
+    // console.log("\n\n------\n Tokens to upload", " \n---");
+    // console.log(uniqueTokensList);
+    // console.log("\n\n\n");
 
     let updatedContractTokens = {
       ...__contractTokens,
       [currentContract]: uniqueTokensList,
     };
-    console.log(
-      "Storing Tokens",
-      JSON.stringify({
-        contractTokens: updatedContractTokens,
-      })
-    );
+
     const _blob = new Blob(
       [
         JSON.stringify({
