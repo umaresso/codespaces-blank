@@ -181,7 +181,7 @@ function ExploreDapps(props) {
               width={"45vw"}
             >
               RentWeb3 provides you bunch of Dapps to rent for your NFT
-              Collection. Time to rent the most luxurative design wesbites for
+              Collection. Time to rent the most luxurative design websites for
               showcasing your NFT collection. As a matter of fact , top designs
               at low prices.So grab one.
             </Text>
