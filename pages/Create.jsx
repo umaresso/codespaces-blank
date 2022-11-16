@@ -29,7 +29,7 @@ function Create() {
         spacing={10}
       >
         <Heading width={"40vw"} fontSize={["3em", "3.5em", "4em"]}>
-          Let&apos; Earn Money
+          Let&apos;s Earn Money
         </Heading>
         <Text width={"40vw"} fontSize={"20px"}>
           After creating a dapp or owning an NFT , do you feel it&apos;s residing in
