@@ -85,6 +85,7 @@ export const getProviderOrSigner = async (network, web3ModalRef) => {
   return signer;
   // If user is not connected to the Mumbai network, let them know and throw an error
 };
+
 export const connectPolygon = async (network, web3ModalRef) => {
   // Connect to Metamask
   // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
