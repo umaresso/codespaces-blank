@@ -11,6 +11,7 @@ import {
 import {
   getCustomNetworkSaleContract,
   getCustomNetworkSaleTrackerContract,
+  getPolygonSaleTrackerContract,
   getTronSaleTrackerContract,
   SaleABI,
   SaleBytecode,
@@ -39,6 +40,7 @@ import {
 } from "../data/TronAccountsManagement";
 import { useSelector } from "react-redux";
 import { parseEther } from "ethers/lib/utils";
+import { getCurrentConnectedOwner } from "../data/blockchainSpecificExports";
 
 // let NetworkChain = "goerli";
 // let Blockchain = "ethereum";
@@ -64,7 +66,7 @@ function CreateSale() {
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [baseURI, setBaseURI] = useState("");
-  const [owner, setOwner] = useState(connectedAddress);
+  const [owner, setOwner] = useState(null);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [presaleMintRate, setPresaleMintRate] = useState(1);
@@ -111,14 +113,13 @@ function CreateSale() {
           setSymbol(_symbol);
           _baseURI = await contract.baseURI().call();
           setBaseURI(_baseURI);
-        } else if (Blockchain == "ethereum") {
+        } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
           _name = await contract.name();
           setName(_name);
           _symbol = await contract.symbol();
           setSymbol(_symbol);
           _baseURI = await contract.baseURI();
           setBaseURI(_baseURI);
-        } else if (Blockchain == "polygon") {
         } else {
           // no support yet
         }
@@ -133,34 +134,17 @@ function CreateSale() {
       console.log("No Blockchain...");
     }
     let sale = { ...saleobj };
-    if (Blockchain == "ethereum") {
-      setFormStep((prev) => prev + 1);
-      setLoader((prev) => prev !== true && true);
-      setStatus("Creating Ethereum whitelist..");
-    } else if (Blockchain == "tron") {
-      setFormStep((prev) => prev + 1);
-      setLoader((prev) => prev !== true && true);
-      let connectedUser = await tronConnect();
-      console.log("connected address is ", connectedUser);
-      setStatus("Creating Tron whitelist..");
-    } else if (Blockchain == "polygon") {
-      setFormStep((prev) => prev + 1);
-      setLoader((prev) => prev !== true && true);
-      setStatus("Creatibg Polygon whitelist..");
-    } else {
-      alert("Invalid Blockhain");
-      return null;
-    }
-
+    setFormStep((prev) => prev + 1);
+    setLoader((prev) => prev !== true && true);
+    setStatus("Creating Your Sale..");
     sale.presaleMintRate = presaleMintRate;
     sale.publicMintRate = publicMintRate;
     (async () => {
       // Deploy the contract to Ethereum test network - Goerli
 
       // Deploy the contract
-      const factory = saleContract;
       try {
-        setStatus("Deploying " + sale.name + "..");
+        setStatus("Deploying " + sale.name + " " + "..");
         let deploymentAddress = null;
         if (Blockchain == "tron") {
           let paramters = [
@@ -189,7 +173,11 @@ function CreateSale() {
             return;
           }
           await trackSaleDeployment(deploymentAddress);
-        } else if (Blockchain == "ethereum") {
+        } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
+          let factory = await getCustomNetworkSaleContract(
+            NetworkChain,
+            Web3ModalRef
+          );
           const contract = await factory.deploy(
             whitelistAddress,
             sale.name,
@@ -203,17 +191,14 @@ function CreateSale() {
             sale.saleSupply
           );
 
-          // "uar",100,owner,baseURI,1665317824956,1665317824956
-
           let tx = await contract.deployed();
           console.log(tx);
           setStatus("It's taking longer but bear with us :/ ");
-          // await tx.wait();
-          setStatus(`Deployment successful 🎉 `);
+          if(Blockchain=="ethereum")
+          await tx.wait();
+          setStatus(`Finally ! Deployment is  Successful 🎉 `);
           setStatus(`Contract Address:`);
-
           setStatus(getMinimalAddress(contract.address, true));
-
           deploymentAddress = contract.address;
           await trackSaleDeployment(contract.address);
         } else if (Blockchain == "polygon") {
@@ -238,14 +223,16 @@ function CreateSale() {
         setStatus("Let's wait for Confirmation");
       }, 2000);
       try {
-        let receipt = await contract.addUserSale(connectedAddress, contractAddress).send({
-          feeLimit: 100000000,
-          callValue: 0,
-          tokenId: "",
-          tokenValue: "",
-          shouldPollResponse: true,
-        });
-        console.log("stored",receipt)
+        let receipt = await contract
+          .addUserSale(connectedAddress, contractAddress)
+          .send({
+            feeLimit: 100000000,
+            callValue: 0,
+            tokenId: "",
+            tokenValue: "",
+            shouldPollResponse: true,
+          });
+        console.log("stored", receipt);
       } catch (e) {
         setStatus("Error: Deployment Unsuccessful");
         console.log("error ", e);
@@ -254,63 +241,50 @@ function CreateSale() {
       setStatus("Storage Successful 🎉");
 
       setDeployedAddress(contractAddress);
-    } else if (Blockchain == "ethereum") {
-      let contract = saleTrackerContract;
+    } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
+      let contract = await getPolygonSaleTrackerContract(
+        NetworkChain,
+        Web3ModalRef
+      );
       try {
         setStatus("Keeping its track for Future!");
         setStatus("Storing on Blockchain..");
 
         let tx = await contract.addUserSale(owner, contractAddress);
-        setStatus("Waiting for Transaction Completion ");
-
         await tx.wait();
+        setStatus("Waiting for Transaction Completion ");
       } catch (e) {
         setStatus("Error: Deployment Unsuccessful");
         console.log("error ", e);
       }
 
       setStatus("Storage Successful 🎉");
-
       setDeployedAddress(contractAddress);
     }
   }
 
   async function getUserWhitelists() {
-    let user = null;
+    let user = owner;
     let trackerContract = null;
-    if (Blockchain == "tron") {
-      let connectedUser = await tronConnect();
-      if (connectedUser) {
-        user = connectedUser;
-      }
-    } else if (Blockchain == "ethereum") {
-      let signer = await getProviderOrSigner(NetworkChain, Web3ModalRef, true);
-      let connectedUser = await signer.getAddress();
-      user = connectedUser;
-    } else if (Blockchain == "polygon") {
-      //
-    } else {
-      return null;
-    }
     trackerContract = await getBlockchainSpecificWhitelistTrackerContract(
       Blockchain,
       NetworkChain,
       Web3ModalRef
     );
-    console.log("Owner is ", user);
+    // console.log("Owner is ", user);
     await fetchWhitelistAddresses(
       trackerContract,
       user,
       setWhitelists,
       Blockchain
     );
-    setOwner(user);
   }
 
   async function init() {
+    if (!owner) return null;
     getUserWhitelists();
-    console.log("Blockchain is ", selectedBlockchainInformation);
-    if (Blockchain === "ethereum") {
+    // console.log("Blockchain is ", selectedBlockchainInformation);
+    if (Blockchain === "ethereum" || Blockchain == "polygon") {
       getCustomNetworkSaleContract(NetworkChain, Web3ModalRef)
         .then(async (contract) => {
           setSaleContract(contract);
@@ -318,7 +292,11 @@ function CreateSale() {
         .catch((e) => {
           console.log("error  in obtaining the contract ");
         });
-      getCustomNetworkSaleTrackerContract(NetworkChain, Web3ModalRef)
+      getBlockchainSpecificWhitelistTrackerContract(
+        Blockchain,
+        NetworkChain,
+        Web3ModalRef
+      )
         .then(async (contract) => {
           setSaleTrackerContract(contract);
         })
@@ -327,7 +305,7 @@ function CreateSale() {
         });
       getCustomNetworkWhitelistContract(NetworkChain, Web3ModalRef).then(
         async (contract) => {
-          console.log("contract factory is ", contract);
+          // console.log("contract factory is ", contract);
           setWhitelistFactory(contract);
         }
       );
@@ -335,12 +313,39 @@ function CreateSale() {
   }
 
   useEffect(() => {
+    if (connectedAddress && owner != connectedAddress) {
+      setOwner(owner);
+    }
+
     init();
   }, [Blockchain, owner]);
-
+  async function connectWallet() {
+    if (connectedAddress == owner) return null;
+    document.getElementById("connect-btn").textContent = "Connecting...";
+    setOwner(connectedAddress);
+  }
   return (
     <>
-      {deployedAddress === null && (
+      {owner == null && (
+        <VStack
+          paddingTop={"20vh"}
+          height={"100vh"}
+          bg="black"
+          textColor={"white"}
+          width={"100%"}
+        >
+          <Button
+            onClick={connectWallet}
+            colorScheme={"blue"}
+            variant={"solid"}
+            id={"connect-btn"}
+          >
+            Connect Wallet
+          </Button>
+        </VStack>
+      )}
+
+      {owner && deployedAddress === null && (
         <Box bg={"black"} width={"100vw"} height={"100vh"}>
           {formStep == 1 && (
             <Card>
@@ -462,7 +467,7 @@ function CreateSale() {
           </VStack>
         </Box>
       )}
-      {deployedAddress !== null && (
+      {owner && deployedAddress !== null && (
         <SuccessfulDeployment
           network={NetworkChain}
           address={deployedAddress}

@@ -1,5 +1,6 @@
 import {
   getCustomNetworkWebsiteRentContract,
+  getPolygonWebsiteRentContract,
   getTronWebsiteRentContract,
   WebsiteRentContract,
 } from "./WebsiteRent";
@@ -359,6 +360,8 @@ export const whitelistTrackerTronShastaAddress = null;
 //
 
 // Polygon
+export const whitelistTrackerAddressPolygon =
+  "0xCa938e8344dc7Fc58Da8fF18707D9A79F9ecE7c3";
 
 const ethers = require("ethers");
 
@@ -419,7 +422,12 @@ export async function getBlockchainSpecificWebsiteRentContract(
     );
     return websiteRentContract;
   } else if (Blockchain == "polygon") {
-    //to be implemented yet
+    websiteRentContract = await getPolygonWebsiteRentContract(
+      NetworkChain,
+      web3modalRef
+    );
+    console.log("website rent contract returning ", websiteRentContract);
+    return websiteRentContract;
   }
   return websiteRentContract;
 }
@@ -428,22 +436,22 @@ export async function getBlockchainSpecificWhitelistTrackerContract(
   NetworkChain,
   web3modalRef
 ) {
-  let WhitelistTracker = null;
   if (Blockchain == "tron") {
-    WhitelistTracker = await getTronWhitelistTrackerContract(NetworkChain);
+    let WhitelistTracker = await getTronWhitelistTrackerContract(NetworkChain);
     // console.log("want to return whitelistTracker ", WhitelistTracker);
     return WhitelistTracker;
   } else if (!Blockchain || Blockchain == "ethereum") {
-    WhitelistTracker = await getCustomNetworkWhitelistTrackerContract(
+    let WhitelistTracker = await getCustomNetworkWhitelistTrackerContract(
       NetworkChain,
       web3modalRef
     );
     return WhitelistTracker;
   } else if (Blockchain == "polygon") {
-    //to be implemented yet
+    let WhitelistTracker = await getPolygonWhitelistTrackerContract(
+      NetworkChain,
+      web3modalRef
+    );
     return WhitelistTracker;
-  } else {
-    return null;
   }
 }
 export async function getBlockchainSpecificWhitelistFactoryContract(
@@ -463,9 +471,15 @@ export async function getBlockchainSpecificWhitelistFactoryContract(
       web3modalRef,
       contractAddress
     );
+    // console.log({ contract });
     return contract;
   } else if (Blockchain == "polygon") {
-    //to be implemented yet
+    contract = await getCustomNetworkWhitelistContract(
+      NetworkChain,
+      web3modalRef,
+      contractAddress
+    );
+    console.log({ contract });
     return contract;
   } else {
     return null;
@@ -515,7 +529,7 @@ export const fetchWhitelists = async (
     let hostedWebsite = "";
     let rentTime = 0;
     if (Blockchain == "tron") {
-      console.log("website rent contract is ",websiteRentContract)
+      console.log("website rent contract is ", websiteRentContract);
       // console.log("checking website for ", _whitelist);
       hostedWebsite = await websiteRentContract
         .deploymentToWebsite(_whitelist)
@@ -530,7 +544,11 @@ export const fetchWhitelists = async (
           rentTime = await websiteRentContract.rentTime(hostedWebsite).call();
         }
       }
-    } else if (!Blockchain || Blockchain == "ethereum") {
+    } else if (
+      !Blockchain ||
+      Blockchain == "ethereum" ||
+      Blockchain == "polygon"
+    ) {
       hostedWebsite = await websiteRentContract.deploymentToWebsite(_whitelist);
       if (hostedWebsite != "") {
         let deployment = await websiteRentContract.websiteToDeployment(
@@ -542,8 +560,6 @@ export const fetchWhitelists = async (
           rentTime = await websiteRentContract.rentTime(hostedWebsite);
         }
       }
-    } else if (Blockchain == "polygon") {
-      // polygon pull
     } else {
       // no support
     }
@@ -560,7 +576,7 @@ export const fetchWhitelists = async (
         .call();
       startTime = await whitelistContract.startTime().call();
       endTime = await whitelistContract.endTime().call();
-    } else if (!Blockchain || Blockchain == "ethereum") {
+    } else if (!Blockchain || Blockchain == "ethereum" || Blockchain=="polygon") {
       name = await whitelistContract.name();
       symbol = await whitelistContract.symbol();
       baseURI = await whitelistContract.baseURI();
@@ -582,7 +598,7 @@ export const fetchWhitelists = async (
       owner,
       rentTime: rentTime * 1000,
     };
-    // console.log("whitelist instance", whitelistInstance);
+    console.log("whitelist instance", whitelistInstance);
     allWhitelists.push(whitelistInstance);
     if (index + 1 == whitelists.length) {
       if (arraySetter != undefined) {
@@ -613,6 +629,19 @@ export const getCustomNetworkWhitelistContract = async (
     );
   }
   return whitelistfactory;
+};
+
+export const getPolygonWhitelistTrackerContract = async (
+  network,
+  web3modalRef
+) => {
+  let signer = await getProviderOrSigner(network, web3modalRef, true);
+  const whitelistTrackerContract = new ethers.Contract(
+    whitelistTrackerAddressPolygon,
+    whitelistTrackerABI,
+    signer
+  );
+  return whitelistTrackerContract;
 };
 
 export const getCustomNetworkWhitelistTrackerContract = async (

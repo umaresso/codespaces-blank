@@ -3,6 +3,8 @@
 */
 import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import Web3Modal from "web3modal";
+import { use } from "@maticnetwork/maticjs";
+import { Web3ClientPlugin } from "@maticnetwork/maticjs-ethers";
 
 export const connectWallet = async (web3ModalRef) => {
   try {
@@ -34,6 +36,56 @@ export const connectWallet = async (web3ModalRef) => {
  *
 =       */
 export const getProviderOrSigner = async (network, web3ModalRef) => {
+  // Connect to Metamask
+  // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
+  // alert("Please Accept the Metamask Connection");
+
+  let Web3ModalRef = web3ModalRef;
+  web3ModalRef.current = new Web3Modal({
+    network: network,
+    providerOptions: {},
+    disableInjectedProvider: false,
+  });
+
+  let provider;
+  let web3Provider;
+  let signer;
+
+  try {
+    //     const QuickNodeProvider = ethers.providers.getDefaultProvider(
+    // 'https://autumn-necessary-frost.ethereum-goerli.quiknode.pro/07319f15c47c89543c7bf75aa284cc5347ace6e1/'
+    //       )
+
+    //    provider = await Web3ModalRef.current.connect(QuickNodeProvider)
+    await window.ethereum.enable();
+    // console.log("selected address is ", window.ethereum.selectedAddress);
+    provider = web3Provider = new ethers.providers.Web3Provider(
+      window.ethereum
+    );
+    const { chainId } = await web3Provider?.getNetwork();
+
+    if (network == "goerli" && chainId && chainId !== 5) {
+      window.alert("Please Change the network to Goerli");
+      return null;
+    }
+    if (network == "mumbai" && chainId && chainId !== 80001) {
+      window.alert("Please Change the network to Mumbai");
+      return null;
+    }
+
+    signer = web3Provider.getSigner();
+    return signer;
+  } catch (err) {
+    if (err.toString().includes("already pending")) {
+      alert("Please Connect your Wallet !");
+    }
+    console.log("Error connecting wallet", err.toString());
+    return null;
+  }
+  return signer;
+  // If user is not connected to the Mumbai network, let them know and throw an error
+};
+export const connectPolygon = async (network, web3ModalRef) => {
   // Connect to Metamask
   // Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
   // alert("Please Accept the Metamask Connection");

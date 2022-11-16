@@ -74,8 +74,9 @@ function Navbar() {
   }
   async function changeBlockchain(newBlockchain) {
     if (newBlockchain == "polygon") {
-      alert("We are working to enable polygon soon..");
-      return null;
+      // alert("We are working to enable polygon soon..");
+      // return null;
+
     }
     // console.log(newBlockchain)
     await getCurrentConnectedOwner(
@@ -142,6 +143,7 @@ function Navbar() {
           selected={selectedBlockchain}
           textMenu={true}
         />{" "}
+        
         <Button
           colorScheme={"green"}
           _hover={{

@@ -55,9 +55,9 @@ function CreateWhitelist(props) {
   async function deployWhitelist(sale) {
     let _Blockchain = sale?._Blockchain;
     _Blockchain = _Blockchain.toString().toLowerCase();
-    if (_Blockchain == "ethereum") {
+    if (_Blockchain == "ethereum" || _Blockchain == "polygon") {
       setFormStage((prev) => prev + 1);
-      setStatus("Creating Ethereum whitelist..");
+      setStatus("Creating Whitelist..");
       deployEthWhitelist(sale);
     } else if (_Blockchain == "tron") {
       let connectedUser = await tronConnect();
@@ -124,17 +124,22 @@ function CreateWhitelist(props) {
     setStatus("Transaction Completed ✅");
 
     setDeployedAddress(contractAddress);
-    
   }
 
   function deployEthWhitelist(Sale) {
     async function deploy(sale) {
+      console.log({
+        _Blockchain,
+        _NetworkChain,
+        Web3ModalRef,
+      });
       let factory = await getBlockchainSpecificWhitelistFactoryContract(
         _Blockchain,
         _NetworkChain,
         Web3ModalRef
       );
-      
+      console.log({factory})
+
       const contract = await factory.deploy(
         sale.name,
         sale.symbol,
@@ -153,6 +158,8 @@ function CreateWhitelist(props) {
       setStatus(getMinimalAddress(contract.address));
       setStatus("Storing on Smart Contract");
       setStatus("Approve Transaction");
+      console.log("deployed  to contract.address", contract.address);
+
       await trackEthWhitelistDeployment(contract.address, sale.owner);
 
       setStatus(`Deployment successful 🎉`);
@@ -191,12 +198,11 @@ function CreateWhitelist(props) {
 
   async function init() {
     // for ethereum
-      
   }
   function RefreshToNewBlockchain() {
     setNetworkChain(_NetworkChain);
     setBlockchain(_Blockchain);
-    
+
     init();
 
     // console.log("calling init");
@@ -255,7 +261,6 @@ function CreateWhitelist(props) {
         <SuccessfulDeployment
           network={_NetworkChain}
           address={deployedAddress}
-          
         />
       )}
     </>

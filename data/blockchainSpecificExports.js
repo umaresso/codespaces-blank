@@ -1,4 +1,4 @@
-import { getProviderOrSigner } from "./accountsConnection";
+import { connectPolygon, getProviderOrSigner } from "./accountsConnection";
 import { tronConnect } from "./TronAccountsManagement";
 
 const ETH_BLOCK_EXPLORER = "https://etherscan.io/address/";
@@ -42,8 +42,9 @@ export async function getCurrentConnectedOwner(
     }
 
     return user;
-  } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
+  } else if (Blockchain == "ethereum" || Blockchain=="polygon") {
     let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
+    console.log(signer)
     if (!signer) {
       if (setter) {
         setter(null);
@@ -55,6 +56,8 @@ export async function getCurrentConnectedOwner(
       setter(user);
     }
     user = await signer?.getAddress();
+    console.log("connected address is ",user);
     return user;
   }
+  
 }

@@ -12,13 +12,17 @@ export const tronConnect = async () => {
       alert("Please Install tronlink First ");
       return null;
     }
-
-    await tronlink.request({ method: "tron_requestAccounts" });
+    try {
+      await tronlink.request({ method: "tron_requestAccounts" });
+    } catch (e) {
+      return null;
+    }
 
     let tronWeb = await tronlink?.tronWeb;
-    if (tronWeb == false) return null;
-    let address = tronWeb.defaultAddress;
-    return address.base58;
+    if (!tronWeb ) return null;
+    let address = tronWeb?.defaultAddress;
+    if(!address) return null;
+    return address?.base58;
   } catch (err) {
     console.log("Error: ", err);
     alert("Error: TronLink extension is not installed");
@@ -109,13 +113,11 @@ export async function deploy_tron_contract(
     let scAddress = contract_instance.address;
     statusUpdater("Deployed Successfully 🥳 ");
     let currentConnectedUser = await tronConnect();
-    if(SuccessFallback)
-      SuccessFallback(scAddress, currentConnectedUser);
+    if (SuccessFallback) SuccessFallback(scAddress, currentConnectedUser);
     return scAddress;
   } catch (e) {
-    if (e?.message?.toString().includes('insufficient')) {
+    if (e?.message?.toString().includes("insufficient")) {
       alert("Platform does not have enough Energy to deploy contract");
-      
     } else alert("Contract Creation Unsuccessful");
     console.log("error : ", e);
     return null;
