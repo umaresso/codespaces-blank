@@ -103,10 +103,10 @@ function ExploreDapps(props) {
       _NetworkChain,
       web3ModalRef
     );
-    console.log("fetching user deployments");
+    // console.log("fetching user deployments");
     await fetchUserDeployments(connectedAddress);
 
-    console.log("fetching dapps ");
+    // console.log("fetching dapps ");
 
     await getAllDappsUris(contract, setDappCids, _Blockchain).then(
       async (cids) => {
@@ -137,19 +137,6 @@ function ExploreDapps(props) {
   useEffect(() => {
     init();
   }, [_Blockchain]);
-
-  // if (_Blockchain != Blockchain) {
-  //   RefreshToNewBlockchain();
-  // }
-
-  // function RefreshToNewBlockchain() {
-  //   loader!=true && setLoader(true)
-  //   setOwner(connectedAddress);
-  //   init();
-  //   setNetworkChain(_NetworkChain);
-  //   setBlockchain(_Blockchain);
-  //   // console.log("calling init");
-  // }
 
   let filteredDapps = [];
 
@@ -212,8 +199,6 @@ function ExploreDapps(props) {
             spacing={10}
             justify={"center"}
             width={"100%"}
-
-            
           >
             {filteredDapps?.map((item, index) => {
               return (

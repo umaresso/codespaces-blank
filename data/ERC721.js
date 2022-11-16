@@ -368,7 +368,6 @@ export const erc721Abi = [
   },
 ];
 
-
 export async function getBlockchainSpecificERC721Contract(
   Blockchain,
   NetworkChain,
@@ -379,15 +378,16 @@ export async function getBlockchainSpecificERC721Contract(
   if (Blockchain == "tron") {
     contract = await getTronERC721Factory(NetworkChain, contractAddress);
     return contract;
-  } else if (!Blockchain || Blockchain == "ethereum") {
+  } else if (
+    !Blockchain ||
+    Blockchain == "ethereum" ||
+    Blockchain == "polygon"
+  ) {
     contract = await getCustomNetworkERC721Contract(
       NetworkChain,
       web3modalRef,
       contractAddress
     );
-    return contract;
-  } else if (Blockchain == "polygon") {
-    //to be implemented yet
     return contract;
   } else {
     return null;
@@ -399,10 +399,7 @@ export const getCustomNetworkERC721Contract = async (
   web3ModalRef,
   contractAddress
 ) => {
-  let signer = await getProviderOrSigner(
-    NetworkChain,
-    web3ModalRef,
-  );
+  let signer = await getProviderOrSigner(NetworkChain, web3ModalRef);
   const erc721Contract = new ethers.Contract(
     contractAddress,
     erc721Abi,
@@ -415,32 +412,31 @@ function embedGateway(hash) {
   return "https://ipfs.io" + hash;
 }
 
-export const getPureTokenUri = async (contract, tokenId,Blockchain) => {
-  let tokenUri='';
-  try{
+export const getPureTokenUri = async (contract, tokenId, Blockchain) => {
+  let tokenUri = "";
+  try {
     // console.log("contract is ",{...contract})
-    tokenUri =Blockchain=="tron"? await contract.tokenURI(tokenId).call():await contract.tokenURI(tokenId);
+    tokenUri =
+      Blockchain == "tron"
+        ? await contract.tokenURI(tokenId).call()
+        : await contract.tokenURI(tokenId);
     // console.log("token uri is _"+tokenUri+'_');
     if (tokenUri == "") {
       return "";
     } else if (tokenUri.toString().startsWith("/ipfs/")) {
-      let newTokenUri = tokenUri.slice(6,);
+      let newTokenUri = tokenUri.slice(6);
       return newTokenUri;
     } else if (tokenUri.toString().startsWith("ipfs://")) {
       let newTokenUri = tokenUri.slice(7);
       return newTokenUri;
     }
     return tokenUri;
-    
-    
-  }
-  catch(e){
-    if(e.toString().includes('invalid token')){
-    alert("You probably dont own this NFT ! ");
+  } catch (e) {
+    if (e.toString().includes("invalid token")) {
+      alert("You probably dont own this NFT ! ");
       return "";
     }
   }
-  
 };
 export const getTronERC721Factory = async (network, contractAddress) => {
   let tronWeb = await getNetworkTronweb(network);
@@ -448,7 +444,11 @@ export const getTronERC721Factory = async (network, contractAddress) => {
   return contract;
 };
 
-export async function getContractName(NetworkChain, web3ModalRef, contractAddress) {
+export async function getContractName(
+  NetworkChain,
+  web3ModalRef,
+  contractAddress
+) {
   return getCustomNetworkERC721Contract(
     NetworkChain,
     web3ModalRef,
@@ -459,14 +459,15 @@ export async function getContractName(NetworkChain, web3ModalRef, contractAddres
   });
 }
 
-export async function getTokenOwner(TrackerContract,tokenId) {
-    let _owner = await TrackerContract.ownerOf(tokenId);
-    return _owner;
-  
+export async function getTokenOwner(TrackerContract, tokenId) {
+  let _owner = await TrackerContract.ownerOf(tokenId);
+  return _owner;
 }
-export async function getTokenRentStatus(TrackerContract,contractAddress,tokenId) {
-  let rented= await TrackerContract.isRented(contractAddress,tokenId);
+export async function getTokenRentStatus(
+  TrackerContract,
+  contractAddress,
+  tokenId
+) {
+  let rented = await TrackerContract.isRented(contractAddress, tokenId);
   return rented;
-
 }
-

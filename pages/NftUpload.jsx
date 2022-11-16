@@ -226,14 +226,14 @@ function NftUpload(props) {
 
   async function init() {
     if (!walletAddress) return;
-    if (_Blockchain == "ethereum") {
+    if (_Blockchain == "ethereum" || _Blockchain == "polygon") {
       let fact = await getBlockchainSpecificNFTFactory(
         _Blockchain,
         _NetworkChain,
         web3ModelRef
       );
 
-      // console.log("factory obtained  ", fact);
+      console.log("factory obtained  ", fact);
       setFactoryContract(fact);
     }
     await getBlockchainSpecificNFTTracker(
@@ -241,7 +241,7 @@ function NftUpload(props) {
       _NetworkChain,
       web3ModelRef
     ).then((contract) => {
-      // console.log('NFT tracker contract is ',contract);
+      console.log("NFT tracker contract is ", contract);
       getAllContractTokens(contract, null, _Blockchain).then(
         (_contractTokens) => {
           if (!_contractTokens) {
@@ -249,8 +249,8 @@ function NftUpload(props) {
             setContractAddress(null);
             return 0;
           }
-          // console.log("The all contrac tokens are", _contractTokens);
-          // console.log("The all addresses are", Object.keys(_contractTokens));
+          console.log("The all contrac tokens are", _contractTokens);
+          console.log("The all addresses are", Object.keys(_contractTokens));
           let arr = Object.keys(_contractTokens).map((item) => item);
           setContractTokens(_contractTokens);
           setContractAddresses(arr);
@@ -287,16 +287,20 @@ function NftUpload(props) {
             parameters,
             setStatus
           );
-          setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
+          setStatus(
+            `Rentable version of NFT contract is Successfully Created 🎉`
+          );
 
           await trackNFTUpload(adr, tokenDeploymentInstance);
-        } else if (_Blockchain == "ethereum") {
+        } else if (_Blockchain == "ethereum" || _Blockchain == "polygon") {
           console.log("factory contract is", factoryContract);
           let _factory = factoryContract;
 
           const contract = await _factory.deploy(contractAddress);
           await contract.deployed();
-          setStatus(`Rentable version of NFT contract is Successfully Created 🎉`);
+          setStatus(
+            `Rentable version of NFT contract is Successfully Created 🎉`
+          );
 
           await trackNFTUpload(contract.address, tokenDeploymentInstance);
           return contract.address;
@@ -337,8 +341,9 @@ function NftUpload(props) {
     if (_Blockchain == "tron") {
       let tronWeb = await window.tronLink.tronWeb;
       contract = await tronWeb.contract().at(NftRentingTrackerAddressNile);
-    } else {
-      contract = await getCustomNetworkNFTTrackerContract(
+    } else if (_Blockchain == "ethereum" || _Blockchain == "polygon") {
+      contract = await getBlockchainSpecificNFTTracker(
+        _Blockchain,
         _NetworkChain,
         web3ModelRef
       );

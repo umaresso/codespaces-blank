@@ -36,6 +36,7 @@ function DappInformationPopup(props) {
     // alert("purchasing...");
     setPurchaseWill(true);
   }
+  console.log("showing dapp ", dapp);
   function getCurrency() {
     if (Blockchain == "tron") return "TRX";
     else if (Blockchain == "ethereum") return "ETH";
@@ -61,7 +62,11 @@ function DappInformationPopup(props) {
             />
             <VStack align={"left"}>
               <Heading paddingBottom={"5vh"}>Dapp information</Heading>
-              <HStack justify="space-between" width="20vw">
+              <HStack
+                textTransform={"capitalize"}
+                justify="space-between"
+                width="20vw"
+              >
                 <b>Name:</b>
                 <Text>{dapp?.name}</Text>
               </HStack>
@@ -82,7 +87,11 @@ function DappInformationPopup(props) {
                   {dapp?.owner.slice(40)}
                 </Text>
               </HStack>
-              <HStack justify="space-between" width="20vw">
+              <HStack
+                textTransform={"capitalize"}
+                justify="space-between"
+                width="20vw"
+              >
                 <b>Type:</b> <Text>{dapp?.type}</Text>
               </HStack>
               <HStack justify="space-between" width="20vw">

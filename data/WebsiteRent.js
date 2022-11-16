@@ -266,7 +266,7 @@ export const WebsiteRentShastaAddress = null;
 
 // Polygon
 export const WebsiteRentAddressPolygon =
-  "0xA8EF900f5a65EE2f6e49021D55A625a558977766";
+  "0x3f69A4618cDd97419D07186093f03BAb267Aa41E";
 
 const ethers = require("ethers");
 let Network = "goerli";

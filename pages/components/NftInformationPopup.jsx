@@ -71,13 +71,16 @@ function NftInformationPopup(props) {
         return "Eth";
       case "tron" || "Tron":
         return "TRX";
+      case "polygon" || "Polygon":
+        return "MATIC";
+
       default:
         break;
     }
   }
 
   async function rentNFT() {
-    let totalPrice = rentPrice * rentDays;    
+    let totalPrice = rentPrice * rentDays;
     console.log("");
     await rentNft(
       Blockchain,
@@ -91,8 +94,7 @@ function NftInformationPopup(props) {
       router.push,
       "/Explore"
     );
-  
-    }
+  }
   async function connectWallet() {
     if (connectedAddress) {
       setWalletAddress(connectedAddress);
@@ -127,7 +129,6 @@ function NftInformationPopup(props) {
       }
 
       setNftTrackerContract(TrackerContract);
-      
     });
   }
 

@@ -1073,11 +1073,14 @@ export const NftRentingTrackerABI = [
 // Ethereum
 const NftRentingTrackerAddress = "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 // Tron
-export const NftRentingTrackerAddressNile = "TYTL59rJM8QARL1zXRKkqGTF6EeieU8mXM";
-const NftRentingTrackerAddressShasta =  
+export const NftRentingTrackerAddressNile =
+  "TYTL59rJM8QARL1zXRKkqGTF6EeieU8mXM";
+const NftRentingTrackerAddressShasta =
   "0x65e5bF619B30828EF9dB4747EBD5B02FDE9230fE";
 
 // Polygon
+export const NftRentingTrackerAddressPolygon =
+  "0xA16E0321fbF3F99D84E5E4DCe9a62f7A75cA8B9D";
 
 export const getCustomNetworkNFTFactoryContract = async (
   network,
@@ -1137,6 +1140,11 @@ export async function getBlockchainSpecificNFTTracker(
     );
     return contract;
   } else if (Blockchain == "polygon") {
+    let contract = await getPolygonNFTTrackerContract(
+      NetworkChain,
+      web3ModalRef
+    );
+    return contract;
   } else {
     // no support
     return null;
@@ -1153,14 +1161,13 @@ export async function getBlockchainSpecificNFTFactory(
     // console.log("inside tron");
     let contract = await getTronNFTFactory(NetworkChain, contractAddress);
     return contract;
-  } else if (Blockchain == "ethereum") {
+  } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
     let contract = await getCustomNetworkNFTFactoryContract(
       NetworkChain,
       web3ModalRef,
       contractAddress
     );
     return contract;
-  } else if (Blockchain == "polygon") {
   } else {
     // no support
     return null;
@@ -1175,6 +1182,20 @@ export const getCustomNetworkNFTTrackerContract = async (
   let signer = await getProviderOrSigner(network, web3modalRef, true);
   let nftTracker = new ethers.Contract(
     NftRentingTrackerAddress,
+    NftRentingTrackerABI,
+    signer
+  );
+
+  return nftTracker;
+};
+export const getPolygonNFTTrackerContract = async (
+  network,
+  web3modalRef,
+  Blockchain
+) => {
+  let signer = await getProviderOrSigner(network, web3modalRef, true);
+  let nftTracker = new ethers.Contract(
+    NftRentingTrackerAddressPolygon,
     NftRentingTrackerABI,
     signer
   );

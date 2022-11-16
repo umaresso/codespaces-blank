@@ -33,14 +33,13 @@ export async function getStaticProps(context) {
   };
 }
 
-
 function CreateDapp(props) {
   const selectedBlockchainInformation = useSelector(
     (state) => state.blockchain.value
   );
   let Blockchain = selectedBlockchainInformation.name;
   let NetworkChain = selectedBlockchainInformation.network;
-  let connectedAddress=selectedBlockchainInformation.address;
+  let connectedAddress = selectedBlockchainInformation.address;
   const [name, setName] = useState("");
   const [url, setUrl] = useState("https://");
   const [price, setPrice] = useState("");
@@ -88,7 +87,7 @@ function CreateDapp(props) {
     const client = makeStorageClient();
     const _file = new File(getDappImage(), "img.PNG");
     const cid = await client.put([_file]);
-    console.log("stored image on :", cid);
+    // console.log("stored image on :", cid);
     return cid;
   }
   async function StoreUpdatedDappsOnIpfs(dappArray) {
@@ -108,7 +107,7 @@ function CreateDapp(props) {
   async function storeWithProgress(files) {
     // show the root cid as soon as it's ready
     const onRootCidReady = (cid) => {
-      console.log("uploading files with cid:", cid);
+      // console.log("uploading files with cid:", cid);
     };
 
     // when each chunk is stored, update the percentage complete and display
@@ -126,6 +125,7 @@ function CreateDapp(props) {
 
   function setStatus(message) {
     let ele = document.getElementById("creationStatus");
+    if (!ele) return null;
     var p_tag = document.createElement("p");
     p_tag.key = `message${message}`;
     p_tag.textContent = "-> " + message;
@@ -145,9 +145,8 @@ function CreateDapp(props) {
     let ifExists = false;
     if (Blockchain == "tron") {
       ifExists = await WebsiteRentContract.websiteExists(url).call();
-    } else if (Blockchain == "ethereum") {
+    } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
       ifExists = await WebsiteRentContract.websiteExists(url);
-    } else if (Blockchain == "polygon") {
     } else {
       // we dont support that blockchain
     }
@@ -207,7 +206,7 @@ function CreateDapp(props) {
         } catch (e) {
           alert("website Upload was Un-successful");
         }
-      } else if (Blockchain == "ethereum") {
+      } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
         setStatus("Kindly approve the Transaction");
         try {
           let tx = await WebsiteRentContract.uploadWebsite(
@@ -222,7 +221,6 @@ function CreateDapp(props) {
         } catch (e) {
           alert("website Upload was Un-successful");
         }
-      } else if (Blockchain == "polygon") {
       } else {
         // no support yet
       }
@@ -249,7 +247,7 @@ function CreateDapp(props) {
         } catch (e) {
           console.log("ipfs link upload error", e);
         }
-      } else if (Blockchain == "ethereum") {
+      } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
         try {
           let _tx = await WebsiteRentContract.updateWebsitesIPFSLink(
             newCID,
@@ -262,7 +260,6 @@ function CreateDapp(props) {
         } catch (e) {
           console.log("ipfs link upload error", e);
         }
-      } else if (Blockchain == "polygon") {
       } else {
         // not supported
       }
@@ -276,10 +273,11 @@ function CreateDapp(props) {
     if (!owner) return null;
     let contract = await getBlockchainSpecificWebsiteRentContract(
       Blockchain,
-      NetworkChain,Web3ModalRef
+      NetworkChain,
+      Web3ModalRef
     );
     // console.log("website rent contract is",contract)
-    if(!contract){
+    if (!contract) {
       return null;
     }
     await getAllDappsUris(contract, setAllDapps, Blockchain);
@@ -287,21 +285,20 @@ function CreateDapp(props) {
   }
 
   useEffect(() => {
-    init(); 
-
+    init();
   }, [owner]);
-  if(owner!=connectedAddress){
-    console.log("setting owner")
-    setOwner(connectedAddress)
+  if (owner != connectedAddress) {
+    console.log("setting owner");
+    setOwner(connectedAddress);
   }
 
-  console.log("owner is ",owner)
+  // console.log("owner is ",owner)
 
   return (
     <Center
       bg="black"
       textColor={"white"}
-      height={["fit-content","fit-content" , "100vh"]}
+      height={["fit-content", "fit-content", "100vh"]}
       width={"100vw"}
       flexDirection={"column"}
       align={"left"}
@@ -310,16 +307,15 @@ function CreateDapp(props) {
         <>
           {" "}
           <Stack
-            width={["95vw","90vw","80vw"]}
+            width={["95vw", "90vw", "80vw"]}
             flexDirection={["column", "column", "row"]}
             align="center"
             justify={"space-evenly"}
             spacing={30}
-            height={["fit-content","fit-content","80vh"]}
-            paddingTop={["20vh","20vh","0"]}
-            
+            height={["fit-content", "fit-content", "80vh"]}
+            paddingTop={["20vh", "20vh", "0"]}
           >
-            <VStack width={["80vw","60vw","40vw"]} spacing={5}>
+            <VStack width={["80vw", "60vw", "40vw"]} spacing={5}>
               <NamedInput title={"Name"}>
                 {" "}
                 <Input
@@ -427,7 +423,7 @@ function CreateDapp(props) {
             </VStack>
             <VStack>
               <Img
-                width={["70vw","60vw","30vw"]}
+                width={["70vw", "60vw", "30vw"]}
                 objectFit={"contain"}
                 borderRadius="10px"
                 src={
@@ -476,8 +472,7 @@ function CreateDapp(props) {
               key={"creating dapp"}
               color={"green"}
               variant={"solid"}
-              marginTop={["10vh","5vh","0vh"]}
-
+              marginTop={["10vh", "5vh", "0vh"]}
             />
           </Box>
         </>

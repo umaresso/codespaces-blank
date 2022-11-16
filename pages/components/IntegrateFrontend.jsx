@@ -60,14 +60,14 @@ function IntegrateFrontend(props) {
     try {
       if (!selectedDeployment) {
         alert("select a deployment address first");
-        showToggle(false)
+        showToggle(false);
         return;
       }
       setStatus("Making Dapp Rent Transaction");
       setStatus("Approve Transaction !");
       if (Blockchain == "tron") {
         setStatus("Transaction in progress..");
-        console.log({websiteURL, selectedDeployment, days})
+        console.log({ websiteURL, selectedDeployment, days });
         let tx = await websiteRentContract
           .rentDapp(websiteURL, selectedDeployment, days)
           .send({
@@ -78,11 +78,11 @@ function IntegrateFrontend(props) {
             shouldPollResponse: true,
           });
         setStatus("SuccessFully Rented 🥳");
-      } else if (Blockchain == "ethereum") {
+      } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
         setStatus("Waiting for Transaction Completion");
         let options = {
           gasLimit: 3000000,
-          value: parseEther(price.toString()) ,
+          value: parseEther(price.toString()),
         };
 
         let tx = await websiteRentContract.rentDapp(
@@ -94,7 +94,6 @@ function IntegrateFrontend(props) {
         setStatus("Tx Hash is " + getMinimalAddress(tx.hash.toString()));
         await tx.wait();
         setStatus("FrontEnd is Integrated🎉");
-
       } else if (Blockchain == "polygon") {
         // yet to implement
       } else {
@@ -180,7 +179,6 @@ function IntegrateFrontend(props) {
                   color={"green"}
                   variant={"solid"}
                   href={"/Deployments"}
-                  
                 />
               </HStack>
             </VStack>

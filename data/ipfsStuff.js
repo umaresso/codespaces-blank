@@ -84,7 +84,7 @@ export const fetchDappsContent = async (
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url).call();
         dapp.rentPrice = parseFloat(rentPrice) / 10 ** 6;
         // console.log("rent price is ", dapp.rentPrice);
-      } else if (Blockchain == "ethereum") {
+      } else if (Blockchain == "ethereum" || Blockchain == "polygon") {
         renttime = await websiteRentContract.rentTime(dapp.url);
         rentPrice = await websiteRentContract.getDappRentPrice(dapp.url);
         dapp.rentPrice = parseFloat(rentPrice / 10 ** 18);

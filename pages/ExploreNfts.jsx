@@ -234,6 +234,7 @@ function ExploreNfts(props) {
           </Button>
         </VStack>
       )}
+      
       {walletAddress != null && (
         <>
           <VStack
