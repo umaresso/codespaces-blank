@@ -1,16 +1,27 @@
-
-![WhatsApp Image 2022-11-15 at 2 18 25 AM](https://user-images.githubusercontent.com/71306738/201767517-bf9dc0b7-54ae-475b-b2d3-698753a1d34b.jpeg)
-
-
-## Github repo Link
-## Devpost URL
-## Video link
-( 3 mins max for tron and <=5 min for chainlink )
+![WhatsApp Image 2022-11-15 at 2 18 23 AM](https://user-images.githubusercontent.com/71306738/202645378-173ab00f-e9f2-4373-9280-b090402b8f16.jpeg)
 
 
+### Project Name:  RentWeb3
+### Project Track: NFT & Gaming
+### Team Name: RentWeb3
+### Team Member(s): 2 [@seemal-arif , @umarkhatab465]
+### Project Details :point_down: 
+For test Instructions read this document. 
+https://docs.google.com/presentation/d/1K7VjFTZlBm8Kb1OLS_AryejLxx2gKepQpiN0GP66D-E/edit?usp=sharing
+
+### Website URL : https://rent-web3-v1.vercel.app
+### Github Repository link :  https://github.com/umaresso/Rent-Web3-Polygon-Included
+### Video link : https://www.youtube.com/watch?v=2onwsWD8uuE
+
+## Project Goal
+ We are aiming to provide a marketplace to rent Web3 assets like NFTs and Dapps , backed up by IPFS and Smart contracts.
+
+
+
+## Project Info: 
 ## Inspiration
 Web3 is booming. Future is promising with the opportunities Metaverse will bring.<br/>
-But NFTs became the cake of rich since they were launched.
+But some Web3 assets became the cake of rich since they were launched - NFTs for example.
 
 Due to tremendous use cases of NFTs like
 
@@ -44,7 +55,7 @@ Good way to earn passive income.
 ### Developers
 They can build a website that does whitelisting and sale of the NFTs <br/>
 by interacting with already deployed smart contracts. <br/>
-These deployed contracts are dynamic means that same website can be rented for different collections, time after time. 
+These deployed contracts are dynamic means that same website <br/> can be rented for different collections, time after time. 
 
 #### Techical Example
 
@@ -80,8 +91,10 @@ Users are People that can borrow NFTs and use them till specific time .
 | Made Website Integration Frontend       |  100%      |
 | Made a WebsiteRent Smart contract        |     100%   |
 | Integrated websiteRent contract with UI     |      100%  |
-| Tested Entire whitelist sale creation and renting the dapp                    |    70%    |
-|Displaying NFT collection on rented Dapp     |     0%   |
+| Tested Entire whitelist sale creation and renting the dapp                    |    100%    |
+|Displaying NFT collection on rented Dapp     |     100%   |
+|Perform whitelisting of collection     |     100%   |
+|Perform minting for Ethereum     |     100%   |
 
 
 ##### NFT Renting
@@ -91,12 +104,12 @@ Users are People that can borrow NFTs and use them till specific time .
 | Built a demo ERC721 contract        |100%    |    
 | Built a rentable version of ERC721 ( using IERC4907 standard )       |  100%  |
 |  Built an NFT renting Tracker smart contract       |  100%  |
-| Tested smart contracts in Remix ID      | 100%   |
+| Tested smart contracts in Remix and tron IDE      | 100%   |
 | Built a dummy UI for uploading NFTs      |  100%  |
 | Uploading NFTs UI integration with smart contracts      |   100% |
-| UI to show available and rented NFTs       |  50%  |
+| UI to show available and rented NFTs       |  100%  |
 |NFT uploading and renting tested|100%|
-|Adding Filters| 10%|
+|Adding Filters| 100%|
     
 ## Challenges we ran into
 We faced many but here are few
@@ -125,29 +138,21 @@ When we wanted to show available NFTs and Dapps for rent <br/>
 we wanted the storage to be decentralized but smart contract performs a bunch of stuff with the records.<br/>
 We could load available NFTs from smart contracts but it is a slow process and User Experience might suffer. <br/>
 We have achieved both User Experience and Decentralized storage properties with **IPFS and filecoin's web3 storage**.
-
-## RentWeb3 Flow
-while writing flow of our project we have to enter images of website.<br/>
-We have to make a separate doc for it in which we have to mention <br/>
-(
-key features and how top perform them on website
-)
-
-## Revenue Model
-
-## Accomplishments that we're proud of
-we have to mention five points of judging criteria <br/>
-plus that we have implemented this project for three different Blockchains (tron ,ethereum ,polygon ,tron).
-
 ## What we learned
-To be added
+
+      Working with multiple Blockchains
+      Crafting a good user experience
+      Built industry level Smart Contracts
+      Grasped strong understanding of IPFS ,Tron development tools and NFTs in depth
 ## What's next for RentWeb3
 We are aiming to be the number one marketplace for Renting Web3 assets Globally.<br/>
 Currently we are dealing with NFT and Dapp renting that are NFT centered. <br/>
 We are implementing their basic features, but in distant future we are aiming to implement <br/>
 
--   Variety of Dapps to rent
--   APIs to build scalable apps on top of our platform ( composability )
--   More to be added
-### End of document but start of a New Journey....
 
+    Dashboard Panel for Dapp Uploader
+    Dashboard Panel for NFT Uploader
+    Integration of Rented NFT with Metaverse Games
+    Bringing more Rentable assets to the space
+    
+    
