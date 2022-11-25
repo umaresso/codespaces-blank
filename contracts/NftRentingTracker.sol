@@ -1,16 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+/*
+
+This is the main smart contract for Renting of NFTs.
+NOTE:- It stores the contract addresses of rentable NFT contracts not plain ERC721 and ERC-1155 tokens because they do not support usership feature utilized for renting
+
+It deals with 
+
+    -   Uploading an NFT
+    -   Renting an NFT
+    -   Storing available NFTs' token IDs and their Prices
+    -   Storing IPFS link of available 
+    -   How much and which nfts are rented by a person
+    -   
+*/
+
 import "./IERC4907.sol";
 contract NftRentingTracker{
-/*
-    Use Cases
 
--> Use in Games (axie infinity ,gods unchained , crypto kitties)
--> Attend the Event
--> Host an Event
--> Use Personal data for organization
-*/
 address platformOwner;
 constructor(){
 platformOwner=msg.sender;

@@ -1,5 +1,17 @@
 pragma solidity ^0.8.6;
 
+/*
+
+ It's an ERC-721 equivalent for Tron Blockchain 
+
+ It's lengthy because we can not use pre-built smart contracts published on github and import them ( like openzeppelin)
+ So we have  to write everything in a single file
+
+
+For details about each function , visit TRC-721 documentation here at https://developers.tron.network/docs/trc-721 
+
+*/
+
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;

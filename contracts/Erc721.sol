@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+// A Simple Smart contract for Making an NFT collection
+// This is technical and better documentation can be found online 
+// if you are a non technical person and are not willing to deep dive into the details,
+//  you should just know that these code lines are written for making an NFT collection
+// otherwise you can visit https://docs.openzeppelin.com/contracts/3.x/erc721 to know more
+
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";

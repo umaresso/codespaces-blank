@@ -2,6 +2,12 @@
 pragma solidity ^0.8.0;
 
 
+/**
+
+  Purpose       :   Create a whitelist contract to perform whitelisting of NFT collection.
+                    This will later be used by sale factory during presale to see if the person who wants to buy tokens is whitelisted or not. 
+
+ */
 interface IWhitelist {
 
     function addAddressToWhitelist()external  ;

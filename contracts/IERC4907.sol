@@ -1,5 +1,21 @@
 // SPDX-License-Identifier: MIT
 
+// This is standard interface to make an NFT Rentable .
+// The feature is called Usership.
+// After the release of this standard there can be two roles associated to each NFT
+// 1. Owner ( as it was before in ERC721 )
+// 2. User  ( holding the NFT for a small period  )
+//          (A user does not have the access to NFT features 
+//           like the real Owner do like transferring the temporarily owned NFT to another person
+//           and receiving the money , this can only be done by owner)
+// There are a number of concerns that this standard has addressed
+
+// Now everyone can use the exact same standard to build on and it's universal so that each rentable NFT created is compatible with other
+// This is the feature we have introduced in Rentweb3 and it's our plus point in the face of competitors like reNFT
+// The point to Note_ here is that only the owner can assign the temporary usership  ( like renting  for some period ) to anyone.
+// We Personally love this standard at rentWeb3
+
+
 pragma solidity ^0.8.7;
 // Contract help taken from Sidharth : https://medium.com/coinmonks/rentable-nfts-erc-4907-part-ii-954cc27d22e9
 
